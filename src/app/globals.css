@@ -1,0 +1,92 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --sidebar-width: 14rem; /* matches w-56 in Sidebar.tsx */
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #f8f9fa;
+  --color-surface-tertiary: #f1f3f5;
+
+  --color-content-primary: #111827;
+  --color-content-secondary: #6b7280;
+  --color-content-tertiary: #9ca3af;
+
+  --color-line-primary: #e5e7eb;
+  --color-line-secondary: #d1d5db;
+
+  --color-accent: #111827;
+  --color-accent-text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Tiptap editor styles */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-content-tertiary);
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid var(--color-line-primary);
+  padding: 0.5rem 0.75rem;
+  min-width: 80px;
+  vertical-align: top;
+}
+
+.tiptap table th {
+  background-color: var(--color-surface-secondary);
+  font-weight: 600;
+}
+
+.tiptap table td.selectedCell,
+.tiptap table th.selectedCell {
+  background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+/* Column resize handle */
+.tiptap .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--color-accent);
+  opacity: 0;
+  cursor: col-resize;
+  transition: opacity 0.15s;
+  pointer-events: auto;
+}
+
+.tiptap td:hover .column-resize-handle,
+.tiptap th:hover .column-resize-handle {
+  opacity: 0.4;
+}
+
+.tiptap .column-resize-handle:hover,
+.tiptap .resize-cursor {
+  cursor: col-resize;
+}
+
+.tiptap table td,
+.tiptap table th {
+  position: relative;
+}
+
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--color-content-primary);
+  background-color: var(--color-surface-primary);
+  -webkit-font-smoothing: antialiased;
+}

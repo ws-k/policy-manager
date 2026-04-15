@@ -1,0 +1,52 @@
+import { createClient } from '@/lib/supabase/server'
+import type { PolicyDoc, PolicyDomain } from '@/lib/types'
+import { PolicyListClient } from './policy-list-client'
+
+interface SearchParams {
+  domain?: string
+  status?: string
+  q?: string
+}
+
+export default async function PoliciesPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const sp = await searchParams
+  const supabase = await createClient()
+
+  // Fetch domains
+  const { data: domains } = await supabase
+    .from('policy_domains')
+    .select('*')
+    .order('sort_order', { ascending: true })
+
+  // Fetch policies with filters
+  let query = supabase
+    .from('policy_docs')
+    .select('*, domain:policy_domains(*)')
+    .order('updated_at', { ascending: false })
+
+  if (sp.domain) {
+    query = query.eq('domain_id', sp.domain)
+  }
+  if (sp.status) {
+    query = query.eq('status', sp.status)
+  }
+  if (sp.q) {
+    query = query.or(`title.ilike.%${sp.q}%,content_text.ilike.%${sp.q}%`)
+  }
+
+  const { data: policies } = await query
+
+  return (
+    <PolicyListClient
+      policies={(policies ?? []) as PolicyDoc[]}
+      domains={(domains ?? []) as PolicyDomain[]}
+      currentDomain={sp.domain ?? ''}
+      currentStatus={sp.status ?? ''}
+      currentQuery={sp.q ?? ''}
+    />
+  )
+}

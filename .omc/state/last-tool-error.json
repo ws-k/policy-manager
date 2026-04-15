@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"git reset HEAD && git add policy-manager/src/app/policies/[id]/compare/compare-client.tsx policy-manager/src/app/policies/[id]/edit/page.tsx \\\"policy-manager/src/components/policy/Changelo...",
+  "error": "Exit code 1\nUnstaged changes after reset:\nM\tCLAUDE.md\nM\tpolicy-manager/src/app/policies/[id]/compare/compare-client.tsx\nM\tpolicy-manager/src/app/policies/[id]/edit/page.tsx\nM\tpolicy-manager/src/components/policy/ChangelogModal.tsx\nM\tpolicy-manager/src/components/policy/PolicyEditor.tsx\n(eval):1: no matches found: policy-manager/src/app/policies/[id]/compare/compare-client.tsx",
+  "timestamp": "2026-04-15T02:25:16.656Z",
+  "retry_count": 1
+}
