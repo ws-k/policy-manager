@@ -94,43 +94,76 @@ const changeTypeColors: Record<string, string> = {
   unpublish: 'bg-surface-tertiary',
 }
 
+const PAGE_SIZE = 5
+
 function VersionsPanel({ policyId, currentVersion }: { policyId: string; currentVersion: number }) {
   const [versions, setVersions] = useState<Pick<PolicyDoc, 'id' | 'version' | 'status' | 'published_at'>[]>([])
+  const [page, setPage] = useState(0)
 
   useEffect(() => {
     fetch(`/api/policies/${policyId}/versions`)
       .then((r) => r.json())
       .then((result: { data: PolicyDoc[] } | { error: string }) => {
-        if ('data' in result) setVersions(result.data)
+        if ('data' in result) {
+          setVersions(result.data)
+          // Start on the page that contains the current version
+          const idx = result.data.findIndex((v) => v.id === policyId)
+          if (idx >= 0) setPage(Math.floor(idx / PAGE_SIZE))
+        }
       })
   }, [policyId])
 
-  if (versions.length <= 1) return null
+  if (versions.length === 0) return null
+
+  const totalPages = Math.ceil(versions.length / PAGE_SIZE)
+  const pageVersions = versions.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   return (
-    <div className="mt-6 rounded-lg border border-line-primary bg-surface-primary p-6">
-      <h2 className="mb-4 text-sm font-medium text-content-primary">버전 이력</h2>
-      <ul className="space-y-1.5">
-        {versions.map((v) => (
-          <li key={v.id} className="flex items-center gap-3">
+    <div className="rounded-lg border border-line-primary bg-surface-primary p-4">
+      <h2 className="mb-3 text-xs font-medium text-content-primary">버전 이력</h2>
+      <ul className="space-y-1">
+        {pageVersions.map((v) => (
+          <li key={v.id}>
             {v.id === policyId ? (
-              <span className="flex-1 rounded-md bg-surface-secondary px-3 py-1.5 text-xs font-medium text-content-primary">
-                v{v.version} <span className="text-content-tertiary">(현재)</span>
-              </span>
+              <div className="flex items-center justify-between rounded-md bg-surface-secondary px-2.5 py-1.5">
+                <span className="text-xs font-medium text-content-primary">v{v.version}</span>
+                <span className="text-xs text-content-tertiary">현재</span>
+              </div>
             ) : (
               <a
                 href={`/policies/${v.id}`}
-                className="flex-1 rounded-md px-3 py-1.5 text-xs text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+                className="flex items-center justify-between rounded-md px-2.5 py-1.5 hover:bg-surface-secondary transition-colors"
               >
-                v{v.version}
+                <span className="text-xs text-content-secondary">v{v.version}</span>
+                <span className={`text-xs ${v.status === 'published' ? 'text-emerald-600' : 'text-content-tertiary'}`}>
+                  {v.status === 'published' ? '게시됨' : '초안'}
+                </span>
               </a>
             )}
-            <span className={`shrink-0 text-xs ${v.status === 'published' ? 'text-emerald-600' : 'text-content-tertiary'}`}>
-              {v.status === 'published' ? '게시됨' : '초안'}
-            </span>
           </li>
         ))}
       </ul>
+      {totalPages > 1 && (
+        <div className="mt-3 flex items-center justify-between border-t border-line-primary pt-3">
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="rounded px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-30"
+          >
+            ←
+          </button>
+          <span className="text-xs text-content-tertiary tabular-nums">
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            disabled={page === totalPages - 1}
+            className="rounded px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-30"
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -405,9 +438,6 @@ export function PolicyDetailClient({
             )}
           </div>
 
-          {/* Versions */}
-          <VersionsPanel policyId={policy.id} currentVersion={policy.version} />
-
           {/* Sections */}
           <SectionsPanel policyId={policy.id} />
 
@@ -459,9 +489,10 @@ export function PolicyDetailClient({
           </div>
         </div>
 
-        {/* TOC sidebar */}
-        <div className="w-52 shrink-0">
+        {/* Right sidebar */}
+        <div className="w-52 shrink-0 space-y-4">
           <PolicyTOC content={policy.content} />
+          <VersionsPanel policyId={policy.id} currentVersion={policy.version} />
         </div>
       </div>
     </div>
