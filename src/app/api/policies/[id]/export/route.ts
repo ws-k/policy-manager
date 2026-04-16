@@ -1,32 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { generateHTML } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import { Table } from '@tiptap/extension-table'
-import { TableRow } from '@tiptap/extension-table-row'
-import { TableHeader } from '@tiptap/extension-table-header'
-import { TableCell } from '@tiptap/extension-table-cell'
-import Underline from '@tiptap/extension-underline'
-import Link from '@tiptap/extension-link'
-import TextAlign from '@tiptap/extension-text-align'
-import Highlight from '@tiptap/extension-highlight'
-import { TextStyle } from '@tiptap/extension-text-style'
-import Color from '@tiptap/extension-color'
 import { tiptapToMarkdown } from '@/lib/tiptap-to-markdown'
-
-const EXTENSIONS = [
-  StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
-  Table.configure({ resizable: false }),
-  TableRow,
-  TableHeader,
-  TableCell,
-  Underline,
-  Link.configure({ openOnClick: false }),
-  TextAlign.configure({ types: ['heading', 'paragraph'] }),
-  Highlight.configure({ multicolor: true }),
-  TextStyle,
-  Color,
-]
+import { tiptapToBodyHtml } from '@/lib/tiptap-to-body-html'
 
 function toFullHtml(title: string, bodyHtml: string): string {
   return `<!DOCTYPE html>
@@ -98,7 +73,7 @@ export async function GET(
   }
 
   if (format === 'html') {
-    const bodyHtml = generateHTML(content as Parameters<typeof generateHTML>[0], EXTENSIONS)
+    const bodyHtml = tiptapToBodyHtml(content)
     const fullHtml = toFullHtml(doc.title, bodyHtml)
     return new NextResponse(fullHtml, {
       headers: {
@@ -109,7 +84,7 @@ export async function GET(
   }
 
   if (format === 'docx') {
-    const bodyHtml = generateHTML(content as Parameters<typeof generateHTML>[0], EXTENSIONS)
+    const bodyHtml = tiptapToBodyHtml(content)
     const fullHtml = toFullHtml(doc.title, bodyHtml)
     // Dynamic import to avoid bundling issues
     const HTMLtoDOCX = (await import('html-to-docx')).default
