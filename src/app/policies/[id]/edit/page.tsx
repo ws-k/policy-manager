@@ -86,7 +86,18 @@ export default function EditPolicyPage() {
     if (pageLoading) return
     const draft = getDraft()
     if (draft) {
-      setHasDraft(true)
+      const d = draft.data
+      const isSameAsPolicy =
+        d.title === policy?.title &&
+        d.domainId === policy?.domain_id &&
+        d.slug === policy?.slug &&
+        d.isPublic === policy?.is_public &&
+        JSON.stringify(d.content) === JSON.stringify(policy?.content)
+      if (isSameAsPolicy) {
+        clearDraft()
+      } else {
+        setHasDraft(true)
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageLoading])
