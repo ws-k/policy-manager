@@ -36,7 +36,15 @@ export default function EditPolicyPage() {
 
   const draftKey = `pm:draft:edit:${id}`
   const draftData = { title, domainId, slug, isPublic, content }
-  const autoSaveEnabled = !pageLoading && policy !== null && !hasDraft
+  const hasChanges =
+    !pageLoading &&
+    policy !== null &&
+    (title !== policy.title ||
+      domainId !== policy.domain_id ||
+      slug !== policy.slug ||
+      isPublic !== policy.is_public ||
+      JSON.stringify(content) !== JSON.stringify(policy.content))
+  const autoSaveEnabled = hasChanges
   const { status: autoSaveStatus, savedAt, getDraft, clearDraft } = useAutoSave(draftKey, draftData, autoSaveEnabled)
 
   useEffect(() => {
@@ -84,10 +92,7 @@ export default function EditPolicyPage() {
   }, [pageLoading])
 
   useEffect(() => {
-    const hasChanges =
-      autoSaveEnabled &&
-      (title !== policy?.title || JSON.stringify(content) !== JSON.stringify(policy?.content))
-    if (!hasChanges) return
+    if (!autoSaveEnabled) return
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault()
     }
