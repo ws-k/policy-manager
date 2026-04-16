@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import type { PolicyDoc, PolicyDomain } from '@/lib/types'
 import { PolicyListClient } from './policy-list-client'
 
+export const revalidate = 30
+
 interface SearchParams {
   domain?: string
   status?: string

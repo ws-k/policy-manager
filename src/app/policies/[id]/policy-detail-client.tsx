@@ -3,58 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table'
 import type { PolicyDoc, Changelog, PolicySection } from '@/lib/types'
 import { PolicyTOC } from '@/components/policy/PolicyTOC'
 import { toast } from 'sonner'
-
-function slugifyText(text: string): string {
-  return (
-    text
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w가-힣-]/g, '')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '') || 'heading'
-  )
-}
-
-function ReadOnlyContent({ content }: { content: Record<string, unknown> }) {
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
-      Table,
-      TableRow,
-      TableHeader,
-      TableCell,
-    ],
-    immediatelyRender: false,
-    content,
-    editable: false,
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm max-w-none',
-      },
-    },
-    onCreate: ({ editor }) => {
-      const seenIds = new Map<string, number>()
-      const el = editor.view.dom
-      el.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading) => {
-        const text = heading.textContent ?? ''
-        const base = slugifyText(text)
-        const count = seenIds.get(base) ?? 0
-        const id = count === 0 ? base : `${base}-${count}`
-        seenIds.set(base, count + 1)
-        ;(heading as HTMLElement).id = id
-      })
-    },
-  })
-
-  if (!editor) return null
-  return <EditorContent editor={editor} />
-}
 
 function StatusBadge({ status }: { status: string }) {
   const styles =
@@ -291,9 +242,11 @@ function ExportDropdown({ policyId, title }: { policyId: string; title: string }
 export function PolicyDetailClient({
   policy,
   changelogs,
+  contentHtml,
 }: {
   policy: PolicyDoc
   changelogs: Changelog[]
+  contentHtml: string
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -468,8 +421,11 @@ export function PolicyDetailClient({
           {/* Content */}
           <div className="mb-8 rounded-lg border border-line-primary bg-surface-primary p-6">
             <h2 className="mb-3 text-sm font-medium text-content-primary">내용</h2>
-            {policy.content && Object.keys(policy.content).length > 0 ? (
-              <ReadOnlyContent content={policy.content} />
+            {contentHtml ? (
+              <div
+                className="prose prose-sm max-w-none text-sm text-content-primary"
+                dangerouslySetInnerHTML={{ __html: contentHtml }}
+              />
             ) : (
               <p className="text-sm text-content-tertiary">내용이 없습니다.</p>
             )}

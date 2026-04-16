@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { PolicyDomain, Changelog, PolicyDoc } from '@/lib/types'
 
+export const revalidate = 60
+
 interface DomainWithStats extends PolicyDomain {
   policy_count: number
   last_updated: string | null
@@ -34,25 +36,21 @@ const CHANGE_TYPE_LABELS: Record<string, { label: string; className: string }> =
 export default async function DashboardPage() {
   const supabase = await createClient()
 
-  // Fetch summary counts
-  const [{ count: totalCount }, { count: draftCount }, { count: publishedCount }] =
-    await Promise.all([
-      supabase.from('policy_docs').select('*', { count: 'exact', head: true }),
-      supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
-      supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('status', 'published'),
-    ])
-
-  // Fetch domains
-  const { data: domains } = await supabase
-    .from('policy_domains')
-    .select('*')
-    .order('sort_order', { ascending: true })
-
-  // Fetch all policies (for domain stats)
-  const { data: allPolicies } = await supabase
-    .from('policy_docs')
-    .select('id, domain_id, updated_at')
-    .order('updated_at', { ascending: false })
+  const [
+    { count: totalCount },
+    { count: draftCount },
+    { count: publishedCount },
+    { data: domains },
+    { data: allPolicies },
+    { data: changelogs },
+  ] = await Promise.all([
+    supabase.from('policy_docs').select('*', { count: 'exact', head: true }),
+    supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
+    supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('policy_domains').select('*').order('sort_order', { ascending: true }),
+    supabase.from('policy_docs').select('id, domain_id, updated_at').order('updated_at', { ascending: false }),
+    supabase.from('changelogs').select('*, policy:policy_docs(id, title)').order('created_at', { ascending: false }).limit(10),
+  ])
 
   // Compute per-domain stats
   const domainStats = ((domains ?? []) as PolicyDomain[]).map((domain) => {
@@ -64,13 +62,6 @@ export default async function DashboardPage() {
       last_updated: last,
     } as DomainWithStats
   })
-
-  // Fetch recent changelogs
-  const { data: changelogs } = await supabase
-    .from('changelogs')
-    .select('*, policy:policy_docs(id, title)')
-    .order('created_at', { ascending: false })
-    .limit(10)
 
   const recentChanges = (changelogs ?? []) as ChangelogWithPolicy[]
 

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import type { PolicyDoc, Changelog } from '@/lib/types'
 import { PolicyDetailClient } from './policy-detail-client'
+import { tiptapToBodyHtml } from '@/lib/tiptap-to-body-html'
 
 export default async function PolicyDetailPage({
   params,
@@ -27,10 +28,15 @@ export default async function PolicyDetailPage({
     .eq('policy_doc_id', id)
     .order('created_at', { ascending: false })
 
+  const contentHtml = policy.content && Object.keys(policy.content).length > 0
+    ? tiptapToBodyHtml(policy.content as Record<string, unknown>)
+    : ''
+
   return (
     <PolicyDetailClient
       policy={policy as PolicyDoc}
       changelogs={(changelogs ?? []) as Changelog[]}
+      contentHtml={contentHtml}
     />
   )
 }

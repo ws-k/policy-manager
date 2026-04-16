@@ -36,8 +36,21 @@ export default async function RootLayout({
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link
+          rel="preload"
+          as="style"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        />
+        {/* Non-blocking font load: switched to all after load */}
+        <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+          media="print"
+          id="pretendard-css"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var l=document.getElementById('pretendard-css');if(l)l.media='all'})()`,
+          }}
         />
       </head>
       <body className="flex h-full bg-surface-primary text-content-primary">
