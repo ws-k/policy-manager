@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { diffLines } from 'diff'
+import { diffLines, diffArrays } from 'diff'
 import type { PolicyDoc } from '@/lib/types'
 import { tiptapToHtmlLines } from '@/lib/tiptap-to-html'
 
@@ -17,33 +17,133 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-function buildSideHtml(leftLines: string[], rightLines: string[]): { leftHtml: string; rightHtml: string } {
+/**
+ * Splits an HTML string into tokens: HTML tags as atomic units, text nodes split by whitespace.
+ * This allows word-level diffing without corrupting HTML structure.
+ */
+function tokenizeHtml(html: string): string[] {
+  const tokens: string[] = []
+  const re = /(<[^>]+\/?>|[^<]+)/g
+  let match
+  while ((match = re.exec(html)) !== null) {
+    if (match[0].startsWith('<')) {
+      tokens.push(match[0])
+    } else {
+      // Split text by whitespace, keeping the whitespace tokens
+      const words = match[0].split(/(\s+)/)
+      for (const w of words) {
+        if (w) tokens.push(w)
+      }
+    }
+  }
+  return tokens
+}
+
+/**
+ * Word-level (HTML-aware) diff of two HTML block strings.
+ * Produces left HTML with removed words wrapped in diff-word-removed spans,
+ * and right HTML with added words wrapped in diff-word-added spans.
+ */
+function inlineDiff(leftHtml: string, rightHtml: string): { leftInline: string; rightInline: string } {
+  const leftTokens = tokenizeHtml(leftHtml)
+  const rightTokens = tokenizeHtml(rightHtml)
+
+  const changes = diffArrays(leftTokens, rightTokens)
+
+  let leftContent = ''
+  let rightContent = ''
+
+  for (const change of changes) {
+    const text = change.value.join('')
+    if (change.removed) {
+      leftContent += `<span class="diff-word-removed">${text}</span>`
+    } else if (change.added) {
+      rightContent += `<span class="diff-word-added">${text}</span>`
+    } else {
+      leftContent += text
+      rightContent += text
+    }
+  }
+
+  return { leftInline: leftContent, rightInline: rightContent }
+}
+
+function buildSideHtml(leftLines: string[], rightLines: string[]): {
+  leftHtml: string
+  rightHtml: string
+  removedCount: number
+  addedCount: number
+} {
   const changes = diffLines(leftLines.join('\n'), rightLines.join('\n'))
 
   const leftParts: string[] = []
   const rightParts: string[] = []
+  let removedCount = 0
+  let addedCount = 0
 
-  for (const change of changes) {
-    // Each change.value is one or more HTML block strings joined by '\n'
-    const blocks = change.value.split('\n').filter(Boolean)
+  let i = 0
+  while (i < changes.length) {
+    const change = changes[i]
 
-    if (change.removed) {
-      for (const block of blocks) {
-        leftParts.push(`<div class="diff-removed">${block}</div>`)
-      }
-    } else if (change.added) {
-      for (const block of blocks) {
-        rightParts.push(`<div class="diff-added">${block}</div>`)
-      }
-    } else {
+    if (!change.removed && !change.added) {
+      // Unchanged blocks
+      const blocks = change.value.split('\n').filter(Boolean)
       for (const block of blocks) {
         leftParts.push(block)
         rightParts.push(block)
       }
+      i++
+    } else if (change.removed) {
+      const removedBlocks = change.value.split('\n').filter(Boolean)
+      const next = changes[i + 1]
+
+      if (next?.added) {
+        // Modified blocks — pair for word-level diff
+        const addedBlocks = next.value.split('\n').filter(Boolean)
+        const len = Math.max(removedBlocks.length, addedBlocks.length)
+
+        for (let j = 0; j < len; j++) {
+          const lb = removedBlocks[j]
+          const rb = addedBlocks[j]
+
+          if (lb && rb) {
+            const { leftInline, rightInline } = inlineDiff(lb, rb)
+            leftParts.push(leftInline)
+            rightParts.push(rightInline)
+          } else if (lb) {
+            leftParts.push(`<div class="diff-block-removed">${lb}</div>`)
+            removedCount++
+          } else if (rb) {
+            rightParts.push(`<div class="diff-block-added">${rb}</div>`)
+            addedCount++
+          }
+        }
+        i += 2
+      } else {
+        // Pure deletion
+        for (const block of removedBlocks) {
+          leftParts.push(`<div class="diff-block-removed">${block}</div>`)
+          removedCount++
+        }
+        i++
+      }
+    } else {
+      // Pure insertion
+      const addedBlocks = change.value.split('\n').filter(Boolean)
+      for (const block of addedBlocks) {
+        rightParts.push(`<div class="diff-block-added">${block}</div>`)
+        addedCount++
+      }
+      i++
     }
   }
 
-  return { leftHtml: leftParts.join(''), rightHtml: rightParts.join('') }
+  return {
+    leftHtml: leftParts.join(''),
+    rightHtml: rightParts.join(''),
+    removedCount,
+    addedCount,
+  }
 }
 
 const PROSE =
@@ -61,8 +161,12 @@ const PROSE =
   '[&_hr]:my-6 [&_hr]:border-line-primary ' +
   '[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through ' +
   '[&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600 ' +
-  '[&_.diff-removed]:bg-red-100 [&_.diff-removed]:rounded [&_.diff-removed]:-mx-2 [&_.diff-removed]:px-2 ' +
-  '[&_.diff-added]:bg-emerald-100 [&_.diff-added]:rounded [&_.diff-added]:-mx-2 [&_.diff-added]:px-2'
+  // Inline word-level diff
+  '[&_.diff-word-removed]:bg-red-200 [&_.diff-word-removed]:line-through [&_.diff-word-removed]:rounded-sm ' +
+  '[&_.diff-word-added]:bg-emerald-200 [&_.diff-word-added]:rounded-sm ' +
+  // Block-level diff (whole block inserted/deleted)
+  '[&_.diff-block-removed]:bg-red-100 [&_.diff-block-removed]:rounded [&_.diff-block-removed]:-mx-2 [&_.diff-block-removed]:px-2 ' +
+  '[&_.diff-block-added]:bg-emerald-100 [&_.diff-block-added]:rounded [&_.diff-block-added]:-mx-2 [&_.diff-block-added]:px-2'
 
 export function CompareClient({
   versions,
@@ -99,18 +203,7 @@ export function CompareClient({
   const { leftHtml, rightHtml, removedCount, addedCount } = useMemo(() => {
     const leftLines = tiptapToHtmlLines(leftVersion.content)
     const rightLines = tiptapToHtmlLines(rightVersion.content)
-    const { leftHtml, rightHtml } = buildSideHtml(leftLines, rightLines)
-
-    const changes = diffLines(leftLines.join('\n'), rightLines.join('\n'))
-    let removed = 0
-    let added = 0
-    for (const c of changes) {
-      const count = c.value.split('\n').filter(Boolean).length
-      if (c.removed) removed += count
-      if (c.added) added += count
-    }
-
-    return { leftHtml, rightHtml, removedCount: removed, addedCount: added }
+    return buildSideHtml(leftLines, rightLines)
   }, [leftVersion, rightVersion])
 
   function swap() {
@@ -167,11 +260,11 @@ export function CompareClient({
         <div className="ml-auto flex items-center gap-4 text-xs text-content-tertiary">
           <span className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-red-200" />
-            삭제 {removedCount}블록
+            삭제 {removedCount}
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-200" />
-            추가 {addedCount}블록
+            추가 {addedCount}
           </span>
         </div>
       </div>
