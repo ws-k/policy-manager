@@ -121,5 +121,11 @@ export async function POST(request: Request) {
     changed_by: user.id,
   })
 
+  // Sync sections from H1/H2 headings
+  if (content) {
+    const { syncPolicySections } = await import('@/lib/sync-sections')
+    await syncPolicySections(supabase, doc.id, content)
+  }
+
   return NextResponse.json({ data: doc }, { status: 201 })
 }

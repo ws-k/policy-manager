@@ -100,6 +100,12 @@ export async function PATCH(
     changed_by: user.id,
   })
 
+  // Sync sections from H1/H2 headings
+  if (content !== undefined) {
+    const { syncPolicySections } = await import('@/lib/sync-sections')
+    await syncPolicySections(supabase, id, content)
+  }
+
   return NextResponse.json({ data })
 }
 
