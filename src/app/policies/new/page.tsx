@@ -97,6 +97,7 @@ export default function NewPolicyPage() {
     setIsPublic(draft.data.isPublic)
     setContent(draft.data.content)
     setRestoredContent(draft.data.content)
+    setTemplateSelected(true) // keep editor mounted after hasDraft is cleared
     setHasDraft(false)
   }
 
