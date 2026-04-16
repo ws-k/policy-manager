@@ -45,7 +45,7 @@ export default function NewPolicyPage() {
 
   const draftKey = 'pm:draft:new'
   const draftData = { title, domainId, slug, isPublic, content }
-  const autoSaveEnabled = !hasDraft && Boolean(title.trim() || Object.keys(content).length > 0)
+  const autoSaveEnabled = Boolean(title.trim() || Object.keys(content).length > 0)
   const { status: autoSaveStatus, savedAt, getDraft, clearDraft } = useAutoSave(draftKey, draftData, autoSaveEnabled)
 
   useEffect(() => {

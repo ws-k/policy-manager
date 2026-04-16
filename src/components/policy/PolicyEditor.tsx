@@ -167,9 +167,6 @@ export function PolicyEditor({ content, onChange }: PolicyEditorProps) {
       type: 'doc',
       content: [{ type: 'paragraph' }],
     },
-    onCreate: ({ editor: ed }) => {
-      onChange(ed.getJSON() as Record<string, unknown>)
-    },
     onUpdate: ({ editor: ed }) => {
       onChange(ed.getJSON() as Record<string, unknown>)
     },
