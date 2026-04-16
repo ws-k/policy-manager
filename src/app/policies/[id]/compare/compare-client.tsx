@@ -18,54 +18,91 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 /**
- * Splits an HTML string into tokens: HTML tags as atomic units, text nodes split by whitespace.
- * This allows word-level diffing without corrupting HTML structure.
+ * Splits HTML into tokens treating tags as atomic units and text as words.
  */
 function tokenizeHtml(html: string): string[] {
   const tokens: string[] = []
-  const re = /(<[^>]+\/?>|[^<]+)/g
-  let match
-  while ((match = re.exec(html)) !== null) {
-    if (match[0].startsWith('<')) {
-      tokens.push(match[0])
+  let i = 0
+  while (i < html.length) {
+    if (html[i] === '<') {
+      // Read until closing >
+      const end = html.indexOf('>', i)
+      if (end === -1) { tokens.push(html.slice(i)); break }
+      tokens.push(html.slice(i, end + 1))
+      i = end + 1
     } else {
-      // Split text by whitespace, keeping the whitespace tokens
-      const words = match[0].split(/(\s+)/)
-      for (const w of words) {
-        if (w) tokens.push(w)
-      }
+      // Read text until next tag, split by whitespace
+      const end = html.indexOf('<', i)
+      const text = end === -1 ? html.slice(i) : html.slice(i, end)
+      const parts = text.split(/(\s+)/)
+      for (const p of parts) if (p) tokens.push(p)
+      i = end === -1 ? html.length : end
     }
   }
   return tokens
 }
 
 /**
- * Word-level (HTML-aware) diff of two HTML block strings.
- * Produces left HTML with removed words wrapped in diff-word-removed spans,
- * and right HTML with added words wrapped in diff-word-added spans.
+ * Extracts the outer tag wrapper from an HTML block string.
+ */
+function parseOuterTag(html: string): { open: string; inner: string; close: string } | null {
+  const m = html.match(/^(<[a-zA-Z][^>]*>)([\s\S]*)(<\/[a-zA-Z][^>]*>)$/)
+  if (!m) return null
+  return { open: m[1], inner: m[2], close: m[3] }
+}
+
+/**
+ * Word-level HTML-aware inline diff for a pair of changed blocks.
+ * Falls back to block-level highlight if outer tags differ or on error.
  */
 function inlineDiff(leftHtml: string, rightHtml: string): { leftInline: string; rightInline: string } {
-  const leftTokens = tokenizeHtml(leftHtml)
-  const rightTokens = tokenizeHtml(rightHtml)
+  try {
+    const lp = parseOuterTag(leftHtml)
+    const rp = parseOuterTag(rightHtml)
 
-  const changes = diffArrays(leftTokens, rightTokens)
+    // Get tag names to check structural compatibility
+    const leftTag = lp?.open.match(/^<([a-zA-Z][^>\s]*)/)?.[1]
+    const rightTag = rp?.open.match(/^<([a-zA-Z][^>\s]*)/)?.[1]
 
-  let leftContent = ''
-  let rightContent = ''
+    if (!lp || !rp || leftTag !== rightTag) {
+      // Structurally different — use block-level highlight
+      return {
+        leftInline: `<div class="diff-block-removed">${leftHtml}</div>`,
+        rightInline: `<div class="diff-block-added">${rightHtml}</div>`,
+      }
+    }
 
-  for (const change of changes) {
-    const text = change.value.join('')
-    if (change.removed) {
-      leftContent += `<span class="diff-word-removed">${text}</span>`
-    } else if (change.added) {
-      rightContent += `<span class="diff-word-added">${text}</span>`
-    } else {
-      leftContent += text
-      rightContent += text
+    // Diff inner content with HTML-aware tokenization
+    const leftTokens = tokenizeHtml(lp.inner)
+    const rightTokens = tokenizeHtml(rp.inner)
+    const changes = diffArrays(leftTokens, rightTokens)
+
+    let leftContent = ''
+    let rightContent = ''
+
+    for (const change of changes) {
+      const text = (change.value as string[]).join('')
+      if (change.removed) {
+        leftContent += `<span class="diff-word-removed">${text}</span>`
+      } else if (change.added) {
+        rightContent += `<span class="diff-word-added">${text}</span>`
+      } else {
+        leftContent += text
+        rightContent += text
+      }
+    }
+
+    return {
+      leftInline: `${lp.open}${leftContent}${lp.close}`,
+      rightInline: `${rp.open}${rightContent}${rp.close}`,
+    }
+  } catch {
+    // Fallback: block-level highlight
+    return {
+      leftInline: `<div class="diff-block-removed">${leftHtml}</div>`,
+      rightInline: `<div class="diff-block-added">${rightHtml}</div>`,
     }
   }
-
-  return { leftInline: leftContent, rightInline: rightContent }
 }
 
 function buildSideHtml(leftLines: string[], rightLines: string[]): {
@@ -87,8 +124,7 @@ function buildSideHtml(leftLines: string[], rightLines: string[]): {
 
     if (!change.removed && !change.added) {
       // Unchanged blocks
-      const blocks = change.value.split('\n').filter(Boolean)
-      for (const block of blocks) {
+      for (const block of change.value.split('\n').filter(Boolean)) {
         leftParts.push(block)
         rightParts.push(block)
       }
@@ -98,14 +134,12 @@ function buildSideHtml(leftLines: string[], rightLines: string[]): {
       const next = changes[i + 1]
 
       if (next?.added) {
-        // Modified blocks — pair for word-level diff
+        // Modified — pair blocks for word-level diff
         const addedBlocks = next.value.split('\n').filter(Boolean)
         const len = Math.max(removedBlocks.length, addedBlocks.length)
-
         for (let j = 0; j < len; j++) {
           const lb = removedBlocks[j]
           const rb = addedBlocks[j]
-
           if (lb && rb) {
             const { leftInline, rightInline } = inlineDiff(lb, rb)
             leftParts.push(leftInline)
@@ -129,8 +163,7 @@ function buildSideHtml(leftLines: string[], rightLines: string[]): {
       }
     } else {
       // Pure insertion
-      const addedBlocks = change.value.split('\n').filter(Boolean)
-      for (const block of addedBlocks) {
+      for (const block of change.value.split('\n').filter(Boolean)) {
         rightParts.push(`<div class="diff-block-added">${block}</div>`)
         addedCount++
       }
@@ -161,10 +194,8 @@ const PROSE =
   '[&_hr]:my-6 [&_hr]:border-line-primary ' +
   '[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through ' +
   '[&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600 ' +
-  // Inline word-level diff
   '[&_.diff-word-removed]:bg-red-200 [&_.diff-word-removed]:line-through [&_.diff-word-removed]:rounded-sm ' +
   '[&_.diff-word-added]:bg-emerald-200 [&_.diff-word-added]:rounded-sm ' +
-  // Block-level diff (whole block inserted/deleted)
   '[&_.diff-block-removed]:bg-red-100 [&_.diff-block-removed]:rounded [&_.diff-block-removed]:-mx-2 [&_.diff-block-removed]:px-2 ' +
   '[&_.diff-block-added]:bg-emerald-100 [&_.diff-block-added]:rounded [&_.diff-block-added]:-mx-2 [&_.diff-block-added]:px-2'
 
@@ -180,11 +211,8 @@ export function CompareClient({
   const getInitialIds = () => {
     if (initialRightId) {
       const rightIdx = versions.findIndex((v) => v.id === initialRightId)
-      if (rightIdx > 0) {
-        return { left: versions[rightIdx - 1].id, right: initialRightId }
-      } else if (rightIdx === 0 && versions.length > 1) {
-        return { left: initialRightId, right: versions[1].id }
-      }
+      if (rightIdx > 0) return { left: versions[rightIdx - 1].id, right: initialRightId }
+      if (rightIdx === 0 && versions.length > 1) return { left: initialRightId, right: versions[1].id }
     }
     const defaultRight =
       versions[versions.length - 1].id !== versions[0].id
@@ -201,9 +229,17 @@ export function CompareClient({
   const rightVersion = versions.find((v) => v.id === rightId) ?? versions[versions.length - 1]
 
   const { leftHtml, rightHtml, removedCount, addedCount } = useMemo(() => {
-    const leftLines = tiptapToHtmlLines(leftVersion.content)
-    const rightLines = tiptapToHtmlLines(rightVersion.content)
-    return buildSideHtml(leftLines, rightLines)
+    try {
+      const leftLines = tiptapToHtmlLines(leftVersion.content)
+      const rightLines = tiptapToHtmlLines(rightVersion.content)
+      if (leftLines.length === 0 && rightLines.length === 0) {
+        return { leftHtml: '', rightHtml: '', removedCount: 0, addedCount: 0 }
+      }
+      return buildSideHtml(leftLines, rightLines)
+    } catch (err) {
+      console.error('[CompareClient] diff error:', err)
+      return { leftHtml: '', rightHtml: '', removedCount: 0, addedCount: 0 }
+    }
   }, [leftVersion, rightVersion])
 
   function swap() {
@@ -213,7 +249,6 @@ export function CompareClient({
 
   return (
     <div className="mx-auto max-w-6xl">
-      {/* Back link */}
       <a
         href={`/policies/${currentId}`}
         className="mb-4 inline-flex items-center gap-1 text-xs text-content-secondary hover:text-content-primary transition-colors"
@@ -275,9 +310,14 @@ export function CompareClient({
         </div>
       )}
 
+      {leftHtml === '' && rightHtml === '' && (
+        <div className="mb-4 rounded-lg border border-line-primary bg-surface-secondary px-4 py-3 text-sm text-content-tertiary">
+          비교할 내용을 불러오는 중 오류가 발생했습니다.
+        </div>
+      )}
+
       {/* Side-by-side */}
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line-primary bg-line-primary">
-        {/* Left — old version */}
         <div className="bg-surface-primary">
           <div className="flex items-center gap-2 border-b border-line-primary bg-red-50 px-4 py-2.5">
             <span className="text-xs font-medium text-content-secondary">v{leftVersion.version}</span>
@@ -290,7 +330,6 @@ export function CompareClient({
           />
         </div>
 
-        {/* Right — new version */}
         <div className="bg-surface-primary">
           <div className="flex items-center gap-2 border-b border-line-primary bg-emerald-50 px-4 py-2.5">
             <span className="text-xs font-medium text-content-secondary">v{rightVersion.version}</span>
