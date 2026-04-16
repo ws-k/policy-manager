@@ -38,11 +38,22 @@ export default async function PoliciesPage({
     query = query.or(`title.ilike.%${sp.q}%,content_text.ilike.%${sp.q}%`)
   }
 
-  const { data: policies } = await query
+  const { data: rawPolicies } = await query
+
+  // Deduplicate by slug — keep only the latest version per policy
+  const latestBySlug = new Map<string, PolicyDoc>()
+  for (const doc of (rawPolicies ?? []) as PolicyDoc[]) {
+    const existing = latestBySlug.get(doc.slug)
+    if (!existing || doc.version > existing.version) {
+      latestBySlug.set(doc.slug, doc)
+    }
+  }
+  const policies = Array.from(latestBySlug.values())
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
 
   return (
     <PolicyListClient
-      policies={(policies ?? []) as PolicyDoc[]}
+      policies={policies}
       domains={(domains ?? []) as PolicyDomain[]}
       currentDomain={sp.domain ?? ''}
       currentStatus={sp.status ?? ''}
