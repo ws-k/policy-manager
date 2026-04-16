@@ -36,7 +36,7 @@ export default function EditPolicyPage() {
 
   const draftKey = `pm:draft:edit:${id}`
   const draftData = { title, domainId, slug, isPublic, content }
-  const autoSaveEnabled = !pageLoading && policy !== null
+  const autoSaveEnabled = !pageLoading && policy !== null && !hasDraft
   const { status: autoSaveStatus, savedAt, getDraft, clearDraft } = useAutoSave(draftKey, draftData, autoSaveEnabled)
 
   useEffect(() => {
