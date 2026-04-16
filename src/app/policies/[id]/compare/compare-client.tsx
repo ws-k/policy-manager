@@ -17,55 +17,30 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-type DiffRow =
+type DiffLine =
   | { kind: 'equal'; text: string }
   | { kind: 'removed'; text: string }
   | { kind: 'added'; text: string }
-  | { kind: 'pair'; left: string; right: string }
 
-function buildDiffRows(leftText: string, rightText: string): DiffRow[] {
+function buildDiffLines(leftText: string, rightText: string): DiffLine[] {
   const changes = diffLines(leftText, rightText)
-  const rows: DiffRow[] = []
+  const lines: DiffLine[] = []
 
-  let i = 0
-  while (i < changes.length) {
-    const cur = changes[i]
-    const next = changes[i + 1]
-
-    if (!cur.added && !cur.removed) {
-      // unchanged — emit each line
-      for (const line of cur.value.split('\n')) {
-        if (line !== '' || i < changes.length - 1) {
-          rows.push({ kind: 'equal', text: line })
-        }
-      }
-      i++
-    } else if (cur.removed && next?.added) {
-      // modified block — pair removed lines with added lines
-      const removedLines = cur.value.split('\n').filter((l) => l !== '' || cur.value.endsWith('\n'))
-      const addedLines = next.value.split('\n').filter((l) => l !== '' || next.value.endsWith('\n'))
-      const len = Math.max(removedLines.length, addedLines.length)
-      for (let j = 0; j < len; j++) {
-        rows.push({ kind: 'pair', left: removedLines[j] ?? '', right: addedLines[j] ?? '' })
-      }
-      i += 2
-    } else if (cur.removed) {
-      for (const line of cur.value.split('\n')) {
-        if (line !== '') rows.push({ kind: 'removed', text: line })
-      }
-      i++
-    } else if (cur.added) {
-      for (const line of cur.value.split('\n')) {
-        if (line !== '') rows.push({ kind: 'added', text: line })
-      }
-      i++
+  for (const change of changes) {
+    const parts = change.value.split('\n').filter((l, i, arr) => l !== '' || i < arr.length - 1)
+    if (change.removed) {
+      for (const text of parts) lines.push({ kind: 'removed', text })
+    } else if (change.added) {
+      for (const text of parts) lines.push({ kind: 'added', text })
     } else {
-      i++
+      for (const text of parts) lines.push({ kind: 'equal', text })
     }
   }
 
-  return rows
+  return lines
 }
+
+const inlineClass = '[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600'
 
 export function CompareClient({
   versions,
@@ -99,11 +74,14 @@ export function CompareClient({
   const leftVersion = versions.find((v) => v.id === leftId) ?? versions[0]
   const rightVersion = versions.find((v) => v.id === rightId) ?? versions[versions.length - 1]
 
-  const rows = useMemo(() => {
+  const lines = useMemo(() => {
     const leftLines = tiptapToHtmlLines(leftVersion.content)
     const rightLines = tiptapToHtmlLines(rightVersion.content)
-    return buildDiffRows(leftLines.join('\n'), rightLines.join('\n'))
+    return buildDiffLines(leftLines.join('\n'), rightLines.join('\n'))
   }, [leftVersion, rightVersion])
+
+  const removedCount = lines.filter((l) => l.kind === 'removed').length
+  const addedCount = lines.filter((l) => l.kind === 'added').length
 
   function swap() {
     setLeftId(rightId)
@@ -111,7 +89,7 @@ export function CompareClient({
   }
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-4xl">
       {/* Back link */}
       <a
         href={`/policies/${currentId}`}
@@ -123,7 +101,7 @@ export function CompareClient({
       <h1 className="mb-6 text-xl font-semibold text-content-primary">버전 비교</h1>
 
       {/* Controls */}
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-4 flex items-center gap-3">
         <select
           value={leftId}
           onChange={(e) => setLeftId(e.target.value)}
@@ -155,6 +133,18 @@ export function CompareClient({
             </option>
           ))}
         </select>
+
+        {/* Version meta */}
+        <div className="ml-auto flex items-center gap-4 text-xs text-content-tertiary">
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm bg-red-200" />
+            삭제 {removedCount}줄
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-200" />
+            추가 {addedCount}줄
+          </span>
+        </div>
       </div>
 
       {leftId === rightId && (
@@ -163,80 +153,52 @@ export function CompareClient({
         </div>
       )}
 
-      {/* Diff table */}
+      {/* Unified diff */}
       <div className="overflow-hidden rounded-lg border border-line-primary">
-        {/* Column headers */}
-        <div className="grid grid-cols-2 border-b border-line-primary">
-          <div className="flex items-center gap-2 border-r border-line-primary bg-surface-secondary px-4 py-3">
-            <span className="text-sm font-medium text-content-primary">v{leftVersion.version}</span>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-line-primary bg-surface-secondary px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-content-secondary">
+              v{leftVersion.version}
+            </span>
             <StatusBadge status={leftVersion.status} />
-            <span className="ml-1 truncate text-xs text-content-tertiary">{leftVersion.title}</span>
-          </div>
-          <div className="flex items-center gap-2 bg-surface-secondary px-4 py-3">
-            <span className="text-sm font-medium text-content-primary">v{rightVersion.version}</span>
+            <span className="text-xs text-content-tertiary">→</span>
+            <span className="text-xs text-content-secondary">
+              v{rightVersion.version}
+            </span>
             <StatusBadge status={rightVersion.status} />
-            <span className="ml-1 truncate text-xs text-content-tertiary">{rightVersion.title}</span>
           </div>
+          <span className="truncate text-xs text-content-tertiary">{leftVersion.title}</span>
         </div>
 
-        {/* Diff rows */}
         <div className="divide-y divide-line-primary font-mono text-xs">
-          {rows.length === 0 && (
+          {lines.length === 0 && (
             <div className="px-4 py-8 text-center text-content-tertiary">
               두 버전의 내용이 동일합니다.
             </div>
           )}
-          {rows.map((row, idx) => {
-            if (row.kind === 'equal') {
+          {lines.map((line, idx) => {
+            if (line.kind === 'equal') {
               return (
-                <div key={idx} className="grid grid-cols-2">
-                  <div className="border-r border-line-primary bg-surface-primary px-4 py-1.5 text-content-primary">
-                    <span className="mr-2 select-none text-content-tertiary"> </span>
-                    <span dangerouslySetInnerHTML={{ __html: row.text }} className="[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600" />
-                  </div>
-                  <div className="bg-surface-primary px-4 py-1.5 text-content-primary">
-                    <span className="mr-2 select-none text-content-tertiary"> </span>
-                    <span dangerouslySetInnerHTML={{ __html: row.text }} className="[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600" />
-                  </div>
+                <div key={idx} className="flex gap-3 bg-surface-primary px-4 py-1.5 text-content-secondary">
+                  <span className="w-4 select-none text-content-tertiary"> </span>
+                  <span dangerouslySetInnerHTML={{ __html: line.text }} className={inlineClass} />
                 </div>
               )
             }
-
-            if (row.kind === 'removed') {
+            if (line.kind === 'removed') {
               return (
-                <div key={idx} className="grid grid-cols-2">
-                  <div className="border-r border-line-primary bg-red-50 px-4 py-1.5 text-red-800">
-                    <span className="mr-2 select-none text-red-400">-</span>
-                    <span dangerouslySetInnerHTML={{ __html: row.text }} className="[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600" />
-                  </div>
-                  <div className="bg-surface-primary px-4 py-1.5" />
+                <div key={idx} className="flex gap-3 bg-red-50 px-4 py-1.5 text-red-800">
+                  <span className="w-4 select-none font-bold text-red-400">−</span>
+                  <span dangerouslySetInnerHTML={{ __html: line.text }} className={inlineClass} />
                 </div>
               )
             }
-
-            if (row.kind === 'added') {
-              return (
-                <div key={idx} className="grid grid-cols-2">
-                  <div className="border-r border-line-primary bg-surface-primary px-4 py-1.5" />
-                  <div className="bg-emerald-50 px-4 py-1.5 text-emerald-800">
-                    <span className="mr-2 select-none text-emerald-400">+</span>
-                    <span dangerouslySetInnerHTML={{ __html: row.text }} className="[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600" />
-                  </div>
-                </div>
-              )
-            }
-
-            // pair (modified)
+            // added
             return (
-              <div key={idx} className="grid grid-cols-2">
-                <div className="border-r border-line-primary bg-amber-50 px-4 py-1.5 text-amber-800">
-                  <span className="mr-2 select-none text-amber-400">~</span>
-                  <span dangerouslySetInnerHTML={{ __html: row.left }} className="[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600" />
-                </div>
-                <div className="bg-amber-50 px-4 py-1.5 text-amber-800">
-                  <span className="mr-2 select-none text-amber-400">~</span>
-                  <span dangerouslySetInnerHTML={{ __html: row.right }} className="[&_strong]:font-bold [&_em]:italic [&_u]:underline [&_s]:line-through [&_mark]:bg-yellow-200 [&_a]:underline [&_a]:text-blue-600" />
-                </div>
+              <div key={idx} className="flex gap-3 bg-emerald-50 px-4 py-1.5 text-emerald-800">
+                <span className="w-4 select-none font-bold text-emerald-500">+</span>
+                <span dangerouslySetInnerHTML={{ __html: line.text }} className={inlineClass} />
               </div>
             )
           })}
