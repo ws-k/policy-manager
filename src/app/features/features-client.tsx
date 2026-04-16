@@ -410,64 +410,75 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                     </ul>
                   )}
 
-                  <div className="mt-3">
+                  <div className="mt-4 border-t border-line-primary pt-3">
                     <button
                       onClick={() => setOpenFeatureId(isOpen ? null : feature.id)}
-                      className="text-xs text-content-secondary hover:text-content-primary"
+                      className="flex w-full items-center justify-center gap-1.5 rounded-md border border-line-primary bg-surface-secondary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:border-line-secondary hover:bg-surface-tertiary hover:text-content-primary"
                     >
-                      {isOpen ? '닫기' : '정책 연결'}
+                      {isOpen ? (
+                        <>
+                          <span>▲</span> 닫기
+                        </>
+                      ) : (
+                        <>
+                          <span>＋</span> 정책 연결 관리
+                        </>
+                      )}
                     </button>
                   </div>
 
                   {isOpen && (
                     <div className="mt-3 rounded-md border border-line-primary bg-surface-secondary p-3">
-                      <p className="mb-2 text-xs font-medium text-content-primary">연결된 섹션</p>
-                      {feature.feature_policies.length === 0 ? (
-                        <p className="mb-3 text-xs text-content-tertiary">연결된 섹션이 없습니다.</p>
-                      ) : (
-                        <ul className="mb-3 space-y-1">
-                          {feature.feature_policies.map((fp) => (
-                            <li key={fp.id} className="flex items-center justify-between gap-2">
-                              <span className="flex-1 truncate text-xs text-content-primary">
-                                {fp.policy_sections?.policy_docs?.title ?? '알 수 없는 정책'} &gt;{' '}
-                                {fp.policy_sections?.title ?? '알 수 없는 섹션'}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  fp.policy_sections &&
-                                  handleUnlink(feature.id, fp.policy_sections.id)
-                                }
-                                className="shrink-0 text-xs text-content-tertiary hover:text-red-500"
-                              >
-                                연결 해제
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
+                      {feature.feature_policies.length > 0 && (
+                        <>
+                          <p className="mb-2 text-xs font-semibold text-content-primary">연결된 섹션</p>
+                          <ul className="mb-3 space-y-1">
+                            {feature.feature_policies.map((fp) => (
+                              <li key={fp.id} className="flex items-center justify-between gap-2 rounded-md bg-surface-primary px-2 py-1.5">
+                                <span className="flex-1 truncate text-xs text-content-primary">
+                                  <span className="text-content-tertiary">{fp.policy_sections?.policy_docs?.title ?? '?'}</span>
+                                  {' › '}
+                                  {fp.policy_sections?.title ?? '알 수 없는 섹션'}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    fp.policy_sections &&
+                                    handleUnlink(feature.id, fp.policy_sections.id)
+                                  }
+                                  className="shrink-0 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs text-red-600 hover:bg-red-100"
+                                >
+                                  해제
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
                       )}
 
-                      <p className="mb-2 text-xs font-medium text-content-primary">섹션 추가</p>
+                      <p className="mb-2 text-xs font-semibold text-content-primary">섹션 추가</p>
                       <div className="max-h-48 overflow-y-auto space-y-3">
                         {Object.values(sectionsByPolicy).map(({ doc, sections }) => (
                           <div key={doc.id}>
-                            <p className="mb-1 text-xs font-medium text-content-secondary">{doc.title}</p>
+                            <p className="mb-1 text-xs font-medium text-content-tertiary">{doc.title}</p>
                             <ul className="space-y-1">
                               {sections.map((section) => {
                                 const isLinked = linkedSectionIds.has(section.id)
                                 return (
-                                  <li key={section.id} className="flex items-center justify-between gap-2">
+                                  <li key={section.id} className="flex items-center justify-between gap-2 rounded-md px-1 py-0.5">
                                     <span className="flex-1 truncate text-xs text-content-primary">
                                       {section.title}
                                     </span>
                                     {isLinked ? (
-                                      <span className="text-xs text-content-tertiary">연결됨</span>
+                                      <span className="flex items-center gap-1 text-xs text-emerald-600">
+                                        <span>✓</span> 연결됨
+                                      </span>
                                     ) : (
                                       <button
                                         onClick={() => handleLink(feature.id, section.id)}
                                         disabled={linking}
-                                        className="shrink-0 rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-accent-text disabled:opacity-50"
+                                        className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-2 py-0.5 text-xs font-medium text-content-secondary hover:border-accent hover:text-accent disabled:opacity-50"
                                       >
-                                        연결
+                                        + 연결
                                       </button>
                                     )}
                                   </li>
