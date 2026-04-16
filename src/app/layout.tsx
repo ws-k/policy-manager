@@ -47,7 +47,7 @@ export default async function RootLayout({
         ) : (
           <>
             <Sidebar />
-            <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex flex-1 flex-col min-h-0">
               <TopBar userEmail={userEmail} />
               <main className="flex-1 overflow-auto p-6">{children}</main>
             </div>
