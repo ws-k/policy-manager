@@ -243,9 +243,9 @@ export function PolicyEditor({ content, onChange }: PolicyEditorProps) {
   }
 
   return (
-    <div className="rounded-lg border border-line-primary bg-surface-primary overflow-hidden">
+    <div className="rounded-lg border border-line-primary bg-surface-primary">
       {/* Toolbar */}
-      <div className="border-b border-line-primary bg-surface-secondary">
+      <div className="sticky top-0 z-20 rounded-t-lg border-b border-line-primary bg-surface-secondary">
         {/* Main toolbar */}
         <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5">
           {/* Headings */}

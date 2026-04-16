@@ -528,8 +528,8 @@ export function PolicyDetailClient({
 
         {/* Right sidebar */}
         <div className="w-52 shrink-0 space-y-4">
-          <PolicyTOC content={policy.content} />
           <VersionsPanel policyId={policy.id} currentVersion={policy.version} />
+          <PolicyTOC content={policy.content} />
         </div>
       </div>
     </div>
