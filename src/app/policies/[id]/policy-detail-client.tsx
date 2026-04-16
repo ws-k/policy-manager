@@ -252,6 +252,42 @@ function SectionsPanel({ policyId }: { policyId: string }) {
   )
 }
 
+function ExportDropdown({ policyId, title }: { policyId: string; title: string }) {
+  const [open, setOpen] = useState(false)
+
+  const download = (format: string) => {
+    window.location.href = `/api/policies/${policyId}/export?format=${format}`
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary"
+      >
+        내보내기 ▾
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 z-40 mt-1 w-36 overflow-hidden rounded-md border border-line-primary bg-surface-primary shadow-md">
+            <button onClick={() => download('markdown')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
+              <span>📄</span> Markdown
+            </button>
+            <button onClick={() => download('html')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
+              <span>🌐</span> HTML
+            </button>
+            <button onClick={() => download('docx')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
+              <span>📝</span> Word (DOCX)
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export function PolicyDetailClient({
   policy,
   changelogs,
@@ -358,6 +394,7 @@ export function PolicyDetailClient({
 
             {/* Actions */}
             <div className="flex items-center gap-2">
+              <ExportDropdown policyId={policy.id} title={policy.title} />
               <Link
                 href={`/policies/${policy.id}/compare`}
                 className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary"
