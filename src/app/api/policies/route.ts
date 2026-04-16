@@ -52,7 +52,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message, code: 'DB_ERROR' }, { status: 500 })
   }
 
-  return NextResponse.json({ data })
+  // Deduplicate by slug — keep only the latest version per policy
+  const latestBySlug = new Map<string, (typeof data)[0]>()
+  for (const doc of data ?? []) {
+    const existing = latestBySlug.get(doc.slug)
+    if (!existing || doc.version > existing.version) {
+      latestBySlug.set(doc.slug, doc)
+    }
+  }
+  const result = Array.from(latestBySlug.values())
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+
+  return NextResponse.json({ data: result })
 }
 
 export async function POST(request: Request) {
