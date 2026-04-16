@@ -31,6 +31,8 @@ export default function EditPolicyPage() {
   const [restoredContent, setRestoredContent] = useState<Record<string, unknown> | undefined>(undefined)
   const [showVersionConfirm, setShowVersionConfirm] = useState(false)
   const [versionLoading, setVersionLoading] = useState(false)
+  const [slugEditing, setSlugEditing] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const draftKey = `pm:draft:edit:${id}`
   const draftData = { title, domainId, slug, isPublic, content }
@@ -298,16 +300,55 @@ export default function EditPolicyPage() {
           </div>
         </div>
 
-        {/* Slug */}
+        {/* Public URL */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-content-secondary">슬러그</label>
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            placeholder="slug"
-            className="w-full rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none placeholder:text-content-tertiary focus:border-line-secondary font-mono text-xs"
-          />
+          <label className="mb-1.5 block text-xs font-medium text-content-secondary">공개 URL 주소</label>
+          {slugEditing ? (
+            <div className="flex items-center gap-2">
+              <span className="shrink-0 text-xs text-content-tertiary font-mono">
+                {typeof window !== 'undefined' ? window.location.origin : ''}/p/
+              </span>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                autoFocus
+                className="flex-1 rounded-md border border-line-secondary bg-surface-primary px-3 py-2 text-xs text-content-primary outline-none font-mono focus:border-line-secondary"
+              />
+              <button
+                type="button"
+                onClick={() => setSlugEditing(false)}
+                className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-secondary hover:bg-surface-tertiary"
+              >
+                완료
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-md border border-line-primary bg-surface-secondary px-3 py-2">
+              <span className="flex-1 truncate font-mono text-xs text-content-secondary">
+                {typeof window !== 'undefined' ? window.location.origin : ''}/p/{slug}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}/p/${slug}`
+                  navigator.clipboard.writeText(url)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+                className="shrink-0 rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
+              >
+                {copied ? '복사됨' : '복사'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSlugEditing(true)}
+                className="shrink-0 rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
+              >
+                수정
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

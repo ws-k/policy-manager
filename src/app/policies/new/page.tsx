@@ -236,16 +236,21 @@ export default function NewPolicyPage() {
           </div>
         </div>
 
-        {/* Slug */}
+        {/* Public URL */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-content-secondary">슬러그</label>
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => handleSlugChange(e.target.value)}
-            placeholder="자동 생성됩니다"
-            className="w-full rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none placeholder:text-content-tertiary focus:border-line-secondary font-mono text-xs"
-          />
+          <label className="mb-1.5 block text-xs font-medium text-content-secondary">공개 URL 주소</label>
+          <div className="flex items-center rounded-md border border-line-primary bg-surface-primary overflow-hidden">
+            <span className="shrink-0 border-r border-line-primary bg-surface-secondary px-3 py-2 text-xs text-content-tertiary font-mono">
+              {typeof window !== 'undefined' ? window.location.origin : ''}/p/
+            </span>
+            <input
+              type="text"
+              value={slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              placeholder="자동 생성됩니다"
+              className="flex-1 bg-transparent px-3 py-2 text-xs text-content-primary outline-none placeholder:text-content-tertiary font-mono"
+            />
+          </div>
         </div>
       </div>
 
