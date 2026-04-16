@@ -64,7 +64,9 @@ function generateSlug(name: string): string {
 export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[] }) {
   const [features, setFeatures] = useState<Feature[]>(initialFeatures)
   const [allSections, setAllSections] = useState<PolicySection[]>([])
-  const [openFeatureId, setOpenFeatureId] = useState<string | null>(null)
+  const [linkModal, setLinkModal] = useState<{ feature: Feature } | null>(null)
+  const [modalStep, setModalStep] = useState<'policy' | 'section'>('policy')
+  const [modalPolicy, setModalPolicy] = useState<{ doc: PolicyDoc; sections: PolicySection[] } | null>(null)
   const [linking, setLinking] = useState(false)
   const [editState, setEditState] = useState<EditState | null>(null)
   const [saving, setSaving] = useState(false)
@@ -216,6 +218,17 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
     {}
   )
 
+  // Get the up-to-date feature from state (refreshFeatures updates features array)
+  const modalFeature = linkModal
+    ? (features.find((f) => f.id === linkModal.feature.id) ?? linkModal.feature)
+    : null
+
+  const linkedSectionIds = new Set(
+    modalFeature?.feature_policies
+      .map((fp) => fp.policy_sections?.id)
+      .filter((id): id is string => !!id) ?? []
+  )
+
   return (
     <div>
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -293,15 +306,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
             .filter((doc): doc is PolicyDoc => doc !== null && doc !== undefined) ?? []
           const visibleDocs = linkedDocs.slice(0, 3)
           const hiddenCount = linkedDocs.length - visibleDocs.length
-          const isOpen = openFeatureId === feature.id
           const isEditing = editState?.id === feature.id
-
-          // sections already linked for this feature
-          const linkedSectionIds = new Set(
-            feature.feature_policies
-              .map((fp) => fp.policy_sections?.id)
-              .filter((id): id is string => !!id)
-          )
 
           return (
             <div
@@ -412,93 +417,176 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
 
                   <div className="mt-4 border-t border-line-primary pt-3">
                     <button
-                      onClick={() => setOpenFeatureId(isOpen ? null : feature.id)}
+                      onClick={() => { setLinkModal({ feature }); setModalStep('policy'); setModalPolicy(null) }}
                       className="flex w-full items-center justify-center gap-1.5 rounded-md border border-line-primary bg-surface-secondary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:border-line-secondary hover:bg-surface-tertiary hover:text-content-primary"
                     >
-                      {isOpen ? (
-                        <>
-                          <span>▲</span> 닫기
-                        </>
-                      ) : (
-                        <>
-                          <span>＋</span> 정책 연결 관리
-                        </>
-                      )}
+                      <span>＋</span> 정책 연결 관리
                     </button>
                   </div>
-
-                  {isOpen && (
-                    <div className="mt-3 rounded-md border border-line-primary bg-surface-secondary p-3">
-                      {feature.feature_policies.length > 0 && (
-                        <>
-                          <p className="mb-2 text-xs font-semibold text-content-primary">연결된 섹션</p>
-                          <ul className="mb-3 space-y-1">
-                            {feature.feature_policies.map((fp) => (
-                              <li key={fp.id} className="flex items-center justify-between gap-2 rounded-md bg-surface-primary px-2 py-1.5">
-                                <span className="flex-1 truncate text-xs text-content-primary">
-                                  <span className="text-content-tertiary">{fp.policy_sections?.policy_docs?.title ?? '?'}</span>
-                                  {' › '}
-                                  {fp.policy_sections?.title ?? '알 수 없는 섹션'}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    fp.policy_sections &&
-                                    handleUnlink(feature.id, fp.policy_sections.id)
-                                  }
-                                  className="shrink-0 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs text-red-600 hover:bg-red-100"
-                                >
-                                  해제
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </>
-                      )}
-
-                      <p className="mb-2 text-xs font-semibold text-content-primary">섹션 추가</p>
-                      <div className="max-h-48 overflow-y-auto space-y-3">
-                        {Object.values(sectionsByPolicy).map(({ doc, sections }) => (
-                          <div key={doc.id}>
-                            <p className="mb-1 text-xs font-medium text-content-tertiary">{doc.title}</p>
-                            <ul className="space-y-1">
-                              {sections.map((section) => {
-                                const isLinked = linkedSectionIds.has(section.id)
-                                return (
-                                  <li key={section.id} className="flex items-center justify-between gap-2 rounded-md px-1 py-0.5">
-                                    <span className="flex-1 truncate text-xs text-content-primary">
-                                      {section.title}
-                                    </span>
-                                    {isLinked ? (
-                                      <span className="flex items-center gap-1 text-xs text-emerald-600">
-                                        <span>✓</span> 연결됨
-                                      </span>
-                                    ) : (
-                                      <button
-                                        onClick={() => handleLink(feature.id, section.id)}
-                                        disabled={linking}
-                                        className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-2 py-0.5 text-xs font-medium text-content-secondary hover:border-accent hover:text-accent disabled:opacity-50"
-                                      >
-                                        + 연결
-                                      </button>
-                                    )}
-                                  </li>
-                                )
-                              })}
-                            </ul>
-                          </div>
-                        ))}
-                        {Object.keys(sectionsByPolicy).length === 0 && (
-                          <p className="text-xs text-content-tertiary">섹션이 없습니다. 정책에 섹션을 먼저 추가해주세요.</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </>
               )}
             </div>
           )
         })}
       </div>
+
+      {/* Link Modal */}
+      {linkModal && modalFeature && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={(e) => { if (e.target === e.currentTarget) setLinkModal(null) }}
+        >
+          <div className="relative w-full max-w-lg mx-4 rounded-xl border border-line-primary bg-surface-primary shadow-xl flex flex-col max-h-[80vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line-primary shrink-0">
+              <div className="min-w-0">
+                {modalStep === 'section' && modalPolicy ? (
+                  <button
+                    onClick={() => { setModalStep('policy'); setModalPolicy(null) }}
+                    className="mb-1 flex items-center gap-1 text-xs text-content-secondary hover:text-content-primary"
+                  >
+                    ← {modalPolicy.doc.title}
+                  </button>
+                ) : null}
+                <h2 className="truncate text-sm font-semibold text-content-primary">
+                  정책 연결 — {modalFeature.name}
+                </h2>
+              </div>
+              <button
+                onClick={() => setLinkModal(null)}
+                className="ml-4 shrink-0 rounded-md p-1 text-content-tertiary hover:text-content-primary"
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              {/* Connected sections */}
+              {modalFeature.feature_policies.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-content-primary">연결된 섹션</p>
+                  <ul className="space-y-1">
+                    {modalFeature.feature_policies.map((fp) => (
+                      <li
+                        key={fp.id}
+                        className="flex items-center justify-between gap-2 rounded-md border border-line-primary bg-surface-secondary px-3 py-2"
+                      >
+                        <span className="min-w-0 flex-1 truncate text-xs text-content-primary">
+                          <span className="text-content-tertiary">
+                            {fp.policy_sections?.policy_docs?.title ?? '?'}
+                          </span>
+                          {' › '}
+                          {fp.policy_sections?.title ?? '알 수 없는 섹션'}
+                        </span>
+                        <button
+                          onClick={() =>
+                            fp.policy_sections &&
+                            handleUnlink(modalFeature.id, fp.policy_sections.id)
+                          }
+                          className="shrink-0 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs text-red-600 hover:bg-red-100"
+                        >
+                          해제
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Step 1: Policy selection */}
+              {modalStep === 'policy' && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-content-primary">섹션 추가 — 정책 선택</p>
+                  {Object.keys(sectionsByPolicy).length === 0 ? (
+                    <p className="text-xs text-content-tertiary">
+                      섹션이 없습니다. 정책에 섹션을 먼저 추가해주세요.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {Object.values(sectionsByPolicy).map(({ doc, sections }) => {
+                        const linkedCount = sections.filter((s) => linkedSectionIds.has(s.id)).length
+                        const hasAvailable = sections.length > 0
+
+                        return (
+                          <button
+                            key={doc.id}
+                            onClick={() => {
+                              if (!hasAvailable) return
+                              setModalPolicy({ doc, sections })
+                              setModalStep('section')
+                            }}
+                            disabled={!hasAvailable}
+                            className={`rounded-lg border border-line-primary px-4 py-3 text-left w-full transition-colors ${
+                              hasAvailable
+                                ? 'bg-surface-secondary hover:bg-surface-tertiary'
+                                : 'bg-surface-secondary opacity-50 cursor-not-allowed'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="flex-1 truncate text-sm font-medium text-content-primary">
+                                {doc.title}
+                              </span>
+                              {doc.status === 'published' ? (
+                                <span className="shrink-0 rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
+                                  게시됨
+                                </span>
+                              ) : (
+                                <span className="shrink-0 rounded border border-line-primary bg-surface-tertiary px-1.5 py-0.5 text-xs text-content-secondary">
+                                  초안
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-1 text-xs text-content-tertiary">
+                              {sections.length}개 항목 · {linkedCount}개 연결됨
+                            </p>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 2: Section selection */}
+              {modalStep === 'section' && modalPolicy && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-content-primary">섹션 선택</p>
+                  <ul className="space-y-1">
+                    {modalPolicy.sections.map((section) => {
+                      const isLinked = linkedSectionIds.has(section.id)
+                      return (
+                        <li
+                          key={section.id}
+                          className="flex items-center justify-between gap-2 rounded-md border border-line-primary bg-surface-secondary px-3 py-2"
+                        >
+                          <span className="flex-1 truncate text-sm text-content-primary">
+                            {section.title}
+                          </span>
+                          {isLinked ? (
+                            <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600">
+                              ✓ 연결됨
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleLink(modalFeature.id, section.id)}
+                              disabled={linking}
+                              className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-2 py-0.5 text-xs font-medium text-content-secondary hover:border-accent hover:text-accent disabled:opacity-50"
+                            >
+                              연결
+                            </button>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
