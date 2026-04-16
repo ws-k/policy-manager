@@ -137,6 +137,12 @@ export async function DELETE(
     )
   }
 
+  // Null out parent_version_id references before deleting to avoid FK violation
+  await supabase
+    .from('policy_docs')
+    .update({ parent_version_id: null })
+    .eq('parent_version_id', id)
+
   const { error } = await supabase
     .from('policy_docs')
     .delete()
