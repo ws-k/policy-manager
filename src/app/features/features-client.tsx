@@ -407,10 +407,9 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                       </button>
                       <button
                         onClick={() => handleDelete(feature.id, feature.name)}
-                        className="text-xs text-content-tertiary hover:text-red-500"
-                        title="삭제"
+                        className="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 hover:bg-red-100"
                       >
-                        ✕
+                        삭제
                       </button>
                     </div>
                   </div>
