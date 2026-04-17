@@ -145,7 +145,7 @@ export function SearchModal() {
       onClick={closeModal}
     >
       <div
-        className="w-full max-w-xl mx-4 rounded-xl border border-line-primary bg-surface-primary shadow-2xl"
+        className="w-full max-w-2xl mx-4 rounded-xl border border-line-primary bg-surface-primary shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Input */}
@@ -155,26 +155,26 @@ export function SearchModal() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="정책 검색..."
-          className="w-full px-4 py-3.5 text-sm border-b border-line-primary outline-none bg-transparent placeholder:text-content-tertiary text-content-primary"
+          className="w-full px-5 py-4 text-base border-b border-line-primary outline-none bg-transparent placeholder:text-content-tertiary text-content-primary"
         />
 
         {/* Results */}
-        <div className="max-h-96 overflow-y-auto divide-y divide-line-primary">
+        <div className="max-h-[520px] overflow-y-auto divide-y divide-line-primary">
           {loading && (
-            <div className="px-4 py-6 text-sm text-content-tertiary opacity-60 animate-pulse">
+            <div className="px-5 py-8 text-sm text-content-tertiary opacity-60 animate-pulse">
               검색 중...
             </div>
           )}
 
           {!loading && query && results.length === 0 && (
-            <div className="px-4 py-6 text-sm text-content-tertiary">검색 결과 없음</div>
+            <div className="px-5 py-8 text-sm text-content-tertiary">검색 결과 없음</div>
           )}
 
           {!loading && results.length > 0 && (
             <>
               {titleMatches.length > 0 && (
                 <>
-                  <div className="px-4 py-1.5 text-[11px] font-medium text-content-tertiary bg-surface-secondary">
+                  <div className="px-5 py-2 text-xs font-medium text-content-tertiary bg-surface-secondary">
                     제목 일치
                   </div>
                   {titleMatches.map((result, i) => {
@@ -194,7 +194,7 @@ export function SearchModal() {
 
               {contentMatches.length > 0 && (
                 <>
-                  <div className="px-4 py-1.5 text-[11px] font-medium text-content-tertiary bg-surface-secondary">
+                  <div className="px-5 py-2 text-xs font-medium text-content-tertiary bg-surface-secondary">
                     내용 일치
                   </div>
                   {contentMatches.map((result, i) => {
@@ -216,7 +216,7 @@ export function SearchModal() {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 text-xs text-content-tertiary border-t border-line-primary flex gap-4">
+        <div className="px-5 py-3 text-sm text-content-tertiary border-t border-line-primary flex gap-4">
           <span>↑↓ 이동</span>
           <span>Enter 열기</span>
           <span>Esc 닫기</span>
@@ -241,37 +241,37 @@ function ResultItem({
     <button
       onClick={onClick}
       className={[
-        'w-full text-left px-4 py-3 flex flex-col gap-0.5 transition-colors',
+        'w-full text-left px-5 py-4 flex flex-col gap-1 transition-colors',
         isSelected ? 'bg-surface-tertiary' : 'hover:bg-surface-secondary',
       ].join(' ')}
     >
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-content-primary">
+        <span className="text-base font-medium text-content-primary">
           {highlight(result.title, query)}
         </span>
         {result.status === 'published' ? (
-          <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-700 font-medium">
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 font-medium">
             게시됨
           </span>
         ) : (
-          <span className="rounded-full bg-surface-tertiary px-1.5 py-0.5 text-[10px] text-content-tertiary font-medium">
+          <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-xs text-content-tertiary font-medium">
             초안
           </span>
         )}
       </div>
 
       {result.domain_name && (
-        <span className="text-xs text-content-tertiary">{result.domain_name}</span>
+        <span className="text-sm text-content-tertiary">{result.domain_name}</span>
       )}
 
       {result.match_in === 'section' && result.section_title && (
-        <span className="text-xs text-content-secondary">
+        <span className="text-sm text-content-secondary">
           섹션: {highlight(result.section_title, query)}
         </span>
       )}
 
       {result.snippet && (
-        <span className="text-xs text-content-secondary line-clamp-2">
+        <span className="text-sm text-content-secondary line-clamp-2">
           {highlight(result.snippet, query)}
         </span>
       )}
