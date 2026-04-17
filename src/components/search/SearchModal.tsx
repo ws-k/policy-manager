@@ -241,7 +241,7 @@ function ResultItem({
     <button
       onClick={onClick}
       className={[
-        'w-full text-left px-5 py-4 flex flex-col gap-1 transition-colors',
+        'cursor-pointer w-full text-left px-5 py-4 flex flex-col gap-1 transition-colors',
         isSelected ? 'bg-surface-tertiary' : 'hover:bg-surface-secondary',
       ].join(' ')}
     >

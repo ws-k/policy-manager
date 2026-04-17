@@ -49,7 +49,7 @@ export const SlashCommandMenu = forwardRef<HTMLDivElement, SlashCommandMenuProps
               e.preventDefault()
               onSelect(cmd)
             }}
-            className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
+            className={`cursor-pointer flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
               i === selectedIndex
                 ? 'bg-surface-tertiary text-content-primary'
                 : 'text-content-secondary hover:bg-surface-secondary'

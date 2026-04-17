@@ -267,7 +267,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
         </div>
         <button
           onClick={() => { setShowAddForm((v) => !v); setError(null) }}
-          className="shrink-0 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text"
+          className="cursor-pointer shrink-0 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text"
         >
           {showAddForm ? '취소' : '기능 추가'}
         </button>
@@ -319,7 +319,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
             <button
               onClick={handleAdd}
               disabled={adding}
-              className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text disabled:opacity-50"
+              className="cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text disabled:opacity-50"
             >
               {adding ? '추가 중...' : '추가'}
             </button>
@@ -375,14 +375,14 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-text disabled:opacity-50"
+                      className="cursor-pointer rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-text disabled:opacity-50"
                     >
                       {saving ? '저장 중...' : '저장'}
                     </button>
                     <button
                       onClick={cancelEdit}
                       disabled={saving}
-                      className="rounded-md border border-line-primary px-3 py-1 text-xs text-content-secondary hover:text-content-primary disabled:opacity-50"
+                      className="cursor-pointer rounded-md border border-line-primary px-3 py-1 text-xs text-content-secondary hover:text-content-primary disabled:opacity-50"
                     >
                       취소
                     </button>
@@ -564,7 +564,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                 {modalStep === 'section' && (
                   <button
                     onClick={() => { setModalStep('policy'); setModalPolicy(null) }}
-                    className="shrink-0 rounded-md p-1 text-content-tertiary hover:text-content-primary"
+                    className="cursor-pointer shrink-0 rounded-md p-1 text-content-tertiary hover:text-content-primary"
                     aria-label="뒤로"
                   >
                     ←
@@ -578,7 +578,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
               </div>
               <button
                 onClick={() => setLinkModal(null)}
-                className="ml-4 shrink-0 rounded-md p-1 text-content-tertiary hover:text-content-primary"
+                className="cursor-pointer ml-4 shrink-0 rounded-md p-1 text-content-tertiary hover:text-content-primary"
                 aria-label="닫기"
               >
                 ✕
@@ -601,7 +601,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                         <button
                           key={doc.id}
                           onClick={() => { setModalPolicy({ doc, sections }); setModalStep('section') }}
-                          className="w-full flex items-center justify-between gap-3 rounded-lg border border-line-primary bg-surface-secondary px-4 py-3 text-left transition-colors hover:border-line-secondary hover:bg-surface-tertiary"
+                          className="cursor-pointer w-full flex items-center justify-between gap-3 rounded-lg border border-line-primary bg-surface-secondary px-4 py-3 text-left transition-colors hover:border-line-secondary hover:bg-surface-tertiary"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
@@ -652,7 +652,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                             <button
                               onClick={() => handleUnlink(modalFeature.id, section.id)}
                               disabled={linking}
-                              className="shrink-0 rounded border border-red-200 bg-red-50 px-4 py-1.5 text-sm text-red-600 hover:bg-red-100 disabled:opacity-50"
+                              className="cursor-pointer shrink-0 rounded border border-red-200 bg-red-50 px-4 py-1.5 text-sm text-red-600 hover:bg-red-100 disabled:opacity-50"
                             >
                               해제
                             </button>
@@ -660,7 +660,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                             <button
                               onClick={() => handleLink(modalFeature.id, section.id)}
                               disabled={linking}
-                              className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-4 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+                              className="cursor-pointer shrink-0 rounded-md border border-line-primary bg-surface-primary px-4 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
                             >
                               연결
                             </button>

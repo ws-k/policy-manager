@@ -64,7 +64,7 @@ export function PolicyTOC({ content }: { content: Record<string, unknown> }) {
                   .getElementById(item.id)
                   ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }
-              className="text-xs text-content-secondary hover:text-content-primary truncate transition-colors text-left w-full"
+              className="cursor-pointer text-xs text-content-secondary hover:text-content-primary truncate transition-colors text-left w-full"
             >
               {item.text}
             </button>

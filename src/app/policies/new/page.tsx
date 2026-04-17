@@ -177,14 +177,14 @@ export default function NewPolicyPage() {
           <button
             type="button"
             onClick={handleRestoreDraft}
-            className="font-medium underline underline-offset-2 hover:opacity-80"
+            className="cursor-pointer font-medium underline underline-offset-2 hover:opacity-80"
           >
             복원하기
           </button>
           <button
             type="button"
             onClick={handleDismissDraft}
-            className="hover:opacity-80"
+            className="cursor-pointer hover:opacity-80"
           >
             무시하기
           </button>
@@ -214,7 +214,7 @@ export default function NewPolicyPage() {
             <select
               value={domainId}
               onChange={(e) => setDomainId(e.target.value)}
-              className="w-full rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-line-secondary"
+              className="cursor-pointer w-full rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-line-secondary"
             >
               {domains.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -225,12 +225,12 @@ export default function NewPolicyPage() {
           </div>
 
           <div className="flex items-end">
-            <label className="flex items-center gap-2 pb-2 text-sm text-content-primary">
+            <label className="cursor-pointer flex items-center gap-2 pb-2 text-sm text-content-primary">
               <input
                 type="checkbox"
                 checked={isPublic}
                 onChange={(e) => setIsPublic(e.target.checked)}
-                className="h-4 w-4 rounded border-line-primary"
+                className="cursor-pointer h-4 w-4 rounded border-line-primary"
               />
               공개
             </label>
@@ -265,7 +265,7 @@ export default function NewPolicyPage() {
                 key={tpl.id}
                 type="button"
                 onClick={() => handleSelectTemplate(tpl.id)}
-                className="rounded-lg border border-line-primary bg-surface-primary px-4 py-4 text-left transition-colors hover:border-line-secondary hover:bg-surface-secondary"
+                className="cursor-pointer rounded-lg border border-line-primary bg-surface-primary px-4 py-4 text-left transition-colors hover:border-line-secondary hover:bg-surface-secondary"
               >
                 <p className="text-sm font-medium text-content-primary">{tpl.name}</p>
                 <p className="mt-1 text-xs text-content-tertiary">{tpl.description}</p>
@@ -294,7 +294,7 @@ export default function NewPolicyPage() {
               type="button"
               onClick={() => openModal('draft')}
               disabled={!canSave || loading}
-              className="rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
+              className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
             >
               임시저장
             </button>
@@ -302,7 +302,7 @@ export default function NewPolicyPage() {
               type="button"
               onClick={() => openModal('published')}
               disabled={!canSave || loading}
-              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+              className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
             >
               게시
             </button>

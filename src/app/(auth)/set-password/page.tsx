@@ -83,7 +83,7 @@ export default function SetPasswordPage() {
           <button
             type="submit"
             disabled={loading || !password || !passwordConfirm}
-            className="mt-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-accent-text transition-opacity disabled:opacity-50"
+            className="cursor-pointer mt-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-accent-text transition-opacity disabled:opacity-50"
           >
             {loading ? '설정 중...' : '비밀번호 설정 완료'}
           </button>

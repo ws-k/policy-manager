@@ -87,7 +87,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading || !email}
-            className="mt-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-accent-text transition-opacity disabled:opacity-50"
+            className="cursor-pointer mt-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-accent-text transition-opacity disabled:opacity-50"
           >
             {loading ? '전송 중...' : '이메일 인증하기'}
           </button>

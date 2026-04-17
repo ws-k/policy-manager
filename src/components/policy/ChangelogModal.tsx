@@ -44,7 +44,7 @@ export function ChangelogModal({ open, loading, onClose, onConfirm }: ChangelogM
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
           >
             취소
           </button>
@@ -52,7 +52,7 @@ export function ChangelogModal({ open, loading, onClose, onConfirm }: ChangelogM
             type="button"
             onClick={() => onConfirm(summary)}
             disabled={!summary.trim() || loading}
-            className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text transition-colors hover:opacity-90 disabled:opacity-50"
+            className="cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text transition-colors hover:opacity-90 disabled:opacity-50"
           >
             {loading ? '저장 중...' : '저장 완료'}
           </button>

@@ -263,7 +263,7 @@ export function CompareClient({
         <select
           value={leftId}
           onChange={(e) => setLeftId(e.target.value)}
-          className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-line-secondary focus:outline-none"
+          className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-line-secondary focus:outline-none"
         >
           {versions.map((v) => (
             <option key={v.id} value={v.id}>
@@ -274,7 +274,7 @@ export function CompareClient({
 
         <button
           onClick={swap}
-          className="rounded-md border border-line-primary bg-surface-primary px-2.5 py-1.5 text-xs text-content-secondary transition-colors hover:bg-surface-tertiary"
+          className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-2.5 py-1.5 text-xs text-content-secondary transition-colors hover:bg-surface-tertiary"
           title="버전 교체"
         >
           ⇄
@@ -283,7 +283,7 @@ export function CompareClient({
         <select
           value={rightId}
           onChange={(e) => setRightId(e.target.value)}
-          className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-line-secondary focus:outline-none"
+          className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-line-secondary focus:outline-none"
         >
           {versions.map((v) => (
             <option key={v.id} value={v.id}>

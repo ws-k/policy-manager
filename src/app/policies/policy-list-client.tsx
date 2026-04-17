@@ -70,7 +70,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
         <div className="flex flex-wrap gap-1.5">
           <button
             onClick={() => updateFilter('domain', '')}
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
               !currentDomain
                 ? 'border-accent bg-accent text-accent-text'
                 : 'border-line-primary bg-surface-primary text-content-secondary hover:bg-surface-tertiary'
@@ -82,7 +82,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
             <button
               key={d.id}
               onClick={() => updateFilter('domain', d.id)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                 currentDomain === d.id
                   ? 'border-accent bg-accent text-accent-text'
                   : 'border-line-primary bg-surface-primary text-content-secondary hover:bg-surface-tertiary'
@@ -97,7 +97,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
         <select
           value={currentStatus}
           onChange={(e) => updateFilter('status', e.target.value)}
-          className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary outline-none focus:border-line-secondary"
+          className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary outline-none focus:border-line-secondary"
         >
           <option value="">전체 상태</option>
           <option value="draft">초안</option>

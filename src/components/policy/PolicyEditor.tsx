@@ -53,7 +53,7 @@ function ColorPalette({
             type="button"
             title={color}
             onClick={() => onSelect(color)}
-            className="relative h-8 w-8 rounded-md border border-line-secondary transition-transform hover:scale-110 hover:shadow-md"
+            className="cursor-pointer relative h-8 w-8 rounded-md border border-line-secondary transition-transform hover:scale-110 hover:shadow-md"
             style={{ backgroundColor: color }}
           >
             {currentColor === color && (
@@ -106,7 +106,7 @@ function ToolbarButton({
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className={`rounded px-2 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${
+      className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition-colors disabled:opacity-40 ${
         isActive
           ? 'bg-accent text-accent-text'
           : 'text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'
@@ -309,7 +309,7 @@ export function PolicyEditor({ content, onChange }: PolicyEditorProps) {
                   type="button"
                   title="폰트 컬러"
                   onClick={() => setColorPaletteOpen((o) => !o)}
-                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+                  className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition-colors ${
                     hasColor ? 'bg-accent text-accent-text' : 'text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'
                   }`}
                 >
@@ -331,7 +331,7 @@ export function PolicyEditor({ content, onChange }: PolicyEditorProps) {
                       <button
                         type="button"
                         onClick={() => { editor.chain().focus().unsetColor().run(); setColorPaletteOpen(false) }}
-                        className="mt-1 w-full rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
+                        className="cursor-pointer mt-1 w-full rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
                       >
                         컬러 제거
                       </button>
@@ -352,7 +352,7 @@ export function PolicyEditor({ content, onChange }: PolicyEditorProps) {
                   type="button"
                   title="하이라이트 컬러"
                   onClick={() => setHighlightPaletteOpen((o) => !o)}
-                  className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+                  className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition-colors ${
                     hasHighlight ? 'bg-accent text-accent-text' : 'text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'
                   }`}
                 >
@@ -369,7 +369,7 @@ export function PolicyEditor({ content, onChange }: PolicyEditorProps) {
                       <button
                         type="button"
                         onClick={() => { editor.chain().focus().unsetHighlight().run(); setHighlightPaletteOpen(false) }}
-                        className="mt-1 w-full rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
+                        className="cursor-pointer mt-1 w-full rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
                       >
                         하이라이트 제거
                       </button>
@@ -504,7 +504,7 @@ export function PolicyEditor({ content, onChange }: PolicyEditorProps) {
             type="button"
             title="키보드 단축키"
             onClick={() => setShortcutPanelOpen((o) => !o)}
-            className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+            className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition-colors ${
               shortcutPanelOpen
                 ? 'bg-accent text-accent-text'
                 : 'text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'

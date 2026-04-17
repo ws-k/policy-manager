@@ -27,7 +27,7 @@ export default async function PublicPoliciesPage() {
                 <Link
                   key={policy.id}
                   href={`/public-view/${policy.id}`}
-                  className="block bg-white border border-gray-200 rounded-lg p-5 hover:border-gray-300 transition-colors"
+                  className="cursor-pointer block bg-white border border-gray-200 rounded-lg p-5 hover:border-gray-300 transition-colors"
                 >
                   <div className="font-medium text-gray-900">{policy.title}</div>
                   <div className="mt-1 flex items-center gap-3 text-sm text-gray-500">

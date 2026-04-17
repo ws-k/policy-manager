@@ -215,7 +215,7 @@ export default function EditPolicyPage() {
               type="button"
               onClick={() => router.push(`/policies/${id}`)}
               disabled={versionLoading}
-              className="rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
+              className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
             >
               취소
             </button>
@@ -223,7 +223,7 @@ export default function EditPolicyPage() {
               type="button"
               onClick={handleCreateNewVersion}
               disabled={versionLoading}
-              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+              className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
             >
               {versionLoading ? '생성 중...' : '새 버전 생성'}
             </button>
@@ -256,14 +256,14 @@ export default function EditPolicyPage() {
           <button
             type="button"
             onClick={handleRestoreDraft}
-            className="font-medium underline underline-offset-2 hover:opacity-80"
+            className="cursor-pointer font-medium underline underline-offset-2 hover:opacity-80"
           >
             복원하기
           </button>
           <button
             type="button"
             onClick={handleDismissDraft}
-            className="hover:opacity-80"
+            className="cursor-pointer hover:opacity-80"
           >
             무시하기
           </button>
@@ -293,7 +293,7 @@ export default function EditPolicyPage() {
             <select
               value={domainId}
               onChange={(e) => setDomainId(e.target.value)}
-              className="w-full rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-line-secondary"
+              className="cursor-pointer w-full rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-line-secondary"
             >
               {domains.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -304,12 +304,12 @@ export default function EditPolicyPage() {
           </div>
 
           <div className="flex items-end">
-            <label className="flex items-center gap-2 pb-2 text-sm text-content-primary">
+            <label className="cursor-pointer flex items-center gap-2 pb-2 text-sm text-content-primary">
               <input
                 type="checkbox"
                 checked={isPublic}
                 onChange={(e) => setIsPublic(e.target.checked)}
-                className="h-4 w-4 rounded border-line-primary"
+                className="cursor-pointer h-4 w-4 rounded border-line-primary"
               />
               공개
             </label>
@@ -334,7 +334,7 @@ export default function EditPolicyPage() {
               <button
                 type="button"
                 onClick={() => setSlugEditing(false)}
-                className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-secondary hover:bg-surface-tertiary"
+                className="cursor-pointer shrink-0 rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-secondary hover:bg-surface-tertiary"
               >
                 완료
               </button>
@@ -352,14 +352,14 @@ export default function EditPolicyPage() {
                   setCopied(true)
                   setTimeout(() => setCopied(false), 2000)
                 }}
-                className="shrink-0 rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
+                className="cursor-pointer shrink-0 rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
               >
                 {copied ? '복사됨' : '복사'}
               </button>
               <button
                 type="button"
                 onClick={() => setSlugEditing(true)}
-                className="shrink-0 rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
+                className="cursor-pointer shrink-0 rounded border border-line-primary bg-surface-primary px-2 py-1 text-xs text-content-secondary hover:bg-surface-tertiary"
               >
                 수정
               </button>
@@ -385,7 +385,7 @@ export default function EditPolicyPage() {
               type="button"
               onClick={() => openModal('draft')}
               disabled={!canSave || loading}
-              className="rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
+              className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
             >
               저장
             </button>
@@ -393,7 +393,7 @@ export default function EditPolicyPage() {
               type="button"
               onClick={() => openModal('published')}
               disabled={!canSave || loading}
-              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+              className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
             >
               게시
             </button>

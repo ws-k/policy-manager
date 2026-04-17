@@ -99,7 +99,7 @@ function VersionsPanel({ policyId, currentVersion }: { policyId: string; current
           <button
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="rounded px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-30"
+            className="cursor-pointer rounded px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-30"
           >
             ←
           </button>
@@ -109,7 +109,7 @@ function VersionsPanel({ policyId, currentVersion }: { policyId: string; current
           <button
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page === totalPages - 1}
-            className="rounded px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-30"
+            className="cursor-pointer rounded px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary disabled:opacity-30"
           >
             →
           </button>
@@ -174,7 +174,7 @@ function SectionsPanel({ policyId }: { policyId: string }) {
               <span className="text-sm text-content-primary">{section.title}</span>
               <button
                 onClick={() => handleDelete(section.id)}
-                className="text-xs text-content-tertiary hover:text-red-500"
+                className="cursor-pointer text-xs text-content-tertiary hover:text-red-500"
               >
                 ✕
               </button>
@@ -194,7 +194,7 @@ function SectionsPanel({ policyId }: { policyId: string }) {
         <button
           onClick={handleAdd}
           disabled={adding || !newTitle.trim()}
-          className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-text disabled:opacity-50"
+          className="cursor-pointer rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-text disabled:opacity-50"
         >
           섹션 추가
         </button>
@@ -257,7 +257,7 @@ function ExportDropdown({ policyId, title }: { policyId: string; title: string }
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary"
+        className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary"
       >
         내보내기 ▾
       </button>
@@ -265,13 +265,13 @@ function ExportDropdown({ policyId, title }: { policyId: string; title: string }
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div className="absolute right-0 z-40 mt-1 w-36 overflow-hidden rounded-md border border-line-primary bg-surface-primary shadow-md">
-            <button onClick={() => download('markdown')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
+            <button onClick={() => download('markdown')} className="cursor-pointer flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
               <span>📄</span> Markdown
             </button>
-            <button onClick={() => download('html')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
+            <button onClick={() => download('html')} className="cursor-pointer flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
               <span>🌐</span> HTML
             </button>
-            <button onClick={() => download('docx')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
+            <button onClick={() => download('docx')} className="cursor-pointer flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-content-primary hover:bg-surface-secondary">
               <span>📝</span> Word (DOCX)
             </button>
           </div>
@@ -412,14 +412,14 @@ export function PolicyDetailClient({
                   <button
                     onClick={() => handleAction('publish')}
                     disabled={loading}
-                    className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                    className="cursor-pointer rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
                   >
                     게시
                   </button>
                   <button
                     onClick={() => handleAction('delete')}
                     disabled={loading}
-                    className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
+                    className="cursor-pointer rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
                   >
                     삭제
                   </button>
@@ -430,7 +430,7 @@ export function PolicyDetailClient({
                   <button
                     onClick={handleTogglePublic}
                     disabled={togglingPublic}
-                    className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                    className={`cursor-pointer rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
                       isPublic
                         ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                         : 'border-line-primary bg-surface-primary text-content-secondary hover:bg-surface-tertiary'
@@ -441,7 +441,7 @@ export function PolicyDetailClient({
                   {isPublic && (
                     <button
                       onClick={handleCopyLink}
-                      className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary"
+                      className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary"
                     >
                       {copied ? '복사됨!' : '링크 복사'}
                     </button>
@@ -449,14 +449,14 @@ export function PolicyDetailClient({
                   <button
                     onClick={() => handleAction('new-version')}
                     disabled={loading}
-                    className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-text transition-colors hover:opacity-90 disabled:opacity-50"
+                    className="cursor-pointer rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-text transition-colors hover:opacity-90 disabled:opacity-50"
                   >
                     새 버전 생성
                   </button>
                   <button
                     onClick={() => handleAction('unpublish')}
                     disabled={loading}
-                    className="rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
+                    className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-tertiary disabled:opacity-50"
                   >
                     게시 취소
                   </button>

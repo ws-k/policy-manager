@@ -208,14 +208,14 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
                           <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-text disabled:opacity-50"
+                            className="cursor-pointer rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-text disabled:opacity-50"
                           >
                             {saving ? '저장 중...' : '저장'}
                           </button>
                           <button
                             onClick={cancelEdit}
                             disabled={saving}
-                            className="rounded-md border border-line-primary px-3 py-1 text-xs text-content-secondary hover:text-content-primary disabled:opacity-50"
+                            className="cursor-pointer rounded-md border border-line-primary px-3 py-1 text-xs text-content-secondary hover:text-content-primary disabled:opacity-50"
                           >
                             취소
                           </button>
@@ -224,13 +224,13 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
                         <>
                           <button
                             onClick={() => startEdit(domain)}
-                            className="text-xs text-content-secondary hover:text-content-primary"
+                            className="cursor-pointer text-xs text-content-secondary hover:text-content-primary"
                           >
                             편집
                           </button>
                           <button
                             onClick={() => handleDelete(domain.id, domain.name)}
-                            className="text-xs text-content-tertiary hover:text-red-500"
+                            className="cursor-pointer text-xs text-content-tertiary hover:text-red-500"
                           >
                             삭제
                           </button>
@@ -301,7 +301,7 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
           <button
             onClick={handleAdd}
             disabled={adding}
-            className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text disabled:opacity-50"
+            className="cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text disabled:opacity-50"
           >
             {adding ? '추가 중...' : '추가'}
           </button>
