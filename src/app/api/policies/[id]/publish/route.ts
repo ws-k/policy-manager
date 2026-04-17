@@ -45,5 +45,11 @@ export async function POST(
     changed_by: user.id,
   })
 
+  // Sync sections from headings on publish
+  if (data?.content) {
+    const { syncPolicySections } = await import('@/lib/sync-sections')
+    await syncPolicySections(supabase, id, data.content as Record<string, unknown>)
+  }
+
   return NextResponse.json({ data })
 }

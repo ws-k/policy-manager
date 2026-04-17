@@ -18,5 +18,40 @@ export async function GET() {
     return NextResponse.json({ error: error.message, code: 'DB_ERROR' }, { status: 500 })
   }
 
+  // Lazy sync: find policy_docs that have content but no sections yet
+  const sectionedDocIds = [...new Set((data ?? []).map((s) => s.policy_doc_id as string))]
+
+  let unsyncedQuery = supabase.from('policy_docs').select('id, content')
+  if (sectionedDocIds.length > 0) {
+    unsyncedQuery = unsyncedQuery.not('id', 'in', `(${sectionedDocIds.join(',')})`)
+  }
+  const { data: unsyncedDocs } = await unsyncedQuery
+
+  const docsToSync = (unsyncedDocs ?? []).filter(
+    (d) => d.content && typeof d.content === 'object' && Object.keys(d.content).length > 0
+  )
+
+  if (docsToSync.length > 0) {
+    const { syncPolicySections } = await import('@/lib/sync-sections')
+    await Promise.all(
+      docsToSync.map((d) =>
+        syncPolicySections(supabase, d.id, d.content as Record<string, unknown>)
+      )
+    )
+
+    // Re-fetch with newly synced sections
+    const { data: refreshed, error: refreshError } = await supabase
+      .from('policy_sections')
+      .select('*, policy_docs:policy_doc_id(id, title, status)')
+      .order('policy_doc_id')
+      .order('sort_order')
+
+    if (refreshError) {
+      return NextResponse.json({ error: refreshError.message, code: 'DB_ERROR' }, { status: 500 })
+    }
+
+    return NextResponse.json({ data: refreshed ?? [] })
+  }
+
   return NextResponse.json({ data: data ?? [] })
 }
