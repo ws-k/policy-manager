@@ -295,6 +295,7 @@ export function PolicyDetailClient({
   const [isPublic, setIsPublic] = useState(policy.is_public)
   const [togglingPublic, setTogglingPublic] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   async function handleTogglePublic() {
     setTogglingPublic(true)
@@ -319,28 +320,32 @@ export function PolicyDetailClient({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  async function handleAction(action: 'publish' | 'unpublish' | 'new-version' | 'delete') {
+  async function executeDelete() {
     setLoading(true)
     try {
-      if (action === 'delete') {
-        if (!confirm('정말 삭제하시겠습니까?')) {
-          setLoading(false)
-          return
-        }
-        const res = await fetch(`/api/policies/${policy.id}`, { method: 'DELETE' })
-        const result = await res.json()
-        if ('error' in result) {
-          toast.error(result.error)
-          return
-        }
-        router.push('/policies')
+      const res = await fetch(`/api/policies/${policy.id}`, { method: 'DELETE' })
+      const result = await res.json()
+      if ('error' in result) {
+        toast.error(result.error)
         return
       }
+      router.push('/policies')
+    } finally {
+      setLoading(false)
+    }
+  }
 
+  async function handleAction(action: 'publish' | 'unpublish' | 'new-version' | 'delete') {
+    if (action === 'delete') {
+      setConfirmDelete(true)
+      return
+    }
+    setLoading(true)
+    try {
       const res = await fetch(`/api/policies/${policy.id}/${action}`, { method: 'POST' })
       const result = await res.json()
       if ('error' in result) {
-        alert(result.error)
+        toast.error(result.error)
         return
       }
 
@@ -531,6 +536,35 @@ export function PolicyDetailClient({
           <PolicyTOC content={policy.content} />
         </div>
       </div>
+
+      {/* Delete Confirm Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
+            <p className="mb-1 text-sm font-semibold text-content-primary">정책을 삭제하시겠습니까?</p>
+            <p className="mb-6 text-sm text-content-secondary">이 작업은 되돌릴 수 없습니다.</p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                disabled={loading}
+                className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  setConfirmDelete(false)
+                  await executeDelete()
+                }}
+                disabled={loading}
+                className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

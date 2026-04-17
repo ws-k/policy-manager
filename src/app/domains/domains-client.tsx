@@ -20,6 +20,7 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
   const [newSlug, setNewSlug] = useState('')
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null)
 
   async function refreshDomains() {
     const res = await fetch('/api/domains')
@@ -73,7 +74,10 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`"${name}" 도메인을 삭제하시겠습니까?`)) return
+    setConfirmDelete({ id, name })
+  }
+
+  async function executeDelete(id: string) {
     setError(null)
     const res = await fetch(`/api/domains/${id}`, { method: 'DELETE' })
     const result = await res.json() as { data: unknown } | { error: string }
@@ -247,6 +251,34 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
           </tbody>
         </table>
       </div>
+
+      {/* Delete Confirm Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
+            <p className="mb-1 text-sm font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 도메인을 삭제하시겠습니까?</p>
+            <p className="mb-6 text-sm text-content-secondary">이 작업은 되돌릴 수 없습니다.</p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  const { id } = confirmDelete
+                  setConfirmDelete(null)
+                  await executeDelete(id)
+                }}
+                className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 새 도메인 추가 */}
       <div className="mt-4 rounded-lg border border-line-primary bg-surface-secondary p-4">

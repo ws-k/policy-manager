@@ -77,6 +77,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   const [error, setError] = useState<string | null>(null)
   const [unlinkingDocId, setUnlinkingDocId] = useState<string | null>(null)
   const [confirmUnlink, setConfirmUnlink] = useState<{ featureId: string; docId: string; docTitle: string; sectionIds: string[] } | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => {
     fetch('/api/sections')
@@ -138,7 +139,10 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`"${name}" 기능을 삭제하시겠습니까?\n연결된 정책 매핑도 함께 삭제됩니다.`)) return
+    setConfirmDelete({ id, name })
+  }
+
+  async function executeDelete(id: string) {
     setError(null)
     const res = await fetch(`/api/features/${id}`, { method: 'DELETE' })
     const result = await res.json() as { data: unknown } | { error: string }
@@ -486,6 +490,34 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           )
         })}
       </div>
+
+      {/* Delete Confirm Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
+            <p className="mb-1 text-sm font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 기능을 삭제하시겠습니까?</p>
+            <p className="mb-6 text-sm text-content-secondary">연결된 정책 매핑도 함께 삭제됩니다.</p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  const { id } = confirmDelete
+                  setConfirmDelete(null)
+                  await executeDelete(id)
+                }}
+                className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Unlink Confirm Modal */}
       {confirmUnlink && (
