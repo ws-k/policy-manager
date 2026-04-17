@@ -315,10 +315,15 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {features.map((feature) => {
-          const policyCount = feature.feature_policies?.length ?? 0
+          const seenDocIds = new Set<string>()
           const linkedDocs = feature.feature_policies
             ?.map((fp) => fp.policy_sections?.policy_docs)
-            .filter((doc): doc is PolicyDoc => doc !== null && doc !== undefined) ?? []
+            .filter((doc): doc is PolicyDoc => {
+              if (!doc || seenDocIds.has(doc.id)) return false
+              seenDocIds.add(doc.id)
+              return true
+            }) ?? []
+          const policyCount = linkedDocs.length
           const visibleDocs = linkedDocs.slice(0, 3)
           const hiddenCount = linkedDocs.length - visibleDocs.length
           const isEditing = editState?.id === feature.id
