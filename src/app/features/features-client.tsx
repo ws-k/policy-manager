@@ -387,7 +387,15 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
               ) : (
                 <>
                   <div className="mb-2 flex items-start justify-between gap-2">
-                    <h2 className="font-semibold text-content-primary">{feature.name}</h2>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <h2 className="truncate font-semibold text-content-primary">{feature.name}</h2>
+                      <button
+                        onClick={() => startEdit(feature)}
+                        className="shrink-0 cursor-pointer text-xs text-content-tertiary hover:text-content-primary"
+                      >
+                        Edit
+                      </button>
+                    </div>
                     <div className="flex shrink-0 items-center gap-2">
                       {policyCount > 0 ? (
                         <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-text">
@@ -398,20 +406,13 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                       )}
                       <button
                         onClick={() => { setLinkModal({ feature }); setModalStep('policy'); setModalPolicy(null) }}
-                        className="rounded border border-line-primary bg-surface-secondary px-3 py-1 text-sm font-medium text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
+                        className="cursor-pointer rounded border border-line-primary bg-surface-secondary px-3 py-1 text-sm font-medium text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
                       >
                         연결
                       </button>
                       <button
-                        onClick={() => startEdit(feature)}
-                        className="text-sm text-content-tertiary hover:text-content-primary"
-                        title="편집"
-                      >
-                        ✏
-                      </button>
-                      <button
                         onClick={() => handleDelete(feature.id, feature.name)}
-                        className="rounded border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-100"
+                        className="cursor-pointer rounded border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-100"
                       >
                         삭제
                       </button>
@@ -443,18 +444,20 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                 {doc.title}
                               </Link>
                               {doc.status === 'published' ? (
-                                <span className="shrink-0 rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
+                                <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600">
+                                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                                   게시됨
                                 </span>
                               ) : (
-                                <span className="shrink-0 rounded border border-line-primary bg-surface-tertiary px-1.5 py-0.5 text-xs text-content-secondary">
+                                <span className="flex shrink-0 items-center gap-1 text-xs text-content-tertiary">
+                                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-content-tertiary" />
                                   초안
                                 </span>
                               )}
                               <button
                                 onClick={() => setConfirmUnlink({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSectionIds })}
                                 disabled={unlinkingDocId === doc.id}
-                                className="shrink-0 rounded px-1.5 py-0.5 text-sm text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                                className="shrink-0 cursor-pointer rounded px-1.5 py-0.5 text-sm text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
                                 title="연결 해제"
                               >
                                 {unlinkingDocId === doc.id ? '…' : '✕'}
@@ -492,7 +495,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
               <button
                 onClick={() => setConfirmUnlink(null)}
                 disabled={!!unlinkingDocId}
-                className="rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
+                className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
               >
                 취소
               </button>
@@ -503,7 +506,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                   await handleUnlinkDoc(featureId, docId, sectionIds)
                 }}
                 disabled={!!unlinkingDocId}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 연결 해제
               </button>
@@ -570,11 +573,13 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                 {doc.title}
                               </span>
                               {doc.status === 'published' ? (
-                                <span className="shrink-0 rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
+                                <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600">
+                                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                                   게시됨
                                 </span>
                               ) : (
-                                <span className="shrink-0 rounded border border-line-primary bg-surface-tertiary px-1.5 py-0.5 text-xs text-content-secondary">
+                                <span className="flex shrink-0 items-center gap-1 text-xs text-content-tertiary">
+                                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-content-tertiary" />
                                   초안
                                 </span>
                               )}
