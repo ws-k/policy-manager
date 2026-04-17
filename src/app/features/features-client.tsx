@@ -334,8 +334,6 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
               return true
             }) ?? []
           const policyCount = linkedDocs.length
-          const visibleDocs = linkedDocs.slice(0, 3)
-          const hiddenCount = linkedDocs.length - visibleDocs.length
           const isEditing = editState?.id === feature.id
 
           return (
@@ -399,6 +397,12 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                         <span className="text-xs text-content-tertiary">정책 미연결</span>
                       )}
                       <button
+                        onClick={() => { setLinkModal({ feature }); setModalStep('policy'); setModalPolicy(null) }}
+                        className="rounded border border-line-primary bg-surface-secondary px-2 py-0.5 text-xs font-medium text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
+                      >
+                        연결
+                      </button>
+                      <button
                         onClick={() => startEdit(feature)}
                         className="text-xs text-content-tertiary hover:text-content-primary"
                         title="편집"
@@ -422,54 +426,53 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                     <p className="mb-3 text-sm text-content-secondary">{feature.description}</p>
                   )}
 
-                  {visibleDocs.length > 0 && (
-                    <ul className="mt-3 space-y-1.5">
-                      {visibleDocs.map((doc) => {
-                        const linkedSectionIdsForDoc = feature.feature_policies
+                  {linkedDocs.length > 0 && (
+                    <ul className="mt-3 space-y-3">
+                      {linkedDocs.map((doc) => {
+                        const linkedSections = feature.feature_policies
                           .filter((fp) => fp.policy_sections?.policy_docs?.id === doc.id)
-                          .map((fp) => fp.policy_sections!.id)
+                          .map((fp) => ({ id: fp.policy_sections!.id, title: fp.policy_sections!.title }))
+                        const linkedSectionIds = linkedSections.map((s) => s.id)
                         return (
-                        <li key={doc.id} className="flex items-center gap-2">
-                          <Link
-                            href={`/policies/${doc.id}`}
-                            className="flex-1 truncate text-sm text-content-primary hover:underline underline-offset-2"
-                          >
-                            {doc.title}
-                          </Link>
-                          {doc.status === 'published' ? (
-                            <span className="shrink-0 rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
-                              게시됨
-                            </span>
-                          ) : (
-                            <span className="shrink-0 rounded border border-line-primary bg-surface-tertiary px-1.5 py-0.5 text-xs text-content-secondary">
-                              초안
-                            </span>
-                          )}
-                          <button
-                            onClick={() => setConfirmUnlink({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSectionIdsForDoc })}
-                            disabled={unlinkingDocId === doc.id}
-                            className="shrink-0 rounded px-1.5 py-0.5 text-sm text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
-                            title="연결 해제"
-                          >
-                            {unlinkingDocId === doc.id ? '…' : '✕'}
-                          </button>
-                        </li>
+                          <li key={doc.id}>
+                            <div className="flex items-center gap-2">
+                              <Link
+                                href={`/policies/${doc.id}`}
+                                className="flex-1 truncate text-sm font-medium text-content-primary hover:underline underline-offset-2"
+                              >
+                                {doc.title}
+                              </Link>
+                              {doc.status === 'published' ? (
+                                <span className="shrink-0 rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
+                                  게시됨
+                                </span>
+                              ) : (
+                                <span className="shrink-0 rounded border border-line-primary bg-surface-tertiary px-1.5 py-0.5 text-xs text-content-secondary">
+                                  초안
+                                </span>
+                              )}
+                              <button
+                                onClick={() => setConfirmUnlink({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSectionIds })}
+                                disabled={unlinkingDocId === doc.id}
+                                className="shrink-0 rounded px-1.5 py-0.5 text-sm text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                                title="연결 해제"
+                              >
+                                {unlinkingDocId === doc.id ? '…' : '✕'}
+                              </button>
+                            </div>
+                            <ul className="mt-1.5 space-y-1 pl-2">
+                              {linkedSections.map((section) => (
+                                <li key={section.id} className="flex items-start gap-1.5">
+                                  <span className="mt-0.5 shrink-0 text-[10px] text-content-tertiary">┗</span>
+                                  <span className="text-xs text-content-secondary">{section.title}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </li>
                         )
                       })}
-                      {hiddenCount > 0 && (
-                        <li className="text-xs text-content-tertiary">...외 {hiddenCount}개</li>
-                      )}
                     </ul>
                   )}
-
-                  <div className="mt-4 border-t border-line-primary pt-3">
-                    <button
-                      onClick={() => { setLinkModal({ feature }); setModalStep('policy'); setModalPolicy(null) }}
-                      className="flex w-full items-center justify-center gap-1.5 rounded-md border border-line-primary bg-surface-secondary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:border-line-secondary hover:bg-surface-tertiary hover:text-content-primary"
-                    >
-                      <span>＋</span> 정책 연결 관리
-                    </button>
-                  </div>
                 </>
               )}
             </div>
