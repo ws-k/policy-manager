@@ -77,6 +77,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   const [error, setError] = useState<string | null>(null)
   const [unlinkingSectionId, setUnlinkingSectionId] = useState<string | null>(null)
   const [confirmUnlink, setConfirmUnlink] = useState<{ featureId: string; sectionId: string; sectionTitle: string; docTitle: string } | null>(null)
+  const [confirmUnlinkDoc, setConfirmUnlinkDoc] = useState<{ featureId: string; docId: string; docTitle: string; sectionIds: string[] } | null>(null)
+  const [bulkLinking, setBulkLinking] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => {
@@ -216,6 +218,38 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       await refreshFeatures()
     } finally {
       setUnlinkingSectionId(null)
+    }
+  }
+
+  async function handleLinkAll(featureId: string, sectionIds: string[]) {
+    setBulkLinking(true)
+    try {
+      await Promise.allSettled(
+        sectionIds.map((sid) =>
+          fetch('/api/feature-policies', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feature_id: featureId, section_id: sid }),
+          })
+        )
+      )
+      await refreshFeatures()
+    } finally {
+      setBulkLinking(false)
+    }
+  }
+
+  async function handleUnlinkDoc(featureId: string, sectionIds: string[]) {
+    setBulkLinking(true)
+    try {
+      await Promise.allSettled(
+        sectionIds.map((sid) =>
+          fetch(`/api/feature-policies?feature_id=${featureId}&section_id=${sid}`, { method: 'DELETE' })
+        )
+      )
+      await refreshFeatures()
+    } finally {
+      setBulkLinking(false)
     }
   }
 
@@ -448,6 +482,14 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                   초안
                                 </span>
                               )}
+                              <button
+                                onClick={() => setConfirmUnlinkDoc({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSections.map((s) => s.id) })}
+                                disabled={bulkLinking}
+                                className="shrink-0 cursor-pointer rounded px-1 py-0.5 text-xs text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                                title="문서 전체 연결 해제"
+                              >
+                                ✕
+                              </button>
                             </div>
                             <ul className="mt-1.5 space-y-1 pl-2">
                               {linkedSections.map((section) => (
@@ -531,6 +573,38 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                 className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 연결 해제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unlink Doc Confirm Modal */}
+      {confirmUnlinkDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
+            <p className="mb-1 text-sm font-semibold text-content-primary">문서 전체 연결을 해제하시겠습니까?</p>
+            <p className="mb-6 text-sm text-content-secondary">
+              <span className="font-medium">{confirmUnlinkDoc.docTitle}</span>의 모든 섹션 연결이 해제됩니다.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmUnlinkDoc(null)}
+                disabled={bulkLinking}
+                className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  const { featureId, sectionIds } = confirmUnlinkDoc
+                  setConfirmUnlinkDoc(null)
+                  await handleUnlinkDoc(featureId, sectionIds)
+                }}
+                disabled={bulkLinking}
+                className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                전체 해제
               </button>
             </div>
           </div>
@@ -621,6 +695,32 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
               ) : (
                 /* Step 2: section list */
                 <div className="space-y-2">
+                  {modalPolicy && modalPolicy.sections.length > 0 && (() => {
+                    const allLinked = modalPolicy.sections.every((s) => linkedSectionIds.has(s.id))
+                    const unlinkedIds = modalPolicy.sections.filter((s) => !linkedSectionIds.has(s.id)).map((s) => s.id)
+                    const allSectionIds = modalPolicy.sections.map((s) => s.id)
+                    return (
+                      <div className="flex justify-end pb-1">
+                        {allLinked ? (
+                          <button
+                            onClick={() => handleUnlinkDoc(modalFeature.id, allSectionIds)}
+                            disabled={bulkLinking}
+                            className="cursor-pointer rounded border border-red-200 bg-red-50 px-3 py-1 text-xs text-red-600 hover:bg-red-100 disabled:opacity-50"
+                          >
+                            {bulkLinking ? '처리 중...' : '전체 해제'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleLinkAll(modalFeature.id, unlinkedIds)}
+                            disabled={bulkLinking}
+                            className="cursor-pointer rounded border border-line-primary bg-surface-primary px-3 py-1 text-xs text-content-secondary hover:border-accent hover:text-accent disabled:opacity-50"
+                          >
+                            {bulkLinking ? '처리 중...' : '전체 연결'}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })()}
                   {modalPolicy && modalPolicy.sections.length === 0 ? (
                     <p className="text-xs text-content-tertiary">이 정책에 섹션이 없습니다.</p>
                   ) : (
