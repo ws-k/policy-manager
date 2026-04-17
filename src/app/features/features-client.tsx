@@ -75,6 +75,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   const [addState, setAddState] = useState<AddState>({ name: '', slug: '', description: '', screen_path: '' })
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [unlinkingDocId, setUnlinkingDocId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/sections')
@@ -194,6 +195,20 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       await refreshFeatures()
     } finally {
       setLinking(false)
+    }
+  }
+
+  async function handleUnlinkDoc(featureId: string, docId: string, sectionIds: string[]) {
+    setUnlinkingDocId(docId)
+    try {
+      await Promise.allSettled(
+        sectionIds.map((sid) =>
+          fetch(`/api/feature-policies?feature_id=${featureId}&section_id=${sid}`, { method: 'DELETE' })
+        )
+      )
+      await refreshFeatures()
+    } finally {
+      setUnlinkingDocId(null)
     }
   }
 
@@ -409,7 +424,11 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
 
                   {visibleDocs.length > 0 && (
                     <ul className="mt-3 space-y-1.5">
-                      {visibleDocs.map((doc) => (
+                      {visibleDocs.map((doc) => {
+                        const linkedSectionIdsForDoc = feature.feature_policies
+                          .filter((fp) => fp.policy_sections?.policy_docs?.id === doc.id)
+                          .map((fp) => fp.policy_sections!.id)
+                        return (
                         <li key={doc.id} className="flex items-center gap-2">
                           <Link
                             href={`/policies/${doc.id}`}
@@ -426,8 +445,17 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                               초안
                             </span>
                           )}
+                          <button
+                            onClick={() => handleUnlinkDoc(feature.id, doc.id, linkedSectionIdsForDoc)}
+                            disabled={unlinkingDocId === doc.id}
+                            className="shrink-0 rounded p-0.5 text-content-tertiary hover:text-red-500 disabled:opacity-50"
+                            title="연결 해제"
+                          >
+                            {unlinkingDocId === doc.id ? '…' : '×'}
+                          </button>
                         </li>
-                      ))}
+                        )
+                      })}
                       {hiddenCount > 0 && (
                         <li className="text-xs text-content-tertiary">...외 {hiddenCount}개</li>
                       )}
