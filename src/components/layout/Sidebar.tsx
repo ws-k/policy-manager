@@ -29,6 +29,18 @@ export function Sidebar() {
         <span className="text-sm font-semibold text-content-primary">Policy Manager</span>
       </div>
 
+      {/* Search */}
+      <div className="px-3 pt-3 pb-2">
+        <button
+          onClick={() => document.dispatchEvent(new Event('open-search'))}
+          className="mx-0 flex w-full items-center gap-2.5 rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-secondary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
+        >
+          <span className="text-base leading-none">⌕</span>
+          <span className="flex-1 text-left">검색</span>
+          <span className="rounded bg-surface-tertiary px-1.5 py-0.5 text-[10px] text-content-tertiary font-mono">⌘K</span>
+        </button>
+      </div>
+
       {/* Nav */}
       <nav className="flex flex-1 flex-col gap-1 p-3">
         {navItems.map((item) => {

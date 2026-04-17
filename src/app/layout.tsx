@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { createClient } from '@/lib/supabase/server'
 import { Toaster } from 'sonner'
+import { SearchModal } from '@/components/search/SearchModal'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -59,6 +60,7 @@ export default async function RootLayout({
           children
         ) : (
           <>
+            <SearchModal />
             <Sidebar />
             <div className="flex flex-1 flex-col min-h-0">
               <TopBar userEmail={userEmail} />
