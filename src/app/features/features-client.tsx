@@ -75,8 +75,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   const [addState, setAddState] = useState<AddState>({ name: '', slug: '', description: '', screen_path: '' })
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [unlinkingDocId, setUnlinkingDocId] = useState<string | null>(null)
-  const [confirmUnlink, setConfirmUnlink] = useState<{ featureId: string; docId: string; docTitle: string; sectionIds: string[] } | null>(null)
+  const [unlinkingSectionId, setUnlinkingSectionId] = useState<string | null>(null)
+  const [confirmUnlink, setConfirmUnlink] = useState<{ featureId: string; sectionId: string; sectionTitle: string; docTitle: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => {
@@ -203,22 +203,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
     }
   }
 
-  async function handleUnlinkDoc(featureId: string, docId: string, sectionIds: string[]) {
-    setUnlinkingDocId(docId)
-    try {
-      await Promise.allSettled(
-        sectionIds.map((sid) =>
-          fetch(`/api/feature-policies?feature_id=${featureId}&section_id=${sid}`, { method: 'DELETE' })
-        )
-      )
-      await refreshFeatures()
-    } finally {
-      setUnlinkingDocId(null)
-    }
-  }
-
   async function handleUnlink(featureId: string, sectionId: string) {
-    setLinking(true)
+    setUnlinkingSectionId(sectionId)
     try {
       const res = await fetch(`/api/feature-policies?feature_id=${featureId}&section_id=${sectionId}`, {
         method: 'DELETE',
@@ -229,7 +215,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       }
       await refreshFeatures()
     } finally {
-      setLinking(false)
+      setUnlinkingSectionId(null)
     }
   }
 
@@ -444,7 +430,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                         const linkedSectionIds = linkedSections.map((s) => s.id)
                         return (
                           <li key={doc.id}>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <Link
                                 href={`/policies/${doc.id}`}
                                 className="flex-1 truncate text-sm font-medium text-content-primary hover:underline underline-offset-2"
@@ -462,20 +448,20 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                   초안
                                 </span>
                               )}
-                              <button
-                                onClick={() => setConfirmUnlink({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSectionIds })}
-                                disabled={unlinkingDocId === doc.id}
-                                className="shrink-0 cursor-pointer rounded px-1.5 py-0.5 text-sm text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
-                                title="연결 해제"
-                              >
-                                {unlinkingDocId === doc.id ? '…' : '✕'}
-                              </button>
                             </div>
                             <ul className="mt-1.5 space-y-1 pl-2">
                               {linkedSections.map((section) => (
-                                <li key={section.id} className="flex items-start gap-1.5">
-                                  <span className="mt-0.5 shrink-0 text-[10px] text-content-tertiary">┗</span>
-                                  <span className="text-xs text-content-secondary">{section.title}</span>
+                                <li key={section.id} className="flex items-center gap-1.5">
+                                  <span className="shrink-0 text-[10px] text-content-tertiary">┗</span>
+                                  <span className="flex-1 text-xs text-content-secondary">{section.title}</span>
+                                  <button
+                                    onClick={() => setConfirmUnlink({ featureId: feature.id, sectionId: section.id, sectionTitle: section.title, docTitle: doc.title })}
+                                    disabled={unlinkingSectionId === section.id}
+                                    className="shrink-0 cursor-pointer rounded px-1 py-0.5 text-xs text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                                    title="섹션 연결 해제"
+                                  >
+                                    {unlinkingSectionId === section.id ? '…' : '✕'}
+                                  </button>
                                 </li>
                               ))}
                             </ul>
@@ -523,25 +509,25 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       {confirmUnlink && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <p className="mb-1 text-sm font-semibold text-content-primary">연결을 끊으시겠습니까?</p>
+            <p className="mb-1 text-sm font-semibold text-content-primary">섹션 연결을 해제하시겠습니까?</p>
             <p className="mb-6 text-sm text-content-secondary">
-              <span className="font-medium">{confirmUnlink.docTitle}</span> 정책과의 연결이 모두 해제됩니다.
+              <span className="font-medium">{confirmUnlink.docTitle}</span> &rsaquo; <span className="font-medium">{confirmUnlink.sectionTitle}</span> 섹션과의 연결이 해제됩니다.
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmUnlink(null)}
-                disabled={!!unlinkingDocId}
+                disabled={!!unlinkingSectionId}
                 className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
               >
                 취소
               </button>
               <button
                 onClick={async () => {
-                  const { featureId, docId, sectionIds } = confirmUnlink
+                  const { featureId, sectionId } = confirmUnlink
                   setConfirmUnlink(null)
-                  await handleUnlinkDoc(featureId, docId, sectionIds)
+                  await handleUnlink(featureId, sectionId)
                 }}
-                disabled={!!unlinkingDocId}
+                disabled={!!unlinkingSectionId}
                 className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 연결 해제
