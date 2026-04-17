@@ -398,20 +398,20 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                       )}
                       <button
                         onClick={() => { setLinkModal({ feature }); setModalStep('policy'); setModalPolicy(null) }}
-                        className="rounded border border-line-primary bg-surface-secondary px-2 py-0.5 text-xs font-medium text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
+                        className="rounded border border-line-primary bg-surface-secondary px-3 py-1 text-sm font-medium text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
                       >
                         연결
                       </button>
                       <button
                         onClick={() => startEdit(feature)}
-                        className="text-xs text-content-tertiary hover:text-content-primary"
+                        className="text-sm text-content-tertiary hover:text-content-primary"
                         title="편집"
                       >
                         ✏
                       </button>
                       <button
                         onClick={() => handleDelete(feature.id, feature.name)}
-                        className="rounded border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 hover:bg-red-100"
+                        className="rounded border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-100"
                       >
                         삭제
                       </button>
@@ -611,7 +611,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                             <button
                               onClick={() => handleUnlink(modalFeature.id, section.id)}
                               disabled={linking}
-                              className="shrink-0 rounded border border-red-200 bg-red-50 px-2.5 py-1 text-xs text-red-600 hover:bg-red-100 disabled:opacity-50"
+                              className="shrink-0 rounded border border-red-200 bg-red-50 px-4 py-1.5 text-sm text-red-600 hover:bg-red-100 disabled:opacity-50"
                             >
                               해제
                             </button>
@@ -619,7 +619,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                             <button
                               onClick={() => handleLink(modalFeature.id, section.id)}
                               disabled={linking}
-                              className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+                              className="shrink-0 rounded-md border border-line-primary bg-surface-primary px-4 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
                             >
                               연결
                             </button>
