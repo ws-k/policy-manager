@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useTransition } from 'react'
 import Link from 'next/link'
 import type { PolicyDoc, PolicyDomain } from '@/lib/types'
+import { StatusBadge } from '@/components/policy/StatusBadge'
 
 interface Props {
   policies: PolicyDoc[]
@@ -11,19 +12,6 @@ interface Props {
   currentDomain: string
   currentStatus: string
   currentQuery: string
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles =
-    status === 'published'
-      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      : 'bg-surface-tertiary text-content-secondary border-line-primary'
-
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${styles}`}>
-      {status === 'published' ? '게시됨' : '초안'}
-    </span>
-  )
 }
 
 function formatDate(dateStr: string) {
@@ -55,7 +43,19 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
     <div className={isPending ? 'opacity-70 transition-opacity' : ''}>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <div />
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold text-content-primary">정책 목록</span>
+          <span className="text-content-secondary text-xs">|</span>
+          <span className="text-xs text-content-secondary">
+            총 {policies.length}건
+          </span>
+          <span className="text-xs text-content-secondary">
+            초안 {policies.filter(p => p.status === 'draft').length}
+          </span>
+          <span className="text-xs text-content-secondary">
+            게시됨 {policies.filter(p => p.status === 'published').length}
+          </span>
+        </div>
         <Link
           href="/policies/new"
           className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text transition-colors hover:opacity-90"

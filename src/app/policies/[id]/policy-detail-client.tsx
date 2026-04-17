@@ -5,20 +5,8 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import type { PolicyDoc, Changelog, PolicySection } from '@/lib/types'
 import { PolicyTOC } from '@/components/policy/PolicyTOC'
+import { StatusBadge } from '@/components/policy/StatusBadge'
 import { toast } from 'sonner'
-
-function StatusBadge({ status }: { status: string }) {
-  const styles =
-    status === 'published'
-      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      : 'bg-surface-tertiary text-content-secondary border-line-primary'
-
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${styles}`}>
-      {status === 'published' ? '게시됨' : '초안'}
-    </span>
-  )
-}
 
 function formatDateTime(dateStr: string) {
   const d = new Date(dateStr)
@@ -530,7 +518,7 @@ export function PolicyDetailClient({
         </div>
 
         {/* Right sidebar */}
-        <div className="w-52 shrink-0 space-y-4">
+        <div className="w-64 shrink-0 space-y-4">
           <LinkedFeaturesPanel policyId={policy.id} />
           <VersionsPanel policyId={policy.id} currentVersion={policy.version} />
           <PolicyTOC content={policy.content} />

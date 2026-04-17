@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 interface TocItem {
   id: string
   text: string
@@ -49,6 +51,26 @@ const indentClass: Record<number, string> = {
 
 export function PolicyTOC({ content }: { content: Record<string, unknown> }) {
   const headings = extractHeadings(content)
+  const [activeId, setActiveId] = useState<string>('')
+
+  useEffect(() => {
+    if (headings.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter(e => e.isIntersecting)
+        if (visible.length > 0) setActiveId(visible[0].target.id)
+      },
+      { rootMargin: '0px 0px -80% 0px', threshold: 0 }
+    )
+
+    headings.forEach(h => {
+      const el = document.getElementById(h.id)
+      if (el) observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [headings])
 
   if (headings.length === 0) return null
 
@@ -56,20 +78,27 @@ export function PolicyTOC({ content }: { content: Record<string, unknown> }) {
     <div className="sticky top-6 rounded-lg border border-line-primary bg-surface-primary p-4">
       <p className="mb-3 text-xs font-medium text-content-secondary">목차</p>
       <ul className="space-y-1">
-        {headings.map((item) => (
-          <li key={item.id} className={indentClass[item.level] ?? 'pl-0'}>
-            <button
-              onClick={() =>
-                document
-                  .getElementById(item.id)
-                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }
-              className="cursor-pointer text-xs text-content-secondary hover:text-content-primary truncate transition-colors text-left w-full"
-            >
-              {item.text}
-            </button>
-          </li>
-        ))}
+        {headings.map((item) => {
+          const isActive = activeId === item.id
+          return (
+            <li key={item.id} className={indentClass[item.level] ?? 'pl-0'}>
+              <button
+                onClick={() =>
+                  document
+                    .getElementById(item.id)
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+                className={`cursor-pointer text-xs truncate transition-colors text-left w-full ${
+                  isActive
+                    ? 'text-content-primary font-medium border-l-2 border-accent pl-2'
+                    : 'text-content-secondary hover:text-content-primary'
+                }`}
+              >
+                {item.text}
+              </button>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

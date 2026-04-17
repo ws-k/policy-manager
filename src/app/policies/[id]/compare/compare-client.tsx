@@ -4,18 +4,7 @@ import { useState, useMemo } from 'react'
 import { diffLines, diffArrays } from 'diff'
 import type { PolicyDoc } from '@/lib/types'
 import { tiptapToHtmlLines } from '@/lib/tiptap-to-html'
-
-function StatusBadge({ status }: { status: string }) {
-  const styles =
-    status === 'published'
-      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      : 'bg-surface-tertiary text-content-secondary border-line-primary'
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${styles}`}>
-      {status === 'published' ? '게시됨' : '초안'}
-    </span>
-  )
-}
+import { StatusBadge } from '@/components/policy/StatusBadge'
 
 /**
  * Splits HTML into tokens treating tags as atomic units and text as words.

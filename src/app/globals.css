@@ -16,6 +16,15 @@
 
   --color-accent: #111827;
   --color-accent-text: #ffffff;
+
+  --color-status-published-bg: #dcfce7;
+  --color-status-published-text: #15803d;
+  --color-status-draft-bg: #fef9c3;
+  --color-status-draft-text: #854d0e;
+  --color-status-archived-bg: #f3f4f6;
+  --color-status-archived-text: #6b7280;
+  --color-danger: #ef4444;
+  --color-danger-bg: #fee2e2;
 }
 
 * {
