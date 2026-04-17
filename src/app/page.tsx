@@ -13,6 +13,19 @@ interface ChangelogWithPolicy extends Changelog {
   policy: Pick<PolicyDoc, 'id' | 'title'>
 }
 
+interface StaleDraft {
+  id: string
+  title: string
+  updated_at: string
+}
+
+interface FeatureWithPolicies {
+  id: string
+  name: string
+  slug: string
+  feature_policies: { id: string }[]
+}
+
 function relativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
   const minutes = Math.floor(diff / 60000)
@@ -36,6 +49,8 @@ const CHANGE_TYPE_LABELS: Record<string, { label: string; className: string }> =
 export default async function DashboardPage() {
   const supabase = await createClient()
 
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+
   const [
     { count: totalCount },
     { count: draftCount },
@@ -43,6 +58,8 @@ export default async function DashboardPage() {
     { data: domains },
     { data: allPolicies },
     { data: changelogs },
+    { data: rawStaleDrafts },
+    { data: rawFeatures },
   ] = await Promise.all([
     supabase.from('policy_docs').select('*', { count: 'exact', head: true }),
     supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
@@ -50,7 +67,23 @@ export default async function DashboardPage() {
     supabase.from('policy_domains').select('*').order('sort_order', { ascending: true }),
     supabase.from('policy_docs').select('id, domain_id, updated_at').order('updated_at', { ascending: false }),
     supabase.from('changelogs').select('*, policy:policy_docs(id, title)').order('created_at', { ascending: false }).limit(10),
+    supabase
+      .from('policy_docs')
+      .select('id, title, updated_at')
+      .eq('status', 'draft')
+      .lt('updated_at', fourteenDaysAgo)
+      .order('updated_at', { ascending: true })
+      .limit(5),
+    supabase
+      .from('features')
+      .select('id, name, slug, feature_policies(id)')
+      .limit(50),
   ])
+
+  const staleDrafts = (rawStaleDrafts ?? []) as StaleDraft[]
+  const unmappedFeatures = ((rawFeatures ?? []) as FeatureWithPolicies[])
+    .filter((f) => f.feature_policies.length === 0)
+    .slice(0, 5)
 
   // Compute per-domain stats
   const domainStats = ((domains ?? []) as PolicyDomain[]).map((domain) => {
@@ -94,6 +127,66 @@ export default async function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {/* Action insights */}
+      {(staleDrafts.length > 0 || unmappedFeatures.length > 0) && (
+        <section>
+          <h2 className="text-content-primary text-sm font-semibold mb-3">액션이 필요한 항목</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            {staleDrafts.length > 0 && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-amber-900">오래된 초안</p>
+                  <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-900 tabular-nums">
+                    {staleDrafts.length}개
+                  </span>
+                </div>
+                <p className="mb-3 text-xs text-amber-700">14일 이상 수정되지 않은 초안입니다.</p>
+                <ul className="space-y-1.5">
+                  {staleDrafts.map((p) => (
+                    <li key={p.id} className="flex items-center justify-between gap-2">
+                      <span className="min-w-0 flex-1 truncate text-xs text-amber-800">{p.title}</span>
+                      <Link
+                        href={`/policies/${p.id}/edit`}
+                        className="shrink-0 rounded border border-amber-300 bg-white px-2 py-0.5 text-xs text-amber-700 hover:bg-amber-100 transition-colors"
+                      >
+                        편집
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {unmappedFeatures.length > 0 && (
+              <div className="rounded-xl border border-line-primary bg-surface-secondary p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-content-primary">연결 없는 기능</p>
+                  <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-xs font-medium text-content-secondary tabular-nums">
+                    {unmappedFeatures.length}개
+                  </span>
+                </div>
+                <p className="mb-3 text-xs text-content-secondary">정책이 연결되지 않은 기능입니다.</p>
+                <ul className="space-y-1.5">
+                  {unmappedFeatures.map((f) => (
+                    <li key={f.id} className="flex items-center justify-between gap-2">
+                      <span className="min-w-0 flex-1 truncate text-xs text-content-primary">{f.name}</span>
+                      <Link
+                        href="/features"
+                        className="shrink-0 rounded border border-line-primary bg-surface-primary px-2 py-0.5 text-xs text-content-secondary hover:bg-surface-tertiary transition-colors"
+                      >
+                        연결
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+          </div>
+        </section>
+      )}
 
       {/* Domain cards */}
       <section>

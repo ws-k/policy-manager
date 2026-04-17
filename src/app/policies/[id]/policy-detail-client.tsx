@@ -203,6 +203,48 @@ function SectionsPanel({ policyId }: { policyId: string }) {
   )
 }
 
+type LinkedFeature = {
+  id: string
+  feature: { id: string; name: string; slug: string; screen_path: string | null }
+  section: { id: string; title: string }
+}
+
+function LinkedFeaturesPanel({ policyId }: { policyId: string }) {
+  const [items, setItems] = useState<LinkedFeature[]>([])
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/policies/${policyId}/features`)
+      .then((r) => r.json())
+      .then((result: { data: LinkedFeature[] } | { error: string }) => {
+        if ('data' in result) setItems(result.data)
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true))
+  }, [policyId])
+
+  if (!loaded || items.length === 0) return null
+
+  return (
+    <div className="rounded-lg border border-line-primary bg-surface-primary p-4">
+      <h2 className="mb-3 text-xs font-medium text-content-primary">연결된 기능</h2>
+      <ul className="space-y-1">
+        {items.map((item) => (
+          <li key={item.id}>
+            <Link
+              href={`/features#${item.feature.slug}`}
+              className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-surface-secondary"
+            >
+              <span className="block text-xs font-medium text-content-primary">{item.feature.name}</span>
+              <span className="block text-xs text-content-tertiary">· {item.section.title}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function ExportDropdown({ policyId, title }: { policyId: string; title: string }) {
   const [open, setOpen] = useState(false)
 
@@ -484,6 +526,7 @@ export function PolicyDetailClient({
 
         {/* Right sidebar */}
         <div className="w-52 shrink-0 space-y-4">
+          <LinkedFeaturesPanel policyId={policy.id} />
           <VersionsPanel policyId={policy.id} currentVersion={policy.version} />
           <PolicyTOC content={policy.content} />
         </div>
