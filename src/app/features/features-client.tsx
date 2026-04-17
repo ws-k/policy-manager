@@ -76,6 +76,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [unlinkingDocId, setUnlinkingDocId] = useState<string | null>(null)
+  const [confirmUnlink, setConfirmUnlink] = useState<{ featureId: string; docId: string; docTitle: string; sectionIds: string[] } | null>(null)
 
   useEffect(() => {
     fetch('/api/sections')
@@ -446,12 +447,12 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                             </span>
                           )}
                           <button
-                            onClick={() => handleUnlinkDoc(feature.id, doc.id, linkedSectionIdsForDoc)}
+                            onClick={() => setConfirmUnlink({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSectionIdsForDoc })}
                             disabled={unlinkingDocId === doc.id}
-                            className="shrink-0 rounded p-0.5 text-content-tertiary hover:text-red-500 disabled:opacity-50"
+                            className="shrink-0 rounded px-1.5 py-0.5 text-sm text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
                             title="연결 해제"
                           >
-                            {unlinkingDocId === doc.id ? '…' : '×'}
+                            {unlinkingDocId === doc.id ? '…' : '✕'}
                           </button>
                         </li>
                         )
@@ -476,6 +477,38 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           )
         })}
       </div>
+
+      {/* Unlink Confirm Modal */}
+      {confirmUnlink && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
+            <p className="mb-1 text-sm font-semibold text-content-primary">연결을 끊으시겠습니까?</p>
+            <p className="mb-6 text-sm text-content-secondary">
+              <span className="font-medium">{confirmUnlink.docTitle}</span> 정책과의 연결이 모두 해제됩니다.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmUnlink(null)}
+                disabled={!!unlinkingDocId}
+                className="rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  const { featureId, docId, sectionIds } = confirmUnlink
+                  setConfirmUnlink(null)
+                  await handleUnlinkDoc(featureId, docId, sectionIds)
+                }}
+                disabled={!!unlinkingDocId}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                연결 해제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Link Modal */}
       {linkModal && modalFeature && (
