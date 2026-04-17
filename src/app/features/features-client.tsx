@@ -465,23 +465,25 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                         return (
                           <li key={doc.id}>
                             <div className="flex items-center gap-1.5">
-                              <Link
-                                href={`/policies/${doc.id}`}
-                                className="flex-1 truncate text-sm font-medium text-content-primary hover:underline underline-offset-2"
-                              >
-                                {doc.title}
-                              </Link>
-                              {doc.status === 'published' ? (
-                                <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600">
-                                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                  게시됨
-                                </span>
-                              ) : (
-                                <span className="flex shrink-0 items-center gap-1 text-xs text-content-tertiary">
-                                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-content-tertiary" />
-                                  초안
-                                </span>
-                              )}
+                              <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                                <Link
+                                  href={`/policies/${doc.id}`}
+                                  className="truncate text-sm font-medium text-content-primary hover:underline underline-offset-2"
+                                >
+                                  {doc.title}
+                                </Link>
+                                {doc.status === 'published' ? (
+                                  <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600">
+                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                    게시됨
+                                  </span>
+                                ) : (
+                                  <span className="flex shrink-0 items-center gap-1 text-xs text-content-tertiary">
+                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-content-tertiary" />
+                                    초안
+                                  </span>
+                                )}
+                              </div>
                               <button
                                 onClick={() => setConfirmUnlinkDoc({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSections.map((s) => s.id) })}
                                 disabled={bulkLinking}
@@ -553,7 +555,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
             <p className="mb-1 text-sm font-semibold text-content-primary">섹션 연결을 해제하시겠습니까?</p>
             <p className="mb-6 text-sm text-content-secondary">
-              <span className="font-medium">{confirmUnlink.docTitle}</span> &rsaquo; <span className="font-medium">{confirmUnlink.sectionTitle}</span> 섹션과의 연결이 해제됩니다.
+              <span className="font-semibold text-content-primary">{confirmUnlink.docTitle}</span> &rsaquo; <span className="font-semibold text-content-primary">{confirmUnlink.sectionTitle}</span> 섹션과의 연결이 해제됩니다.
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -585,7 +587,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
             <p className="mb-1 text-sm font-semibold text-content-primary">문서 전체 연결을 해제하시겠습니까?</p>
             <p className="mb-6 text-sm text-content-secondary">
-              <span className="font-medium">{confirmUnlinkDoc.docTitle}</span>의 모든 섹션 연결이 해제됩니다.
+              <span className="font-semibold text-content-primary">{confirmUnlinkDoc.docTitle}</span>의 모든 섹션 연결이 해제됩니다.
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -700,12 +702,15 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                     const unlinkedIds = modalPolicy.sections.filter((s) => !linkedSectionIds.has(s.id)).map((s) => s.id)
                     const allSectionIds = modalPolicy.sections.map((s) => s.id)
                     return (
-                      <div className="flex justify-end pb-1">
+                      <div className="flex items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3">
+                        <span className="flex-1 truncate text-sm font-medium text-content-primary">
+                          {modalPolicy.doc.title}
+                        </span>
                         {allLinked ? (
                           <button
                             onClick={() => handleUnlinkDoc(modalFeature.id, allSectionIds)}
                             disabled={bulkLinking}
-                            className="cursor-pointer rounded border border-red-200 bg-red-50 px-3 py-1 text-xs text-red-600 hover:bg-red-100 disabled:opacity-50"
+                            className="cursor-pointer shrink-0 rounded border border-red-200 bg-red-50 px-4 py-1.5 text-sm text-red-600 hover:bg-red-100 disabled:opacity-50"
                           >
                             {bulkLinking ? '처리 중...' : '전체 해제'}
                           </button>
@@ -713,7 +718,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                           <button
                             onClick={() => handleLinkAll(modalFeature.id, unlinkedIds)}
                             disabled={bulkLinking}
-                            className="cursor-pointer rounded border border-line-primary bg-surface-primary px-3 py-1 text-xs text-content-secondary hover:border-accent hover:text-accent disabled:opacity-50"
+                            className="cursor-pointer shrink-0 rounded-md border border-line-primary bg-surface-primary px-4 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
                           >
                             {bulkLinking ? '처리 중...' : '전체 연결'}
                           </button>
