@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Policy Manager UX Review</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<style>
+  :root {
+    --surface-primary: #ffffff;
+    --surface-secondary: #f8f9fa;
+    --surface-tertiary: #f1f3f5;
+    --content-primary: #111827;
+    --content-secondary: #6b7280;
+    --content-tertiary: #9ca3af;
+    --line-primary: #e5e7eb;
+    --line-secondary: #d1d5db;
+    --accent: #111827;
+    --accent-text: #ffffff;
+    /* New accent system for After */
+    --accent-blue: #2563eb;
+    --accent-blue-light: #eff6ff;
+    --accent-blue-mid: #dbeafe;
+    --accent-emerald: #059669;
+    --accent-emerald-light: #ecfdf5;
+    --accent-amber: #d97706;
+    --accent-amber-light: #fffbeb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--content-primary);
+    background: #f5f5f7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Tab system */
+  .tab-btn {
+    position: relative; padding: 12px 24px; font-size: 14px; font-weight: 500;
+    color: var(--content-secondary); cursor: pointer; border: none; background: none;
+    transition: color 0.2s;
+  }
+  .tab-btn:hover { color: var(--content-primary); }
+  .tab-btn.active { color: var(--content-primary); font-weight: 600; }
+  .tab-btn.active::after {
+    content: ''; position: absolute; bottom: 0; left: 12px; right: 12px;
+    height: 2px; background: var(--accent); border-radius: 1px;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Compare layout */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .compare-label {
+    display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px;
+  }
+  .compare-label.before { background: #fef2f2; color: #dc2626; }
+  .compare-label.after { background: #ecfdf5; color: #059669; }
+
+  /* Mockup frame */
+  .mockup-frame {
+    background: var(--surface-primary); border-radius: 12px;
+    border: 1px solid var(--line-primary); overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* Improvement callout */
+  .callout {
+    position: relative; padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; line-height: 1.5; margin-top: 12px;
+    background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+  }
+  .callout::before { content: 'Why'; font-weight: 700; margin-right: 6px; }
+
+  /* Annotation dot */
+  .anno {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 700;
+    background: #dc2626; color: #fff; flex-shrink: 0;
+  }
+  .anno.green { background: #059669; }
+
+  /* Sidebar mock */
+  .mock-sidebar {
+    width: 220px; background: var(--surface-secondary);
+    border-right: 1px solid var(--line-primary); padding: 16px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .mock-sidebar .nav-item {
+    padding: 8px 12px; border-radius: 6px; font-size: 13px;
+    color: var(--content-secondary); display: flex; align-items: center; gap: 8px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .mock-sidebar .nav-item:hover { background: var(--surface-tertiary); color: var(--content-primary); }
+  .mock-sidebar .nav-item.active { background: var(--accent); color: var(--accent-text); }
+
+  /* After sidebar with colored icons */
+  .mock-sidebar-after .nav-item {
+    padding: 8px 12px; border-radius: 8px; font-size: 13px;
+    color: var(--content-secondary); display: flex; align-items: center; gap: 10px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .mock-sidebar-after .nav-item:hover { background: var(--surface-tertiary); color: var(--content-primary); }
+  .mock-sidebar-after .nav-item.active {
+    background: var(--accent-blue-light); color: var(--accent-blue); font-weight: 500;
+  }
+  .mock-sidebar-after .nav-icon {
+    width: 28px; height: 28px; border-radius: 6px; display: flex;
+    align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+
+  /* Tabular nums */
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+
+  /* Smooth transitions */
+  .transition-all { transition: all 0.2s ease; }
+
+  /* Header section */
+  .review-header {
+    background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+    color: #fff; padding: 48px 0;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+  /* Tooltip */
+  .tooltip { position: relative; }
+  .tooltip .tooltip-text {
+    visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px);
+    left: 50%; transform: translateX(-50%); padding: 6px 10px; border-radius: 6px;
+    background: #111827; color: #fff; font-size: 11px; white-space: nowrap;
+    transition: opacity 0.15s; pointer-events: none; z-index: 10;
+  }
+  .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 4px; background: var(--line-primary); border-radius: 2px; overflow: hidden;
+  }
+  .progress-bar .fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+
+  /* Badge animation */
+  @keyframes badge-pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .badge-pop { animation: badge-pop 0.2s ease-out; }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="review-header">
+  <div style="max-width:1280px; margin:0 auto; padding:0 32px;">
+    <p style="font-size:12px; opacity:0.5; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px;">UX Review</p>
+    <h1 style="font-size:28px; font-weight:700; letter-spacing:-0.02em;">Policy Manager 개선안</h1>
+    <p style="font-size:14px; opacity:0.6; margin-top:8px;">각 화면의 Before / After를 비교하며 개선점을 확인합니다.</p>
+  </div>
+</div>
+
+<!-- ===== TABS ===== -->
+<div style="max-width:1280px; margin:0 auto; padding:0 32px;">
+  <div style="border-bottom:1px solid var(--line-primary); display:flex; gap:4px; background:var(--surface-primary); border-radius:12px 12px 0 0; margin-top:-24px; padding:0 8px;">
+    <button class="tab-btn active" onclick="switchTab('policies')">정책 목록</button>
+    <button class="tab-btn" onclick="switchTab('detail')">정책 상세</button>
+    <button class="tab-btn" onclick="switchTab('features')">기능맵</button>
+  </div>
+</div>
+
+<div style="max-width:1280px; margin:0 auto; padding:24px 32px 64px;">
+
+<!-- =========================================== -->
+<!-- TAB 1: 정책 목록 -->
+<!-- =========================================== -->
+<div id="tab-policies" class="tab-content active">
+  <div class="compare-grid">
+    <!-- BEFORE -->
+    <div>
+      <span class="compare-label before">Before</span>
+      <div class="mockup-frame">
+        <!-- Header -->
+        <div style="padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
+          <div></div>
+          <button style="background:var(--accent); color:var(--accent-text); padding:8px 16px; border-radius:6px; border:none; font-size:13px; font-weight:500; cursor:pointer;">새 정책</button>
+        </div>
+        <!-- Filters -->
+        <div style="padding:0 24px 16px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+          <div style="display:flex; gap:6px;">
+            <span style="background:var(--accent); color:var(--accent-text); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:500;">전체</span>
+            <span style="border:1px solid var(--line-primary); padding:4px 12px; border-radius:20px; font-size:11px; color:var(--content-secondary);">인증/보안</span>
+            <span style="border:1px solid var(--line-primary); padding:4px 12px; border-radius:20px; font-size:11px; color:var(--content-secondary);">개인정보</span>
+            <span style="border:1px solid var(--line-primary); padding:4px 12px; border-radius:20px; font-size:11px; color:var(--content-secondary);">서비스 운영</span>
+          </div>
+          <select style="border:1px solid var(--line-primary); padding:6px 12px; border-radius:6px; font-size:11px; background:var(--surface-primary); color:var(--content-primary);">
+            <option>전체 상태</option>
+          </select>
+          <input style="margin-left:auto; width:200px; border:1px solid var(--line-primary); padding:6px 12px; border-radius:6px; font-size:11px; background:var(--surface-primary);" placeholder="정책 검색..." />
+        </div>
+        <!-- Table -->
+        <div style="border-top:1px solid var(--line-primary);">
+          <table style="width:100%; font-size:13px; border-collapse:collapse;">
+            <thead>
+              <tr style="background:var(--surface-secondary);">
+                <th style="padding:10px 16px; text-align:left; font-weight:500; font-size:11px; color:var(--content-secondary);">제목</th>
+                <th style="padding:10px 16px; text-align:left; font-weight:500; font-size:11px; color:var(--content-secondary);">영역</th>
+                <th style="padding:10px 16px; text-align:center; font-weight:500; font-size:11px; color:var(--content-secondary);">버전</th>
+                <th style="padding:10px 16px; text-align:center; font-weight:500; font-size:11px; color:var(--content-secondary);">상태</th>
+                <th style="padding:10px 16px; text-align:right; font-weight:500; font-size:11px; color:var(--content-secondary);">최종 수정일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid var(--line-primary); cursor:pointer;" onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background=''">
+                <td style="padding:10px 16px; font-weight:500;">개인정보 처리방침</td>
+                <td style="padding:10px 16px; color:var(--content-secondary);">개인정보</td>
+                <td style="padding:10px 16px; text-align:center; color:var(--content-secondary);" class="tabular-nums">v3</td>
+                <td style="padding:10px 16px; text-align:center;"><span style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:500;">게시됨</span></td>
+                <td style="padding:10px 16px; text-align:right; color:var(--content-secondary);" class="tabular-nums">2026.04.15</td>
+              </tr>
+              <tr style="border-top:1px solid var(--line-primary); cursor:pointer;" onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background=''">
+                <td style="padding:10px 16px; font-weight:500;">이용약관</td>
+                <td style="padding:10px 16px; color:var(--content-secondary);">서비스 운영</td>
+                <td style="padding:10px 16px; text-align:center; color:var(--content-secondary);" class="tabular-nums">v2</td>
+                <td style="padding:10px 16px; text-align:center;"><span style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:500;">게시됨</span></td>
+                <td style="padding:10px 16px; text-align:right; color:var(--content-secondary);" class="tabular-nums">2026.04.10</td>
+              </tr>
+              <tr style="border-top:1px solid var(--line-primary); cursor:pointer;" onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background=''">
+                <td style="padding:10px 16px; font-weight:500;">비밀번호 정책</td>
+                <td style="padding:10px 16px; color:var(--content-secondary);">인증/보안</td>
+                <td style="padding:10px 16px; text-align:center; color:var(--content-secondary);" class="tabular-nums">v1</td>
+                <td style="padding:10px 16px; text-align:center;"><span style="background:var(--surface-tertiary); color:var(--content-secondary); border:1px solid var(--line-primary); padding:2px 8px; border-radius:20px; font-size:11px; font-weight:500;">초안</span></td>
+                <td style="padding:10px 16px; text-align:right; color:var(--content-secondary);" class="tabular-nums">2026.04.08</td>
+              </tr>
+              <tr style="border-top:1px solid var(--line-primary); cursor:pointer;" onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background=''">
+                <td style="padding:10px 16px; font-weight:500;">접근 권한 관리 지침</td>
+                <td style="padding:10px 16px; color:var(--content-secondary);">인증/보안</td>
+                <td style="padding:10px 16px; text-align:center; color:var(--content-secondary);" class="tabular-nums">v1</td>
+                <td style="padding:10px 16px; text-align:center;"><span style="background:var(--surface-tertiary); color:var(--content-secondary); border:1px solid var(--line-primary); padding:2px 8px; border-radius:20px; font-size:11px; font-weight:500;">초안</span></td>
+                <td style="padding:10px 16px; text-align:right; color:var(--content-secondary);" class="tabular-nums">2026.04.05</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="callout">현재 헤더 좌측이 비어있고, 페이지 타이틀이 TopBar에만 존재하여 맥락 파악이 어렵습니다. 테이블에 정보 밀도가 균일해 스캔 우선순위가 불분명합니다.</div>
+    </div>
+
+    <!-- AFTER -->
+    <div>
+      <span class="compare-label after">After</span>
+      <div class="mockup-frame">
+        <!-- Header with title + stats -->
+        <div style="padding:24px 24px 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="font-size:18px; font-weight:700; letter-spacing:-0.01em;">정책 목록</h2>
+              <p style="font-size:12px; color:var(--content-tertiary); margin-top:4px;">총 12개 정책 &middot; 게시 8 &middot; 초안 4</p>
+            </div>
+            <button style="background:var(--accent-blue); color:#fff; padding:8px 20px; border-radius:8px; border:none; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              새 정책
+            </button>
+          </div>
+          <!-- Summary stats -->
+          <div style="display:flex; gap:12px; margin-top:16px;">
+            <div style="flex:1; background:var(--accent-emerald-light); border-radius:8px; padding:12px 16px;">
+              <div style="font-size:20px; font-weight:700; color:var(--accent-emerald);" class="tabular-nums">8</div>
+              <div style="font-size:11px; color:#065f46; margin-top:2px;">게시됨</div>
+            </div>
+            <div style="flex:1; background:var(--accent-amber-light); border-radius:8px; padding:12px 16px;">
+              <div style="font-size:20px; font-weight:700; color:var(--accent-amber);" class="tabular-nums">4</div>
+              <div style="font-size:11px; color:#92400e; margin-top:2px;">초안</div>
+            </div>
+            <div style="flex:1; background:var(--accent-blue-light); border-radius:8px; padding:12px 16px;">
+              <div style="font-size:20px; font-weight:700; color:var(--accent-blue);" class="tabular-nums">3</div>
+              <div style="font-size:11px; color:#1e40af; margin-top:2px;">이번 주 수정</div>
+            </div>
+          </div>
+        </div>
+        <!-- Filters -->
+        <div style="padding:0 24px 16px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+          <div style="display:flex; gap:6px;">
+            <span style="background:var(--accent-blue); color:#fff; padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600;">전체</span>
+            <span style="border:1px solid var(--line-primary); padding:5px 14px; border-radius:20px; font-size:11px; color:var(--content-secondary); cursor:pointer;">인증/보안 <span class="tabular-nums" style="color:var(--content-tertiary); margin-left:2px;">3</span></span>
+            <span style="border:1px solid var(--line-primary); padding:5px 14px; border-radius:20px; font-size:11px; color:var(--content-secondary); cursor:pointer;">개인정보 <span class="tabular-nums" style="color:var(--content-tertiary); margin-left:2px;">4</span></span>
+            <span style="border:1px solid var(--line-primary); padding:5px 14px; border-radius:20px; font-size:11px; color:var(--content-secondary); cursor:pointer;">서비스 운영 <span class="tabular-nums" style="color:var(--content-tertiary); margin-left:2px;">5</span></span>
+          </div>
+          <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+            <select style="border:1px solid var(--line-primary); padding:7px 12px; border-radius:8px; font-size:11px; background:var(--surface-primary); color:var(--content-primary);">
+              <option>전체 상태</option>
+            </select>
+            <div style="position:relative;">
+              <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--content-tertiary);" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <input style="width:220px; border:1px solid var(--line-primary); padding:7px 12px 7px 32px; border-radius:8px; font-size:12px; background:var(--surface-primary);" placeholder="정책명, 키워드로 검색..." />
+            </div>
+          </div>
+        </div>
+        <!-- Enhanced table -->
+        <div style="border-top:1px solid var(--line-primary);">
+          <table style="width:100%; font-size:13px; border-collapse:collapse;">
+            <thead>
+              <tr style="background:var(--surface-secondary);">
+                <th style="padding:10px 16px; text-align:left; font-weight:500; font-size:11px; color:var(--content-secondary);">정책</th>
+                <th style="padding:10px 16px; text-align:center; font-weight:500; font-size:11px; color:var(--content-secondary);">버전</th>
+                <th style="padding:10px 16px; text-align:center; font-weight:500; font-size:11px; color:var(--content-secondary);">상태</th>
+                <th style="padding:10px 16px; text-align:center; font-weight:500; font-size:11px; color:var(--content-secondary);">연결 기능</th>
+                <th style="padding:10px 16px; text-align:right; font-weight:500; font-size:11px; color:var(--content-secondary);">수정일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid var(--line-primary); cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                <td style="padding:12px 16px;">
+                  <div style="font-weight:600; font-size:13px;">개인정보 처리방침</div>
+                  <div style="font-size:11px; color:var(--content-tertiary); margin-top:2px; display:flex; align-items:center; gap:6px;">
+                    <span style="display:inline-flex; align-items:center; gap:3px;"><span style="width:6px; height:6px; border-radius:50%; background:#8b5cf6; display:inline-block;"></span>개인정보</span>
+                  </div>
+                </td>
+                <td style="padding:12px 16px; text-align:center;" class="tabular-nums"><span style="font-weight:500;">v3</span></td>
+                <td style="padding:12px 16px; text-align:center;"><span style="background:#ecfdf5; color:#059669; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;">게시됨</span></td>
+                <td style="padding:12px 16px; text-align:center;"><span style="background:var(--accent-blue-light); color:var(--accent-blue); padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500;" class="tabular-nums">4개</span></td>
+                <td style="padding:12px 16px; text-align:right; color:var(--content-secondary); font-size:12px;" class="tabular-nums">04.15</td>
+              </tr>
+              <tr style="border-top:1px solid var(--line-primary); cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                <td style="padding:12px 16px;">
+                  <div style="font-weight:600; font-size:13px;">이용약관</div>
+                  <div style="font-size:11px; color:var(--content-tertiary); margin-top:2px; display:flex; align-items:center; gap:6px;">
+                    <span style="display:inline-flex; align-items:center; gap:3px;"><span style="width:6px; height:6px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>서비스 운영</span>
+                  </div>
+                </td>
+                <td style="padding:12px 16px; text-align:center;" class="tabular-nums"><span style="font-weight:500;">v2</span></td>
+                <td style="padding:12px 16px; text-align:center;"><span style="background:#ecfdf5; color:#059669; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;">게시됨</span></td>
+                <td style="padding:12px 16px; text-align:center;"><span style="background:var(--accent-blue-light); color:var(--accent-blue); padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500;" class="tabular-nums">2개</span></td>
+                <td style="padding:12px 16px; text-align:right; color:var(--content-secondary); font-size:12px;" class="tabular-nums">04.10</td>
+              </tr>
+              <tr style="border-top:1px solid var(--line-primary); cursor:pointer; background:#fffbeb;" onmouseover="this.style.background='#fef3c7'" onmouseout="this.style.background='#fffbeb'">
+                <td style="padding:12px 16px;">
+                  <div style="font-weight:600; font-size:13px; display:flex; align-items:center; gap:6px;">비밀번호 정책 <span style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:600;" class="badge-pop">NEW</span></div>
+                  <div style="font-size:11px; color:var(--content-tertiary); margin-top:2px; display:flex; align-items:center; gap:6px;">
+                    <span style="display:inline-flex; align-items:center; gap:3px;"><span style="width:6px; height:6px; border-radius:50%; background:#3b82f6; display:inline-block;"></span>인증/보안</span>
+                  </div>
+                </td>
+                <td style="padding:12px 16px; text-align:center;" class="tabular-nums"><span style="font-weight:500;">v1</span></td>
+                <td style="padding:12px 16px; text-align:center;"><span style="background:var(--surface-tertiary); color:var(--content-secondary); padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500;">초안</span></td>
+                <td style="padding:12px 16px; text-align:center;"><span style="color:var(--content-tertiary); font-size:11px;">--</span></td>
+                <td style="padding:12px 16px; text-align:right; color:var(--content-secondary); font-size:12px;" class="tabular-nums">04.08</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="callout">요약 통계로 전체 현황을 한눈에 파악. 도메인 칩에 개수 표시. 제목+영역을 한 셀로 결합하여 스캔성 향상. 연결 기능 수 컬럼 추가로 정책-기능 연결 가시성 확보. 초안 행 배경 강조로 작업 필요 항목 식별.</div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================== -->
+<!-- TAB 2: 정책 상세 -->
+<!-- =========================================== -->
+<div id="tab-detail" class="tab-content">
+  <div class="compare-grid">
+    <!-- BEFORE -->
+    <div>
+      <span class="compare-label before">Before</span>
+      <div class="mockup-frame">
+        <div style="padding:20px 24px;">
+          <a style="font-size:11px; color:var(--content-secondary); text-decoration:none; display:flex; align-items:center; gap:4px;">&larr; 목록으로</a>
+          <div style="display:flex; gap:24px; margin-top:20px;">
+            <!-- Main -->
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <h1 style="font-size:18px; font-weight:600;">개인정보 처리방침</h1>
+                    <span style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500;">게시됨</span>
+                  </div>
+                  <div style="font-size:11px; color:var(--content-secondary); margin-top:6px; display:flex; gap:8px;">
+                    <span>개인정보</span>
+                    <span style="color:var(--line-primary);">|</span>
+                    <span class="tabular-nums">v3</span>
+                    <span style="color:var(--line-primary);">|</span>
+                    <span>게시일: 2026.04.15 14:30</span>
+                  </div>
+                </div>
+                <!-- Actions - too many buttons -->
+                <div style="display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; max-width:380px;">
+                  <button style="border:1px solid var(--line-primary); padding:6px 12px; border-radius:6px; font-size:11px; background:var(--surface-primary); cursor:pointer;">내보내기 &#x25BE;</button>
+                  <button style="border:1px solid var(--line-primary); padding:6px 12px; border-radius:6px; font-size:11px; background:var(--surface-primary); cursor:pointer;">버전 비교</button>
+                  <button style="border:1px solid #a7f3d0; background:#ecfdf5; padding:6px 12px; border-radius:6px; font-size:11px; color:#059669; cursor:pointer;">공개중</button>
+                  <button style="border:1px solid var(--line-primary); padding:6px 12px; border-radius:6px; font-size:11px; background:var(--surface-primary); cursor:pointer;">링크 복사</button>
+                  <button style="background:var(--accent); color:var(--accent-text); padding:6px 12px; border-radius:6px; font-size:11px; border:none; cursor:pointer;">새 버전 생성</button>
+                  <button style="border:1px solid var(--line-primary); padding:6px 12px; border-radius:6px; font-size:11px; background:var(--surface-primary); cursor:pointer;">게시 취소</button>
+                </div>
+              </div>
+              <!-- Content area -->
+              <div style="margin-top:20px; border:1px solid var(--line-primary); border-radius:8px; padding:20px;">
+                <h2 style="font-size:13px; font-weight:500; margin-bottom:10px;">내용</h2>
+                <div style="font-size:13px; line-height:1.8; color:var(--content-primary);">
+                  <h3 style="font-size:15px; font-weight:600; margin:16px 0 8px;">1. 개인정보의 수집 및 이용 목적</h3>
+                  <p style="margin-bottom:12px;">회사는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며...</p>
+                  <h3 style="font-size:15px; font-weight:600; margin:16px 0 8px;">2. 수집하는 개인정보의 항목</h3>
+                  <p>필수 항목: 이름, 이메일, 전화번호, 비밀번호...</p>
+                </div>
+              </div>
+              <!-- Changelog -->
+              <div style="margin-top:20px; border:1px solid var(--line-primary); border-radius:8px; padding:20px;">
+                <h2 style="font-size:13px; font-weight:500; margin-bottom:12px;">변경 이력</h2>
+                <div style="display:flex; gap:10px; padding-bottom:16px;">
+                  <div style="width:12px; height:12px; border-radius:50%; background:#059669; margin-top:3px; flex-shrink:0;"></div>
+                  <div>
+                    <div style="font-size:11px;"><span style="font-weight:500;">게시</span> <span style="color:var(--content-tertiary);">v3</span></div>
+                    <p style="font-size:11px; color:var(--content-secondary); margin-top:2px;">개인정보 수집 항목 업데이트</p>
+                    <p style="font-size:11px; color:var(--content-tertiary); margin-top:2px;" class="tabular-nums">2026.04.15 14:30</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Right sidebar - too narrow -->
+            <div style="width:180px; flex-shrink:0;">
+              <div style="border:1px solid var(--line-primary); border-radius:8px; padding:12px; margin-bottom:12px;">
+                <h2 style="font-size:11px; font-weight:500; margin-bottom:8px;">연결된 기능</h2>
+                <div style="padding:6px 8px; border-radius:6px; font-size:11px; font-weight:500;">회원가입</div>
+                <div style="padding:2px 8px; font-size:11px; color:var(--content-tertiary);">&middot; 수집동의 절차</div>
+              </div>
+              <div style="border:1px solid var(--line-primary); border-radius:8px; padding:12px; margin-bottom:12px;">
+                <h2 style="font-size:11px; font-weight:500; margin-bottom:8px;">버전 이력</h2>
+                <div style="background:var(--surface-secondary); padding:6px 8px; border-radius:6px; font-size:11px; display:flex; justify-content:space-between;">
+                  <span style="font-weight:500;">v3</span><span style="color:var(--content-tertiary);">현재</span>
+                </div>
+                <div style="padding:6px 8px; font-size:11px; color:var(--content-secondary);">v2</div>
+                <div style="padding:6px 8px; font-size:11px; color:var(--content-secondary);">v1</div>
+              </div>
+              <div style="border:1px solid var(--line-primary); border-radius:8px; padding:12px;">
+                <p style="font-size:11px; color:var(--content-secondary); margin-bottom:6px;">목차</p>
+                <div style="font-size:11px; color:var(--content-secondary); padding:2px 0;">1. 수집 및 이용 목적</div>
+                <div style="font-size:11px; color:var(--content-secondary); padding:2px 0;">2. 수집하는 항목</div>
+                <div style="font-size:11px; color:var(--content-secondary); padding:2px 0;">3. 보유 기간</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="callout">액션 버튼 6개가 수평으로 나열되어 시각적 혼란. 사이드바 w-52(208px)로 좁아 콘텐츠 잘림. "내용" 라벨이 불필요한 공간 차지. 메타 정보와 본문 경계가 모호합니다.</div>
+    </div>
+
+    <!-- AFTER -->
+    <div>
+      <span class="compare-label after">After</span>
+      <div class="mockup-frame">
+        <div style="padding:24px;">
+          <!-- Breadcrumb -->
+          <div style="font-size:12px; color:var(--content-tertiary); display:flex; align-items:center; gap:6px; margin-bottom:20px;">
+            <a style="color:var(--content-secondary); text-decoration:none; cursor:pointer;">정책 목록</a>
+            <span>/</span>
+            <span style="color:var(--content-primary);">개인정보 처리방침</span>
+          </div>
+
+          <div style="display:flex; gap:28px;">
+            <!-- Main content -->
+            <div style="flex:1; min-width:0;">
+              <!-- Title bar -->
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <h1 style="font-size:22px; font-weight:700; letter-spacing:-0.02em;">개인정보 처리방침</h1>
+                    <span style="background:#ecfdf5; color:#059669; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;">게시됨</span>
+                    <span style="background:var(--accent-blue-light); color:var(--accent-blue); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:500;">공개중</span>
+                  </div>
+                  <div style="font-size:12px; color:var(--content-secondary); margin-top:8px; display:flex; gap:16px;">
+                    <span style="display:flex; align-items:center; gap:4px;">
+                      <span style="width:6px; height:6px; border-radius:50%; background:#8b5cf6; display:inline-block;"></span>
+                      개인정보
+                    </span>
+                    <span class="tabular-nums">v3</span>
+                    <span class="tabular-nums">2026.04.15 14:30 게시</span>
+                  </div>
+                </div>
+                <!-- Grouped actions -->
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <button style="background:var(--accent-blue); color:#fff; padding:8px 16px; border-radius:8px; border:none; font-size:12px; font-weight:600; cursor:pointer;">새 버전 생성</button>
+                  <button style="border:1px solid var(--line-primary); padding:8px; border-radius:8px; background:var(--surface-primary); cursor:pointer; display:flex; align-items:center;" title="더보기">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--content-secondary)"><circle cx="4" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12" cy="8" r="1.2"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Progress indicator -->
+              <div style="margin-top:16px; display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--surface-secondary); border-radius:8px;">
+                <span style="font-size:11px; color:var(--content-secondary); font-weight:500;">정책 완성도</span>
+                <div class="progress-bar" style="flex:1;">
+                  <div class="fill" style="width:85%; background:var(--accent-emerald);"></div>
+                </div>
+                <span style="font-size:11px; font-weight:600; color:var(--accent-emerald);" class="tabular-nums">85%</span>
+              </div>
+
+              <!-- Content - direct, no wrapper label -->
+              <div style="margin-top:24px; font-size:14px; line-height:1.9; color:var(--content-primary);">
+                <h2 style="font-size:17px; font-weight:700; margin-bottom:10px; padding-bottom:8px; border-bottom:2px solid var(--line-primary); letter-spacing:-0.01em;">1. 개인정보의 수집 및 이용 목적</h2>
+                <p style="margin-bottom:16px; color:#374151;">회사는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.</p>
+                <h2 style="font-size:17px; font-weight:700; margin:24px 0 10px; padding-bottom:8px; border-bottom:2px solid var(--line-primary); letter-spacing:-0.01em;">2. 수집하는 개인정보의 항목</h2>
+                <p style="color:#374151;">필수 항목: 이름, 이메일, 전화번호, 비밀번호</p>
+                <p style="color:#374151; margin-top:8px;">선택 항목: 프로필 사진, 주소</p>
+              </div>
+
+              <!-- Changelog - compact -->
+              <div style="margin-top:32px; padding-top:24px; border-top:1px solid var(--line-primary);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                  <h2 style="font-size:14px; font-weight:600;">변경 이력</h2>
+                  <button style="font-size:11px; color:var(--accent-blue); background:none; border:none; cursor:pointer; font-weight:500;">전체 보기</button>
+                </div>
+                <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--surface-tertiary);">
+                  <div style="width:6px; height:6px; border-radius:50%; background:#059669; margin-top:5px; flex-shrink:0;"></div>
+                  <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between;">
+                      <span style="font-size:12px; font-weight:600;">게시 <span style="font-weight:400; color:var(--content-tertiary);">v3</span></span>
+                      <span style="font-size:11px; color:var(--content-tertiary);" class="tabular-nums">04.15</span>
+                    </div>
+                    <p style="font-size:12px; color:var(--content-secondary); margin-top:2px;">개인정보 수집 항목 업데이트</p>
+                  </div>
+                </div>
+                <div style="display:flex; gap:12px; padding:10px 0;">
+                  <div style="width:6px; height:6px; border-radius:50%; background:#f59e0b; margin-top:5px; flex-shrink:0;"></div>
+                  <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between;">
+                      <span style="font-size:12px; font-weight:600;">수정 <span style="font-weight:400; color:var(--content-tertiary);">v2</span></span>
+                      <span style="font-size:11px; color:var(--content-tertiary);" class="tabular-nums">04.10</span>
+                    </div>
+                    <p style="font-size:12px; color:var(--content-secondary); margin-top:2px;">이용약관 문구 수정</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right sidebar - wider, sticky -->
+            <div style="width:220px; flex-shrink:0;">
+              <!-- TOC - sticky -->
+              <div style="position:sticky; top:24px;">
+                <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; margin-bottom:16px; background:var(--surface-primary);">
+                  <p style="font-size:11px; font-weight:600; color:var(--content-secondary); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">목차</p>
+                  <div style="border-left:2px solid var(--accent-blue); padding-left:12px;">
+                    <div style="font-size:12px; color:var(--accent-blue); padding:4px 0; font-weight:500; cursor:pointer;">1. 수집 및 이용 목적</div>
+                    <div style="font-size:12px; color:var(--content-secondary); padding:4px 0; cursor:pointer;">2. 수집하는 항목</div>
+                    <div style="font-size:12px; color:var(--content-secondary); padding:4px 0; cursor:pointer;">3. 보유 기간</div>
+                    <div style="font-size:12px; color:var(--content-secondary); padding:4px 0; cursor:pointer;">4. 파기 절차</div>
+                    <div style="font-size:12px; color:var(--content-secondary); padding:4px 0; cursor:pointer;">5. 권리와 의무</div>
+                  </div>
+                </div>
+                <!-- Linked features -->
+                <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; margin-bottom:16px; background:var(--surface-primary);">
+                  <p style="font-size:11px; font-weight:600; color:var(--content-secondary); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">연결 기능</p>
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <div style="padding:8px 10px; background:var(--surface-secondary); border-radius:6px; cursor:pointer;">
+                      <div style="font-size:12px; font-weight:500;">회원가입</div>
+                      <div style="font-size:10px; color:var(--content-tertiary); margin-top:2px;">수집동의 절차</div>
+                    </div>
+                    <div style="padding:8px 10px; background:var(--surface-secondary); border-radius:6px; cursor:pointer;">
+                      <div style="font-size:12px; font-weight:500;">마이페이지</div>
+                      <div style="font-size:10px; color:var(--content-tertiary); margin-top:2px;">정보 열람/수정</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Versions - compact -->
+                <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+                  <p style="font-size:11px; font-weight:600; color:var(--content-secondary); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">버전</p>
+                  <div style="display:flex; flex-direction:column; gap:2px;">
+                    <div style="display:flex; justify-content:space-between; padding:6px 8px; background:var(--accent-blue-light); border-radius:6px;">
+                      <span style="font-size:12px; font-weight:600; color:var(--accent-blue);" class="tabular-nums">v3</span>
+                      <span style="font-size:10px; color:var(--accent-blue);">현재</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding:6px 8px; border-radius:6px; cursor:pointer;" onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background=''">
+                      <span style="font-size:12px; color:var(--content-secondary);" class="tabular-nums">v2</span>
+                      <span style="font-size:10px; color:var(--accent-emerald);">게시됨</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding:6px 8px; border-radius:6px; cursor:pointer;" onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background=''">
+                      <span style="font-size:12px; color:var(--content-secondary);" class="tabular-nums">v1</span>
+                      <span style="font-size:10px; color:var(--content-tertiary);">초안</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="callout">빵크럼 네비게이션으로 위치 파악 개선. 액션 버튼을 주요 1개 + overflow 메뉴로 정리. 정책 완성도 프로그레스바 추가. TOC에 현재 위치 하이라이트. 사이드바 패널에 일관된 라벨 스타일. 콘텐츠 헤딩에 밑줄로 섹션 구분 강화.</div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================== -->
+<!-- TAB 3: 기능맵 -->
+<!-- =========================================== -->
+<div id="tab-features" class="tab-content">
+  <div class="compare-grid">
+    <!-- BEFORE -->
+    <div>
+      <span class="compare-label before">Before</span>
+      <div class="mockup-frame">
+        <div style="padding:20px 24px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+            <div>
+              <h1 style="font-size:18px; font-weight:600;">기능 맵</h1>
+              <p style="font-size:13px; color:var(--content-secondary); margin-top:4px;">앱 기능별 연관 정책 현황</p>
+            </div>
+            <button style="background:var(--accent); color:var(--accent-text); padding:8px 16px; border-radius:6px; border:none; font-size:13px; cursor:pointer;">기능 추가</button>
+          </div>
+          <!-- Masonry columns mock -->
+          <div style="display:flex; gap:16px;">
+            <div style="flex:1;">
+              <!-- Card 1 -->
+              <div style="border:1px solid var(--line-primary); border-radius:8px; padding:14px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <h2 style="font-size:14px; font-weight:600;">회원가입</h2>
+                    <button style="border:none; background:none; padding:4px; cursor:pointer; color:var(--content-tertiary);" title="수정">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="background:var(--accent); color:var(--accent-text); padding:2px 8px; border-radius:20px; font-size:10px; font-weight:500;">정책 2개 연결</span>
+                    <button style="border:1px solid var(--line-primary); background:var(--surface-secondary); padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer;">연결</button>
+                    <button style="border:1px solid #fecaca; background:#fef2f2; padding:4px 10px; border-radius:6px; font-size:12px; color:#dc2626; cursor:pointer;">삭제</button>
+                  </div>
+                </div>
+                <p style="font-size:11px; color:var(--content-tertiary); font-family:monospace;">/auth/signup</p>
+                <p style="font-size:12px; color:var(--content-secondary); margin-top:6px;">사용자 회원가입 처리</p>
+                <!-- Linked docs -->
+                <div style="margin-top:10px;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <a style="font-size:12px; font-weight:500; color:var(--content-primary); text-decoration:none;">개인정보 처리방침</a>
+                    <span style="display:flex; align-items:center; gap:3px; font-size:10px; color:#059669;">
+                      <span style="width:5px; height:5px; border-radius:50%; background:#059669; display:inline-block;"></span>게시됨
+                    </span>
+                    <button style="border:none; background:none; font-size:10px; color:var(--content-tertiary); cursor:pointer;">&#x2715;</button>
+                  </div>
+                  <div style="padding-left:10px; margin-top:4px;">
+                    <div style="display:flex; align-items:center; gap:4px;">
+                      <span style="font-size:9px; color:var(--content-tertiary);">&#x2517;</span>
+                      <span style="font-size:11px; color:var(--content-secondary);">수집동의 절차</span>
+                      <button style="border:none; background:none; font-size:10px; color:var(--content-tertiary); cursor:pointer;">&#x2715;</button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px; margin-top:2px;">
+                      <span style="font-size:9px; color:var(--content-tertiary);">&#x2517;</span>
+                      <span style="font-size:11px; color:var(--content-secondary);">제3자 제공 동의</span>
+                      <button style="border:none; background:none; font-size:10px; color:var(--content-tertiary); cursor:pointer;">&#x2715;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 2 -->
+              <div style="border:1px solid var(--line-primary); border-radius:8px; padding:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <h2 style="font-size:14px; font-weight:600;">매장 검색</h2>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:10px; color:var(--content-tertiary);">정책 미연결</span>
+                    <button style="border:1px solid var(--line-primary); background:var(--surface-secondary); padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer;">연결</button>
+                    <button style="border:1px solid #fecaca; background:#fef2f2; padding:4px 10px; border-radius:6px; font-size:12px; color:#dc2626; cursor:pointer;">삭제</button>
+                  </div>
+                </div>
+                <p style="font-size:11px; color:var(--content-tertiary); font-family:monospace;">/search</p>
+                <p style="font-size:12px; color:var(--content-secondary); margin-top:6px;">키워드로 매장 검색</p>
+              </div>
+            </div>
+            <div style="flex:1;">
+              <!-- Card 3 -->
+              <div style="border:1px solid var(--line-primary); border-radius:8px; padding:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <h2 style="font-size:14px; font-weight:600;">길찾기</h2>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="background:var(--accent); color:var(--accent-text); padding:2px 8px; border-radius:20px; font-size:10px; font-weight:500;">정책 1개 연결</span>
+                    <button style="border:1px solid var(--line-primary); background:var(--surface-secondary); padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer;">연결</button>
+                    <button style="border:1px solid #fecaca; background:#fef2f2; padding:4px 10px; border-radius:6px; font-size:12px; color:#dc2626; cursor:pointer;">삭제</button>
+                  </div>
+                </div>
+                <p style="font-size:11px; color:var(--content-tertiary); font-family:monospace;">/navigation</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="callout">카드 헤더에 버튼이 너무 많아(편집+연결+삭제+배지) 시각적 잡음. 삭제 버튼이 항상 노출되어 오조작 위험. masonry 레이아웃이 카드 높이 불균등으로 시각적 균형 부족. 정책 미연결 기능의 빈 상태가 도드라지지 않음.</div>
+    </div>
+
+    <!-- AFTER -->
+    <div>
+      <span class="compare-label after">After</span>
+      <div class="mockup-frame">
+        <div style="padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+            <div>
+              <h2 style="font-size:18px; font-weight:700; letter-spacing:-0.01em;">기능 맵</h2>
+              <p style="font-size:12px; color:var(--content-tertiary); margin-top:4px;">총 8개 기능 &middot; 정책 연결 5 &middot; 미연결 3</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <div style="display:flex; border:1px solid var(--line-primary); border-radius:8px; overflow:hidden;">
+                <button style="padding:7px 12px; font-size:11px; background:var(--accent-blue-light); color:var(--accent-blue); font-weight:600; border:none; cursor:pointer;">전체</button>
+                <button style="padding:7px 12px; font-size:11px; background:var(--surface-primary); color:var(--content-secondary); border:none; border-left:1px solid var(--line-primary); cursor:pointer;">연결됨</button>
+                <button style="padding:7px 12px; font-size:11px; background:var(--surface-primary); color:var(--content-secondary); border:none; border-left:1px solid var(--line-primary); cursor:pointer;">미연결</button>
+              </div>
+              <button style="background:var(--accent-blue); color:#fff; padding:8px 20px; border-radius:8px; border:none; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                기능 추가
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid layout - consistent card sizes -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <!-- Card 1 - connected -->
+            <div style="border:1px solid var(--line-primary); border-radius:10px; overflow:hidden; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--line-secondary)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'" onmouseout="this.style.borderColor='var(--line-primary)'; this.style.boxShadow='none'">
+              <div style="padding:16px; display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:32px; height:32px; border-radius:8px; background:var(--accent-blue-light); display:flex; align-items:center; justify-content:center; font-size:16px;">&#x1F464;</div>
+                    <div>
+                      <h3 style="font-size:14px; font-weight:600;">회원가입</h3>
+                      <p style="font-size:11px; color:var(--content-tertiary); font-family:monospace;">/auth/signup</p>
+                    </div>
+                  </div>
+                </div>
+                <button style="border:none; background:none; padding:4px; cursor:pointer; color:var(--content-tertiary); border-radius:6px;" onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background='none'" title="더보기">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12" cy="8" r="1.2"/></svg>
+                </button>
+              </div>
+              <p style="padding:0 16px 12px; font-size:12px; color:var(--content-secondary);">사용자 회원가입 처리</p>
+              <!-- Linked policies -->
+              <div style="border-top:1px solid var(--line-primary); padding:12px 16px; background:var(--surface-secondary);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                  <span style="font-size:11px; font-weight:600; color:var(--content-secondary);">연결된 정책</span>
+                  <button style="font-size:11px; color:var(--accent-blue); background:none; border:none; cursor:pointer; font-weight:500;">+ 추가</button>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div style="background:var(--surface-primary); border:1px solid var(--line-primary); border-radius:8px; padding:10px 12px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <span style="font-size:12px; font-weight:500;">개인정보 처리방침</span>
+                      <span style="width:6px; height:6px; border-radius:50%; background:#059669; display:inline-block;"></span>
+                    </div>
+                    <div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
+                      <span style="background:var(--surface-tertiary); padding:2px 8px; border-radius:4px; font-size:10px; color:var(--content-secondary);">수집동의 절차</span>
+                      <span style="background:var(--surface-tertiary); padding:2px 8px; border-radius:4px; font-size:10px; color:var(--content-secondary);">제3자 제공 동의</span>
+                    </div>
+                  </div>
+                  <div style="background:var(--surface-primary); border:1px solid var(--line-primary); border-radius:8px; padding:10px 12px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <span style="font-size:12px; font-weight:500;">이용약관</span>
+                      <span style="width:6px; height:6px; border-radius:50%; background:#059669; display:inline-block;"></span>
+                    </div>
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                      <span style="background:var(--surface-tertiary); padding:2px 8px; border-radius:4px; font-size:10px; color:var(--content-secondary);">약관 동의</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 - connected -->
+            <div style="border:1px solid var(--line-primary); border-radius:10px; overflow:hidden;">
+              <div style="padding:16px; display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="width:32px; height:32px; border-radius:8px; background:#ecfdf5; display:flex; align-items:center; justify-content:center; font-size:16px;">&#x1F4CD;</div>
+                  <div>
+                    <h3 style="font-size:14px; font-weight:600;">길찾기</h3>
+                    <p style="font-size:11px; color:var(--content-tertiary); font-family:monospace;">/navigation</p>
+                  </div>
+                </div>
+                <button style="border:none; background:none; padding:4px; cursor:pointer; color:var(--content-tertiary);">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12" cy="8" r="1.2"/></svg>
+                </button>
+              </div>
+              <div style="border-top:1px solid var(--line-primary); padding:12px 16px; background:var(--surface-secondary);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                  <span style="font-size:11px; font-weight:600; color:var(--content-secondary);">연결된 정책</span>
+                  <button style="font-size:11px; color:var(--accent-blue); background:none; border:none; cursor:pointer; font-weight:500;">+ 추가</button>
+                </div>
+                <div style="background:var(--surface-primary); border:1px solid var(--line-primary); border-radius:8px; padding:10px 12px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <span style="font-size:12px; font-weight:500;">위치정보 이용약관</span>
+                    <span style="width:6px; height:6px; border-radius:50%; background:#059669; display:inline-block;"></span>
+                  </div>
+                  <div style="display:flex; gap:6px; margin-top:6px;">
+                    <span style="background:var(--surface-tertiary); padding:2px 8px; border-radius:4px; font-size:10px; color:var(--content-secondary);">위치 수집 동의</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 - NOT connected (empty state) -->
+            <div style="border:2px dashed var(--line-primary); border-radius:10px; overflow:hidden; background:var(--surface-secondary);">
+              <div style="padding:16px; display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="width:32px; height:32px; border-radius:8px; background:var(--surface-tertiary); display:flex; align-items:center; justify-content:center; font-size:16px;">&#x1F50D;</div>
+                  <div>
+                    <h3 style="font-size:14px; font-weight:600; color:var(--content-secondary);">매장 검색</h3>
+                    <p style="font-size:11px; color:var(--content-tertiary); font-family:monospace;">/search</p>
+                  </div>
+                </div>
+                <button style="border:none; background:none; padding:4px; cursor:pointer; color:var(--content-tertiary);">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12" cy="8" r="1.2"/></svg>
+                </button>
+              </div>
+              <p style="padding:0 16px 12px; font-size:12px; color:var(--content-tertiary);">키워드로 매장 검색</p>
+              <div style="padding:16px; text-align:center;">
+                <p style="font-size:12px; color:var(--content-tertiary); margin-bottom:8px;">연결된 정책이 없습니다</p>
+                <button style="background:var(--surface-primary); border:1px solid var(--line-primary); padding:6px 16px; border-radius:8px; font-size:12px; color:var(--accent-blue); cursor:pointer; font-weight:500;">정책 연결하기</button>
+              </div>
+            </div>
+
+            <!-- Card 4 - NOT connected -->
+            <div style="border:2px dashed var(--line-primary); border-radius:10px; overflow:hidden; background:var(--surface-secondary);">
+              <div style="padding:16px; display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="width:32px; height:32px; border-radius:8px; background:var(--surface-tertiary); display:flex; align-items:center; justify-content:center; font-size:16px;">&#x1F5FA;</div>
+                  <div>
+                    <h3 style="font-size:14px; font-weight:600; color:var(--content-secondary);">실내 지도</h3>
+                    <p style="font-size:11px; color:var(--content-tertiary); font-family:monospace;">/map</p>
+                  </div>
+                </div>
+                <button style="border:none; background:none; padding:4px; cursor:pointer; color:var(--content-tertiary);">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="12" cy="8" r="1.2"/></svg>
+                </button>
+              </div>
+              <div style="padding:16px; text-align:center;">
+                <p style="font-size:12px; color:var(--content-tertiary); margin-bottom:8px;">연결된 정책이 없습니다</p>
+                <button style="background:var(--surface-primary); border:1px solid var(--line-primary); padding:6px 16px; border-radius:8px; font-size:12px; color:var(--accent-blue); cursor:pointer; font-weight:500;">정책 연결하기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="callout">카드 액션을 overflow 메뉴(...)로 통합하여 시각적 잡음 대폭 감소. 기능 아이콘으로 카드 식별성 향상. 미연결 기능은 dashed border + 배경색으로 명확히 구분. 정책 섹션을 태그 UI로 변환하여 정보 밀도를 높이면서 가독성 유지. 필터 segmented control 추가.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /max-width container -->
+
+<!-- ===== IMPROVEMENTS LIST SECTION ===== -->
+<div style="max-width:1280px; margin:0 auto; padding:0 32px 64px;">
+  <div style="border-top:1px solid var(--line-primary); padding-top:40px;">
+    <h2 style="font-size:20px; font-weight:700; margin-bottom:8px; letter-spacing:-0.01em;">개선점 요약</h2>
+    <p style="font-size:13px; color:var(--content-secondary); margin-bottom:24px;">총 12개 개선 항목 &mdash; Critical 2 / High 4 / Medium 4 / Low 2</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      <!-- Item 1 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#dc2626; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Critical</span>
+          <span style="font-size:13px; font-weight:600;">정책 목록 페이지 헤더 부재</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">헤더 좌측이 <code style="background:var(--surface-tertiary); padding:1px 4px; border-radius:3px; font-size:11px;">&lt;div/&gt;</code> 빈 요소. 페이지 타이틀 / 요약 통계가 없어 사용자가 현재 위치와 데이터 현황을 즉시 파악할 수 없음.</p>
+      </div>
+      <!-- Item 2 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#dc2626; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Critical</span>
+          <span style="font-size:13px; font-weight:600;">정책 상세 액션 버튼 과부하</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">published 상태에서 6개 버튼이 동시 노출(내보내기, 버전비교, 공개중, 링크복사, 새버전, 게시취소). 시각적 위계 없이 수평 배치되어 주요 행동 식별이 어려움.</p>
+      </div>
+      <!-- Item 3 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#ea580c; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">High</span>
+          <span style="font-size:13px; font-weight:600;">기능맵 카드 시각적 잡음</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">각 카드에 편집/연결/삭제 버튼 3개가 항상 노출. 특히 삭제 버튼이 빨간 배경으로 항상 보여 오조작 위험. 핵심 정보(기능명+정책)보다 액션이 시각적으로 더 강함.</p>
+      </div>
+      <!-- Item 4 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#ea580c; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">High</span>
+          <span style="font-size:13px; font-weight:600;">accent 색상 단조로움</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;"><code style="background:var(--surface-tertiary); padding:1px 4px; border-radius:3px; font-size:11px;">--color-accent: #111827</code>(검정) 하나로 모든 주요 요소를 처리. 도메인 칩, 사이드바 active, 배지가 동일 색상이라 기능적 구분이 어려움.</p>
+      </div>
+      <!-- Item 5 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#ea580c; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">High</span>
+          <span style="font-size:13px; font-weight:600;">퍼블릭 뷰 디자인 시스템 미적용</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">public-view에서 하드코딩 <code style="background:var(--surface-tertiary); padding:1px 4px; border-radius:3px; font-size:11px;">bg-gray-50, text-gray-900</code> 등 CSS 변수 미사용. 관리자와 공개 뷰 사이에 디자인 시스템 단절.</p>
+      </div>
+      <!-- Item 6 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#ea580c; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">High</span>
+          <span style="font-size:13px; font-weight:600;">정책-기능 연결 가시성 부족</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">정책 목록에서 각 정책에 몇 개의 기능이 연결되어 있는지 확인 불가. 정책 관리의 핵심 가치인 "기능 커버리지"가 목록 수준에서 보이지 않음.</p>
+      </div>
+      <!-- Item 7 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#d97706; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Medium</span>
+          <span style="font-size:13px; font-weight:600;">정책 상세 네비게이션 빈약</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">"&larr; 목록으로" 텍스트 링크만 존재. 빵크럼 없어 정책 &gt; 도메인 &gt; 현재 문서의 위계적 위치 파악 불가. 상위 도메인으로의 직접 이동 경로 없음.</p>
+      </div>
+      <!-- Item 8 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#d97706; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Medium</span>
+          <span style="font-size:13px; font-weight:600;">TOC 현재 위치 표시 없음</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">PolicyTOC가 스크롤 추적(Intersection Observer) 없이 정적 목록. 현재 읽고 있는 섹션이 어디인지 시각적 피드백이 없어 긴 문서에서 위치 감각 상실.</p>
+      </div>
+      <!-- Item 9 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#d97706; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Medium</span>
+          <span style="font-size:13px; font-weight:600;">기능맵 미연결 상태 시각적 미분화</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">정책 연결된 카드와 미연결 카드가 동일한 실선 테두리. "정책 미연결" 텍스트만으로는 빈 상태가 충분히 드러나지 않아 커버리지 갭을 놓칠 수 있음.</p>
+      </div>
+      <!-- Item 10 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#d97706; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Medium</span>
+          <span style="font-size:13px; font-weight:600;">도메인 칩에 개수 미표시</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">정책 목록 필터 도메인 칩에 해당 도메인의 정책 수가 없어 필터링 전 데이터 분포를 예측할 수 없음. 불필요한 클릭 발생.</p>
+      </div>
+      <!-- Item 11 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#6b7280; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Low</span>
+          <span style="font-size:13px; font-weight:600;">사이드바 아이콘 유니코드 문자 사용</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">네비게이션 아이콘이 유니코드 문자(&#x229E;, &#x2261;, &#x25C8;, &#x25CE;)로 구현. 시각적 일관성과 크기 제어가 어렵고, OS/브라우저별 렌더링이 다를 수 있음.</p>
+      </div>
+      <!-- Item 12 -->
+      <div style="border:1px solid var(--line-primary); border-radius:10px; padding:16px; background:var(--surface-primary);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#6b7280; color:#fff; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;">Low</span>
+          <span style="font-size:13px; font-weight:600;">StatusBadge 컴포넌트 중복 정의</span>
+        </div>
+        <p style="font-size:12px; color:var(--content-secondary); line-height:1.6;">StatusBadge가 policy-list-client.tsx와 policy-detail-client.tsx에 각각 별도로 정의. padding 값이 미세하게 다름(px-2 py-0.5 vs px-2.5 py-1). 공통 컴포넌트로 추출 필요.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+  // Deactivate all
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  // Activate target
+  document.getElementById('tab-' + tabId).classList.add('active');
+  // Find the button
+  const buttons = document.querySelectorAll('.tab-btn');
+  const labels = { policies: '정책 목록', detail: '정책 상세', features: '기능맵' };
+  buttons.forEach(btn => {
+    if (btn.textContent.trim() === labels[tabId]) btn.classList.add('active');
+  });
+}
+</script>
+</body>
+</html>
