@@ -323,7 +323,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="columns-1 md:columns-2 gap-4">
         {features.map((feature) => {
           const seenDocIds = new Set<string>()
           const linkedDocs = feature.feature_policies
@@ -341,7 +341,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           return (
             <div
               key={feature.id}
-              className="rounded-lg border border-line-primary bg-surface-primary p-4"
+              className="break-inside-avoid mb-4 rounded-lg border border-line-primary bg-surface-primary p-4"
             >
               {isEditing ? (
                 <div className="space-y-2">
