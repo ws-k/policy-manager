@@ -91,7 +91,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
         <select
           value={currentStatus}
           onChange={(e) => updateFilter('status', e.target.value)}
-          className="cursor-pointer rounded-lg border border-line-primary bg-surface-primary px-4 py-2 text-sm text-content-primary outline-none focus:border-accent transition-colors hover:border-line-secondary"
+          className="cursor-pointer rounded-full border border-line-primary bg-surface-primary px-4 py-1.5 text-sm text-content-primary outline-none focus:border-accent transition-colors hover:border-line-secondary font-medium"
         >
           <option value="">전체 상태</option>
           <option value="draft">초안</option>

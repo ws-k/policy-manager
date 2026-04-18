@@ -224,13 +224,13 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
                         <>
                           <button
                             onClick={() => startEdit(domain)}
-                            className="cursor-pointer text-xs text-content-secondary hover:text-content-primary"
+                            className="cursor-pointer rounded-lg border border-line-primary bg-surface-primary px-3 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:border-line-secondary hover:text-content-primary"
                           >
                             편집
                           </button>
                           <button
                             onClick={() => handleDelete(domain.id, domain.name)}
-                            className="cursor-pointer text-xs text-content-tertiary hover:text-red-500"
+                            className="cursor-pointer rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
                           >
                             삭제
                           </button>
