@@ -2,6 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 type PolicyDoc = {
   id: string
@@ -62,6 +79,21 @@ function generateSlug(name: string): string {
   return `feature-${Date.now()}`
 }
 
+function SortableFeatureCard({ id, children }: { id: string; children: (dragHandleProps: React.HTMLAttributes<HTMLElement>) => React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  }
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children({ ...attributes, ...listeners })}
+    </div>
+  )
+}
+
 export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[] }) {
   const [features, setFeatures] = useState<Feature[]>(initialFeatures)
   const [allSections, setAllSections] = useState<PolicySection[]>([])
@@ -80,6 +112,22 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   const [confirmUnlinkDoc, setConfirmUnlinkDoc] = useState<{ featureId: string; docId: string; docTitle: string; sectionIds: string[] } | null>(null)
   const [bulkLinking, setBulkLinking] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      setFeatures((items) => {
+        const oldIndex = items.findIndex((f) => f.id === active.id)
+        const newIndex = items.findIndex((f) => f.id === over.id)
+        return arrayMove(items, oldIndex, newIndex)
+      })
+    }
+  }
 
   useEffect(() => {
     fetch('/api/sections')
@@ -347,179 +395,172 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
         </div>
       )}
 
-      <div className="columns-1 md:columns-2 gap-4">
-        {features.map((feature) => {
-          const seenDocIds = new Set<string>()
-          const linkedDocs = feature.feature_policies
-            ?.map((fp) => fp.policy_sections?.policy_docs)
-            .filter((doc): doc is PolicyDoc => {
-              if (!doc || seenDocIds.has(doc.id)) return false
-              seenDocIds.add(doc.id)
-              return true
-            }) ?? []
-          const policyCount = linkedDocs.length
-          const isEditing = editState?.id === feature.id
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={features.map((f) => f.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {features.map((feature) => {
+              const seenDocIds = new Set<string>()
+              const linkedDocs = feature.feature_policies
+                ?.map((fp) => fp.policy_sections?.policy_docs)
+                .filter((doc): doc is PolicyDoc => {
+                  if (!doc || seenDocIds.has(doc.id)) return false
+                  seenDocIds.add(doc.id)
+                  return true
+                }) ?? []
+              const policyCount = linkedDocs.length
+              const isEditing = editState?.id === feature.id
 
-          return (
-            <div
-              key={feature.id}
-              className="break-inside-avoid mb-4 rounded-lg border border-line-primary bg-surface-primary p-4"
-            >
-              {isEditing ? (
-                <div className="space-y-2">
-                  <input
-                    className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="이름"
-                    value={editState.name}
-                    onChange={(e) => setEditState({ ...editState, name: e.target.value })}
-                  />
-                  <input
-                    className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 font-mono text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="슬러그"
-                    value={editState.slug}
-                    onChange={(e) => setEditState({ ...editState, slug: e.target.value })}
-                  />
-                  <input
-                    className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="설명 (선택)"
-                    value={editState.description}
-                    onChange={(e) => setEditState({ ...editState, description: e.target.value })}
-                  />
-                  <input
-                    className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 font-mono text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="화면 경로 (선택)"
-                    value={editState.screen_path}
-                    onChange={(e) => setEditState({ ...editState, screen_path: e.target.value })}
-                  />
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="cursor-pointer rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-text disabled:opacity-50"
-                    >
-                      {saving ? '저장 중...' : '저장'}
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      disabled={saving}
-                      className="cursor-pointer rounded-md border border-line-primary px-3 py-1 text-xs text-content-secondary hover:text-content-primary disabled:opacity-50"
-                    >
-                      취소
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <h2 className="truncate font-semibold text-content-primary">{feature.name}</h2>
-                      <button
-                        onClick={() => startEdit(feature)}
-                        className="shrink-0 cursor-pointer rounded p-1.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
-                        title="수정"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      {policyCount > 0 ? (
-                        <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-text">
-                          정책 {policyCount}개 연결
-                        </span>
-                      ) : (
-                        <span className="text-xs text-content-tertiary">정책 미연결</span>
+              return (
+                <SortableFeatureCard key={feature.id} id={feature.id}>
+                  {(dragHandleProps) => (
+                    <div className="relative rounded-xl border border-line-primary bg-surface-primary p-4 shadow-sm">
+                      {!isEditing && (
+                        <div
+                          {...dragHandleProps}
+                          className="absolute top-3 right-3 cursor-grab active:cursor-grabbing p-1 text-content-tertiary hover:text-content-secondary touch-none"
+                          title="드래그하여 순서 변경"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                            <circle cx="4" cy="2" r="1.2"/><circle cx="10" cy="2" r="1.2"/>
+                            <circle cx="4" cy="7" r="1.2"/><circle cx="10" cy="7" r="1.2"/>
+                            <circle cx="4" cy="12" r="1.2"/><circle cx="10" cy="12" r="1.2"/>
+                          </svg>
+                        </div>
                       )}
-                      <button
-                        onClick={() => { setLinkModal({ feature }); setModalStep('policy'); setModalPolicy(null) }}
-                        className="cursor-pointer rounded border border-line-primary bg-surface-secondary px-3 py-1 text-sm font-medium text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
-                      >
-                        연결
-                      </button>
-                      <button
-                        onClick={() => handleDelete(feature.id, feature.name)}
-                        className="cursor-pointer rounded border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-100"
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </div>
 
-                  {feature.screen_path && (
-                    <p className="mb-1 font-mono text-xs text-content-tertiary">{feature.screen_path}</p>
-                  )}
-
-                  {feature.description && (
-                    <p className="mb-3 text-sm text-content-secondary">{feature.description}</p>
-                  )}
-
-                  {linkedDocs.length > 0 && (
-                    <ul className="mt-3 space-y-3">
-                      {linkedDocs.map((doc) => {
-                        const linkedSections = feature.feature_policies
-                          .filter((fp) => fp.policy_sections?.policy_docs?.id === doc.id)
-                          .map((fp) => ({ id: fp.policy_sections!.id, title: fp.policy_sections!.title }))
-                        const linkedSectionIds = linkedSections.map((s) => s.id)
-                        return (
-                          <li key={doc.id}>
-                            <div className="flex items-center gap-1.5">
-                              <div className="flex min-w-0 flex-1 items-center gap-1.5">
-                                <Link
-                                  href={`/policies/${doc.id}`}
-                                  className="truncate text-sm font-medium text-content-primary hover:underline underline-offset-2"
-                                >
-                                  {doc.title}
-                                </Link>
-                                {doc.status === 'published' ? (
-                                  <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600">
-                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                                    게시됨
-                                  </span>
-                                ) : (
-                                  <span className="flex shrink-0 items-center gap-1 text-xs text-content-tertiary">
-                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-content-tertiary" />
-                                    초안
-                                  </span>
-                                )}
-                              </div>
+                      {isEditing ? (
+                        <div className="space-y-2">
+                          <input
+                            className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
+                            placeholder="이름"
+                            value={editState.name}
+                            onChange={(e) => setEditState({ ...editState, name: e.target.value })}
+                          />
+                          <input
+                            className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 font-mono text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
+                            placeholder="슬러그"
+                            value={editState.slug}
+                            onChange={(e) => setEditState({ ...editState, slug: e.target.value })}
+                          />
+                          <input
+                            className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
+                            placeholder="설명 (선택)"
+                            value={editState.description}
+                            onChange={(e) => setEditState({ ...editState, description: e.target.value })}
+                          />
+                          <input
+                            className="w-full rounded border border-line-primary bg-surface-secondary px-2 py-1.5 font-mono text-sm text-content-primary focus:outline-none focus:ring-1 focus:ring-accent"
+                            placeholder="화면 경로 (선택)"
+                            value={editState.screen_path}
+                            onChange={(e) => setEditState({ ...editState, screen_path: e.target.value })}
+                          />
+                          <div className="flex justify-end gap-2 pt-1">
+                            <button
+                              onClick={handleSave}
+                              disabled={saving}
+                              className="cursor-pointer rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-text disabled:opacity-50"
+                            >
+                              {saving ? '저장 중...' : '저장'}
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              disabled={saving}
+                              className="cursor-pointer rounded-md border border-line-primary px-3 py-1 text-xs text-content-secondary hover:text-content-primary disabled:opacity-50"
+                            >
+                              취소
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="mb-2 flex items-start justify-between gap-2 pr-6">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <h2 className="truncate font-semibold text-content-primary">{feature.name}</h2>
                               <button
-                                onClick={() => setConfirmUnlinkDoc({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSections.map((s) => s.id) })}
-                                disabled={bulkLinking}
-                                className="shrink-0 cursor-pointer rounded px-1 py-0.5 text-xs text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
-                                title="문서 전체 연결 해제"
+                                onClick={() => startEdit(feature)}
+                                className="shrink-0 cursor-pointer rounded p-1.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                                title="수정"
                               >
-                                ✕
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
                               </button>
                             </div>
-                            <ul className="mt-1.5 space-y-1 pl-2">
-                              {linkedSections.map((section) => (
-                                <li key={section.id} className="flex items-center gap-1.5">
-                                  <span className="shrink-0 text-[10px] text-content-tertiary">┗</span>
-                                  <span className="flex-1 text-xs text-content-secondary">{section.title}</span>
-                                  <button
-                                    onClick={() => setConfirmUnlink({ featureId: feature.id, sectionId: section.id, sectionTitle: section.title, docTitle: doc.title })}
-                                    disabled={unlinkingSectionId === section.id}
-                                    className="shrink-0 cursor-pointer rounded px-1 py-0.5 text-xs text-content-tertiary hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
-                                    title="섹션 연결 해제"
-                                  >
-                                    {unlinkingSectionId === section.id ? '…' : '✕'}
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          </li>
-                        )
-                      })}
-                    </ul>
+                            <div className="flex shrink-0 items-center gap-2">
+                              {policyCount > 0 ? (
+                                <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-text">
+                                  정책 {policyCount}개 연결
+                                </span>
+                              ) : (
+                                <span className="text-xs text-content-tertiary">정책 미연결</span>
+                              )}
+                              <button
+                                onClick={() => { setLinkModal({ feature }); setModalStep('policy'); setModalPolicy(null) }}
+                                className="cursor-pointer rounded border border-line-primary bg-surface-secondary px-3 py-1 text-sm font-medium text-content-secondary hover:bg-surface-tertiary hover:text-content-primary"
+                              >
+                                연결
+                              </button>
+                              <button
+                                onClick={() => handleDelete(feature.id, feature.name)}
+                                className="cursor-pointer rounded border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-100"
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          </div>
+
+                          {feature.screen_path && (
+                            <p className="mb-1 font-mono text-xs text-content-tertiary">{feature.screen_path}</p>
+                          )}
+
+                          {feature.description && (
+                            <p className="mb-3 text-sm text-content-secondary">{feature.description}</p>
+                          )}
+
+                          {linkedDocs.length > 0 && (
+                            <div className="mt-3 border-t border-line-primary pt-3 space-y-0.5">
+                              {linkedDocs.map((doc) => {
+                                const linkedSections = feature.feature_policies
+                                  .filter((fp) => fp.policy_sections?.policy_docs?.id === doc.id)
+                                  .map((fp) => ({ id: fp.policy_sections!.id, title: fp.policy_sections!.title }))
+                                return (
+                                  <div key={doc.id} className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-secondary transition-colors">
+                                    <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${doc.status === 'published' ? 'bg-emerald-500' : 'bg-content-tertiary'}`} />
+                                    <Link
+                                      href={`/policies/${doc.id}`}
+                                      className="flex-1 truncate text-sm text-content-primary hover:underline underline-offset-2 min-w-0"
+                                    >
+                                      {doc.title}
+                                    </Link>
+                                    <span className="shrink-0 rounded-full bg-surface-tertiary px-2 py-0.5 text-[10px] font-medium text-content-secondary">
+                                      {linkedSections.length}개 섹션
+                                    </span>
+                                    <button
+                                      onClick={() => setConfirmUnlinkDoc({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSections.map((s) => s.id) })}
+                                      disabled={bulkLinking}
+                                      className="invisible shrink-0 cursor-pointer rounded p-0.5 text-content-tertiary hover:text-red-500 group-hover:visible transition-colors disabled:opacity-50"
+                                      title="연결 해제"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                      </svg>
+                                    </button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
                   )}
-                </>
-              )}
-            </div>
-          )
-        })}
-      </div>
+                </SortableFeatureCard>
+              )
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Delete Confirm Modal */}
       {confirmDelete && (
