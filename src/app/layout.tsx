@@ -8,8 +8,8 @@ import { SearchModal } from '@/components/search/SearchModal'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Policy Manager',
-  description: 'DS Visitor 정책 관리 시스템',
+  title: 'Poli',
+  description: '정책 관리 시스템',
 }
 
 export default async function RootLayout({

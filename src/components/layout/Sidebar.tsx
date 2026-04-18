@@ -52,17 +52,9 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-line-primary px-4">
         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-accent shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20">
-            <rect x="5" y="4" width="10" height="2" rx="1" fill="white" opacity="0.85"/>
-            <rect x="5" y="9" width="22" height="2" rx="1" fill="white"/>
-            <rect x="5" y="14" width="22" height="2" rx="1" fill="white"/>
-            <rect x="5" y="19" width="16" height="2" rx="1" fill="white" opacity="0.7"/>
-          </svg>
+          <span className="text-[19px] font-bold leading-none tracking-tight text-white" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>P</span>
         </div>
-        <div className="min-w-0">
-          <div className="truncate text-[15px] font-bold tracking-tight text-content-primary">Policy Manager</div>
-          <div className="text-[11px] font-medium text-content-tertiary tracking-wide uppercase">DS Visitor</div>
-        </div>
+        <span className="text-[18px] font-bold tracking-tight text-content-primary">Poli</span>
       </div>
 
       {/* Search */}
