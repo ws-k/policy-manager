@@ -1,8 +1,9 @@
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import type { PolicyDoc, PolicyDomain } from '@/lib/types'
 import { PolicyListClient } from './policy-list-client'
 
-export const revalidate = 30
+const DEFAULT_PROJECT_ID = '00000000-0000-0000-0000-000000000001'
 
 interface SearchParams {
   domain?: string
@@ -17,17 +18,21 @@ export default async function PoliciesPage({
 }) {
   const sp = await searchParams
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
 
   // Fetch domains
   const { data: domains } = await supabase
     .from('policy_domains')
     .select('*')
+    .eq('project_id', projectId)
     .order('sort_order', { ascending: true })
 
   // Fetch policies with filters
   let query = supabase
     .from('policy_docs')
     .select('*, domain:policy_domains(*)')
+    .eq('project_id', projectId)
     .order('updated_at', { ascending: false })
 
   if (sp.domain) {

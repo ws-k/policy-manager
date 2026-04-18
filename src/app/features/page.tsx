@@ -1,5 +1,8 @@
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { FeaturesClient } from './features-client'
+
+const DEFAULT_PROJECT_ID = '00000000-0000-0000-0000-000000000001'
 
 type PolicyDoc = {
   id: string
@@ -31,6 +34,8 @@ type FeatureWithPolicies = {
 
 export default async function FeaturesPage() {
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
 
   const { data, error } = await supabase
     .from('features')
@@ -51,6 +56,7 @@ export default async function FeaturesPage() {
         )
       )
     `)
+    .eq('project_id', projectId)
     .order('name')
 
   const features = (data ?? []) as FeatureWithPolicies[]

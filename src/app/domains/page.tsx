@@ -1,15 +1,21 @@
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { DomainsClient } from './domains-client'
 import type { PolicyDomain } from '@/lib/types'
+
+const DEFAULT_PROJECT_ID = '00000000-0000-0000-0000-000000000001'
 
 export type DomainWithCount = PolicyDomain & { policy_count: number }
 
 export default async function DomainsPage() {
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
 
   const { data: domains } = await supabase
     .from('policy_domains')
     .select('*, policy_docs(count)')
+    .eq('project_id', projectId)
     .order('sort_order', { ascending: true })
 
   const domainsWithCount: DomainWithCount[] = (domains ?? []).map((d) => ({
