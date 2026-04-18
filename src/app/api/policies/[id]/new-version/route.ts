@@ -48,6 +48,7 @@ export async function POST(
   const { data: newDoc, error: docError } = await supabase
     .from('policy_docs')
     .insert({
+      project_id: source.project_id,
       domain_id: source.domain_id,
       title: source.title,
       slug: source.slug,
