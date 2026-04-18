@@ -15,11 +15,11 @@ function setCookie(name: string, value: string) {
   document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=31536000;SameSite=Lax`
 }
 
-export function ProjectSwitcher() {
+export function ProjectSwitcher({ initialProjectName }: { initialProjectName?: string }) {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
   const [currentId, setCurrentId] = useState<string>('')
-  const [cachedName, setCachedName] = useState<string>('')
+  const [cachedName, setCachedName] = useState<string>(initialProjectName ?? '')
   const [open, setOpen] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [newName, setNewName] = useState('')

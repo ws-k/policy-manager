@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { createClient } from '@/lib/supabase/server'
@@ -22,6 +22,7 @@ export default async function RootLayout({
   const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/set-password') || pathname.startsWith('/public-view')
 
   let userEmail: string | undefined
+  let initialProjectName: string | undefined
   if (!isAuthPage) {
     try {
       const supabase = await createClient()
@@ -30,6 +31,8 @@ export default async function RootLayout({
     } catch {
       // middleware handles redirect
     }
+    const cookieStore = await cookies()
+    initialProjectName = cookieStore.get('poli_project_name')?.value
   }
 
   return (
@@ -64,7 +67,7 @@ export default async function RootLayout({
         ) : (
           <>
             <SearchModal />
-            <Sidebar />
+            <Sidebar initialProjectName={initialProjectName} />
             <div className="flex flex-1 flex-col min-h-0">
               <TopBar userEmail={userEmail} />
               <main className="flex-1 overflow-auto p-6">{children}</main>

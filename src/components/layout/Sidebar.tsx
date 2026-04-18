@@ -44,7 +44,7 @@ const navItems = [
   { href: '/projects', label: '프로젝트 관리', icon: <SettingsIcon /> },
 ]
 
-export function Sidebar() {
+export function Sidebar({ initialProjectName }: { initialProjectName?: string }) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -67,7 +67,7 @@ export function Sidebar() {
       </div>
 
       {/* Project Switcher */}
-      <ProjectSwitcher />
+      <ProjectSwitcher initialProjectName={initialProjectName} />
 
       {/* Search */}
       <div className="px-3 pt-3 pb-2">
