@@ -405,7 +405,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <SortableContext items={features.map((f) => f.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {features.map((feature) => {
               const seenDocIds = new Set<string>()
               const linkedDocs = feature.feature_policies
@@ -572,18 +572,45 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           {activeId ? (() => {
             const f = features.find((f) => f.id === activeId)
             if (!f) return null
-            const count = new Set(f.feature_policies.map((fp) => fp.policy_sections?.policy_docs?.id).filter(Boolean)).size
+            const seenDocIds = new Set<string>()
+            const linkedDocs = f.feature_policies
+              .map((fp) => fp.policy_sections?.policy_docs)
+              .filter((doc): doc is PolicyDoc => {
+                if (!doc || seenDocIds.has(doc.id)) return false
+                seenDocIds.add(doc.id)
+                return true
+              })
+            const policyCount = linkedDocs.length
             return (
               <div className="rounded-xl border border-line-primary bg-surface-primary p-4 shadow-xl opacity-95">
-                <div className="flex items-start justify-between gap-2 pr-6">
+                <div className="mb-2 flex items-start justify-between gap-2 pr-6">
                   <h2 className="truncate font-semibold text-content-primary">{f.name}</h2>
-                  {count > 0 ? (
-                    <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-text shrink-0">정책 {count}개 연결</span>
-                  ) : (
-                    <span className="text-xs text-content-tertiary shrink-0">정책 미연결</span>
-                  )}
+                  <div className="shrink-0">
+                    {policyCount > 0 ? (
+                      <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-text">정책 {policyCount}개 연결</span>
+                    ) : (
+                      <span className="text-xs text-content-tertiary">정책 미연결</span>
+                    )}
+                  </div>
                 </div>
-                {f.description && <p className="mt-1 text-sm text-content-secondary">{f.description}</p>}
+                {f.screen_path && <p className="mb-1 font-mono text-xs text-content-tertiary">{f.screen_path}</p>}
+                {f.description && <p className="mb-3 text-sm text-content-secondary">{f.description}</p>}
+                {linkedDocs.length > 0 && (
+                  <div className="mt-3 border-t border-line-primary pt-3 space-y-0.5">
+                    {linkedDocs.map((doc) => {
+                      const linkedSections = f.feature_policies
+                        .filter((fp) => fp.policy_sections?.policy_docs?.id === doc.id)
+                        .map((fp) => fp.policy_sections!)
+                      return (
+                        <div key={doc.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                          <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${doc.status === 'published' ? 'bg-emerald-500' : 'bg-content-tertiary'}`} />
+                          <span className="flex-1 truncate text-sm text-content-primary">{doc.title}</span>
+                          <span className="shrink-0 rounded-full bg-surface-tertiary px-2 py-0.5 text-[10px] font-medium text-content-secondary">{linkedSections.length}개 섹션</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )
           })() : null}
