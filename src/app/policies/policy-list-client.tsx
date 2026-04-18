@@ -160,7 +160,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
             {policies.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-5 py-16 text-center text-sm text-content-tertiary">
-                  정책이 없습니다.
+                  정책이 없습니다
                 </td>
               </tr>
             ) : (

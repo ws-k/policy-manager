@@ -399,6 +399,10 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
         </div>
       )}
 
+      {features.length === 0 && (
+        <p className="text-sm text-content-tertiary">등록된 기능이 없습니다</p>
+      )}
+
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <SortableContext items={features.map((f) => f.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
