@@ -200,8 +200,9 @@ type LinkedFeature = {
 function LinkedFeaturesPanel({ policyId }: { policyId: string }) {
   const [items, setItems] = useState<LinkedFeature[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [showLinkModal, setShowLinkModal] = useState(false)
 
-  useEffect(() => {
+  const fetchItems = useCallback(() => {
     fetch(`/api/policies/${policyId}/features`)
       .then((r) => r.json())
       .then((result: { data: LinkedFeature[] } | { error: string }) => {
@@ -211,24 +212,181 @@ function LinkedFeaturesPanel({ policyId }: { policyId: string }) {
       .finally(() => setLoaded(true))
   }, [policyId])
 
-  if (!loaded || items.length === 0) return null
+  useEffect(() => {
+    fetchItems()
+  }, [fetchItems])
+
+  const handleUnlink = async (featureId: string, sectionId: string) => {
+    await fetch(`/api/feature-policies?feature_id=${featureId}&section_id=${sectionId}`, {
+      method: 'DELETE',
+    })
+    fetchItems()
+  }
 
   return (
     <div className="rounded-lg border border-line-primary bg-surface-primary p-4">
-      <h2 className="mb-3 text-xs font-medium text-content-primary">연결된 기능</h2>
-      <ul className="space-y-1">
-        {items.map((item) => (
-          <li key={item.id}>
-            <Link
-              href={`/features#${item.feature.slug}`}
-              className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-surface-secondary"
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-xs font-medium text-content-primary">연결된 기능</h2>
+        <button
+          onClick={() => setShowLinkModal(true)}
+          className="cursor-pointer text-xs text-accent hover:underline"
+        >
+          연결하기
+        </button>
+      </div>
+      {!loaded ? (
+        <div className="space-y-1">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-9 animate-pulse rounded-md bg-surface-secondary" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-xs text-content-tertiary">연결된 기능이 없습니다</p>
+      ) : (
+        <ul className="space-y-1">
+          {items.map((item) => (
+            <li key={item.id} className="flex items-center">
+              <Link
+                href={`/features#${item.feature.slug}`}
+                className="flex-1 rounded-md px-2.5 py-1.5 transition-colors hover:bg-surface-secondary"
+              >
+                <span className="block text-xs font-medium text-content-primary">{item.feature.name}</span>
+                <span className="block text-xs text-content-tertiary">· {item.section.title}</span>
+              </Link>
+              <button
+                onClick={() => handleUnlink(item.feature.id, item.section.id)}
+                className="cursor-pointer rounded px-1.5 py-1 text-xs text-content-tertiary hover:text-content-primary"
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {showLinkModal && (
+        <LinkFeatureModal
+          policyId={policyId}
+          onClose={() => setShowLinkModal(false)}
+          onSuccess={() => {
+            setShowLinkModal(false)
+            fetchItems()
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function LinkFeatureModal({
+  policyId,
+  onClose,
+  onSuccess,
+}: {
+  policyId: string
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [features, setFeatures] = useState<{ id: string; name: string }[]>([])
+  const [sections, setSections] = useState<{ id: string; title: string }[]>([])
+  const [selectedFeatureId, setSelectedFeatureId] = useState('')
+  const [selectedSectionId, setSelectedSectionId] = useState('')
+  const [linking, setLinking] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/features')
+      .then((r) => r.json())
+      .then((result: { data: { id: string; name: string }[] } | { error: string }) => {
+        if ('data' in result) setFeatures(result.data)
+      })
+      .catch(() => {})
+    fetch(`/api/policies/${policyId}/sections`)
+      .then((r) => r.json())
+      .then((result: { data: { id: string; title: string }[] } | { error: string }) => {
+        if ('data' in result) setSections(result.data)
+      })
+      .catch(() => {})
+  }, [policyId])
+
+  const handleLink = async () => {
+    if (!selectedFeatureId || !selectedSectionId) return
+    setLinking(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/feature-policies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feature_id: selectedFeatureId, section_id: selectedSectionId }),
+      })
+      if (res.status === 409) {
+        setError('이미 연결되어 있습니다')
+        return
+      }
+      if (!res.ok) {
+        setError('연결에 실패했습니다')
+        return
+      }
+      onSuccess()
+    } catch {
+      setError('연결에 실패했습니다')
+    } finally {
+      setLinking(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-sm rounded-xl border border-line-primary bg-surface-primary p-6 shadow-lg">
+        <h3 className="mb-4 text-sm font-medium text-content-primary">기능 연결</h3>
+        <div className="space-y-3">
+          <select
+            value={selectedFeatureId}
+            onChange={(e) => setSelectedFeatureId(e.target.value)}
+            className="w-full rounded-md border border-line-primary bg-surface-secondary px-3 py-2 text-sm text-content-primary"
+          >
+            <option value="">기능 선택</option>
+            {features.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+          {sections.length === 0 ? (
+            <p className="text-xs text-content-tertiary">
+              이 정책에 섹션이 없습니다. 섹션을 먼저 추가해주세요.
+            </p>
+          ) : (
+            <select
+              value={selectedSectionId}
+              onChange={(e) => setSelectedSectionId(e.target.value)}
+              className="w-full rounded-md border border-line-primary bg-surface-secondary px-3 py-2 text-sm text-content-primary"
             >
-              <span className="block text-xs font-medium text-content-primary">{item.feature.name}</span>
-              <span className="block text-xs text-content-tertiary">· {item.section.title}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+              <option value="">섹션 선택</option>
+              {sections.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+          )}
+          {error && <p className="text-xs text-red-500">{error}</p>}
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="cursor-pointer rounded-md border border-line-primary px-3 py-1.5 text-xs text-content-secondary hover:bg-surface-secondary"
+          >
+            취소
+          </button>
+          <button
+            onClick={handleLink}
+            disabled={linking || !selectedFeatureId || !selectedSectionId}
+            className="cursor-pointer rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-text disabled:opacity-50"
+          >
+            연결
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
