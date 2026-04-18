@@ -9,7 +9,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Poli',
-  description: '정책 관리 시스템',
+  description: 'Poli',
 }
 
 export default async function RootLayout({
