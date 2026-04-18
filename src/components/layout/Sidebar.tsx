@@ -51,8 +51,10 @@ export function Sidebar() {
     <aside className="flex h-screen w-60 flex-col border-r border-line-primary bg-surface-tertiary">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-line-primary px-4">
-        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-accent shadow-sm">
-          <span className="text-[19px] font-bold leading-none tracking-tight text-white" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>P</span>
+        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl shadow-sm" style={{ background: 'linear-gradient(145deg, #5BA4FF 0%, #2060E8 100%)' }}>
+          <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+            <path d="M2.5 19V2H9C12.5 2 14.5 4 14.5 7.5C14.5 11 12.5 13 9 13H2.5" stroke="white" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
         <span className="text-[18px] font-bold tracking-tight text-content-primary">Poli</span>
       </div>
