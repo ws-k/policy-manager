@@ -852,38 +852,41 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                   </div>
                 ) : (
                   <>
-                    <div className="px-5 py-[13px] border-b border-line-primary flex items-center justify-between shrink-0">
-                      <span className="text-sm font-medium text-content-primary truncate">
-                        {modalPolicy.doc.title}
-                      </span>
-                      {modalPolicy.sections.length > 0 && (() => {
-                        const allLinked = modalPolicy.sections.every((s) => linkedSectionIds.has(s.id))
-                        const unlinkedIds = modalPolicy.sections.filter((s) => !linkedSectionIds.has(s.id)).map((s) => s.id)
-                        const allSectionIds = modalPolicy.sections.map((s) => s.id)
-                        return allLinked ? (
-                          <button
-                            onClick={() => handleUnlinkDoc(modalFeature.id, allSectionIds)}
-                            disabled={bulkLinking}
-                            className="cursor-pointer shrink-0 rounded border border-red-200 bg-red-50 px-3 py-1 text-xs text-red-600 hover:bg-red-100 disabled:opacity-50"
-                          >
-                            {bulkLinking ? '처리 중...' : '전체 해제'}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleLinkAll(modalFeature.id, unlinkedIds)}
-                            disabled={bulkLinking}
-                            className="cursor-pointer shrink-0 rounded-md border border-line-primary bg-surface-primary px-3 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
-                          >
-                            {bulkLinking ? '처리 중...' : '전체 연결'}
-                          </button>
-                        )
-                      })()}
-                    </div>
                     <div className="flex-1 overflow-y-auto p-4 space-y-2">
                       {modalPolicy.sections.length === 0 ? (
                         <p className="text-xs text-content-tertiary">이 정책에 섹션이 없습니다</p>
                       ) : (
-                        modalPolicy.sections.map((section) => {
+                        <>
+                        {(() => {
+                          const allLinked = modalPolicy.sections.every((s) => linkedSectionIds.has(s.id))
+                          const unlinkedIds = modalPolicy.sections.filter((s) => !linkedSectionIds.has(s.id)).map((s) => s.id)
+                          const allSectionIds = modalPolicy.sections.map((s) => s.id)
+                          return (
+                            <div className="flex items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent/5 px-4 py-3">
+                              <span className="flex-1 truncate text-sm font-medium text-accent">
+                                문서 전체
+                              </span>
+                              {allLinked ? (
+                                <button
+                                  onClick={() => handleUnlinkDoc(modalFeature.id, allSectionIds)}
+                                  disabled={bulkLinking}
+                                  className="cursor-pointer shrink-0 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-600 hover:bg-red-100 disabled:opacity-50"
+                                >
+                                  {bulkLinking ? '처리 중...' : '해제'}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleLinkAll(modalFeature.id, unlinkedIds)}
+                                  disabled={bulkLinking}
+                                  className="cursor-pointer shrink-0 rounded border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/20 disabled:opacity-50"
+                                >
+                                  {bulkLinking ? '처리 중...' : '연결'}
+                                </button>
+                              )}
+                            </div>
+                          )
+                        })()}
+                        {modalPolicy.sections.map((section) => {
                           const isLinked = linkedSectionIds.has(section.id)
                           return (
                             <div
@@ -897,7 +900,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                 <button
                                   onClick={() => handleUnlink(modalFeature.id, section.id)}
                                   disabled={linking}
-                                  className="cursor-pointer shrink-0 rounded border border-red-200 bg-red-50 px-4 py-1.5 text-sm text-red-600 hover:bg-red-100 disabled:opacity-50"
+                                  className="cursor-pointer shrink-0 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-600 hover:bg-red-100 disabled:opacity-50"
                                 >
                                   해제
                                 </button>
@@ -905,14 +908,15 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                 <button
                                   onClick={() => handleLink(modalFeature.id, section.id)}
                                   disabled={linking}
-                                  className="cursor-pointer shrink-0 rounded-md border border-line-primary bg-surface-primary px-4 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+                                  className="cursor-pointer shrink-0 rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
                                 >
                                   연결
                                 </button>
                               )}
                             </div>
                           )
-                        })
+                        })}
+                        </>
                       )}
                     </div>
                   </>
