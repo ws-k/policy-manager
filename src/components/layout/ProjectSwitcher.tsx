@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 type Project = { id: string; name: string; created_at: string; archived: boolean }
@@ -18,8 +18,8 @@ function setCookie(name: string, value: string) {
 export function ProjectSwitcher() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [currentId, setCurrentId] = useState<string>(() => getCookie('poli_project_id') ?? '')
-  const [cachedName, setCachedName] = useState<string>(() => getCookie('poli_project_name') ?? '')
+  const [currentId, setCurrentId] = useState<string>('')
+  const [cachedName, setCachedName] = useState<string>('')
   const [open, setOpen] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [newName, setNewName] = useState('')
@@ -31,6 +31,13 @@ export function ProjectSwitcher() {
       .then(r => r.json())
       .then(({ data }) => { if (data) setProjects(data) })
   }
+
+  useLayoutEffect(() => {
+    const savedId = getCookie('poli_project_id')
+    const savedName = getCookie('poli_project_name')
+    if (savedId) setCurrentId(savedId)
+    if (savedName) setCachedName(savedName)
+  }, [])
 
   useEffect(() => {
     fetchProjects()
