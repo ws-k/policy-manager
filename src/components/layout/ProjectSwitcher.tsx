@@ -23,12 +23,13 @@ export function ProjectSwitcher() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   function fetchProjects() {
     fetch('/api/projects')
       .then(r => r.json())
-      .then(({ data }) => { if (data) setProjects(data) })
+      .then(({ data }) => { if (data) setProjects(data); setLoaded(true) })
   }
 
   useEffect(() => {
@@ -92,7 +93,7 @@ export function ProjectSwitcher() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-content-tertiary">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
           </svg>
-          <span className="flex-1 truncate text-left">{current?.name ?? '프로젝트 없음'}</span>
+          <span className="flex-1 truncate text-left">{loaded ? (current?.name ?? '프로젝트 없음') : ''}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`shrink-0 text-content-tertiary transition-transform ${open ? 'rotate-180' : ''}`}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
