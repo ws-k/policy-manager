@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Policy Manager — 정책 목록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --bg-subtle: #F7F8FA;
+    --sidebar-bg: #F2F4F6;
+    --text-primary: #191F28;
+    --text-secondary: #6B7684;
+    --text-tertiary: #B0B8C1;
+    --accent: #3182F6;
+    --accent-hover: #1C6EEB;
+    --accent-subtle: #EFF6FF;
+    --border: #E5E8EB;
+    --border-focus: #3182F6;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --sidebar-width: 240px;
+    --font: 'Noto Sans KR', -apple-system, sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
+
+  .layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0;
+  }
+
+  .sidebar-section {
+    padding: 20px 12px 8px;
+  }
+
+  .sidebar-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0 6px;
+    margin-bottom: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    margin-bottom: 1px;
+  }
+
+  .nav-item:hover {
+    background: rgba(0,0,0,0.04);
+    color: var(--text-primary);
+  }
+
+  .nav-item.active {
+    background: #FFFFFF;
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .nav-item .nav-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .user-card:hover { background: rgba(0,0,0,0.04); }
+
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3182F6, #60A5FA);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .user-role { font-size: 11px; color: var(--text-secondary); }
+
+  /* ── Main ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    gap: 8px;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .breadcrumb span { cursor: pointer; }
+  .breadcrumb span:hover { color: var(--text-primary); }
+  .breadcrumb .sep { color: var(--text-tertiary); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 500; }
+
+  .topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover {
+    background: var(--bg-subtle);
+    color: var(--text-primary);
+  }
+
+  /* ── Content ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 36px 40px 48px;
+  }
+
+  .page-header {
+    margin-bottom: 28px;
+  }
+
+  .page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* ── Filter Chips ── */
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-subtle);
+  }
+
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    font-weight: 600;
+  }
+
+  .chip-count {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .select-wrapper {
+    position: relative;
+  }
+
+  .select-wrapper select {
+    appearance: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 32px 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font);
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .select-wrapper select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(49,130,246,0.12);
+  }
+
+  .select-wrapper::after {
+    content: '▾';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: var(--text-secondary);
+    pointer-events: none;
+  }
+
+  .search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
+  }
+
+  .search-wrapper input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px 8px 36px;
+    font-size: 14px;
+    font-family: var(--font);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .search-wrapper input::placeholder { color: var(--text-tertiary); }
+
+  .search-wrapper input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(49,130,246,0.12);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--text-tertiary);
+    pointer-events: none;
+  }
+
+  .toolbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-count {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .result-count strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* ── Table ── */
+  .table-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th {
+    padding: 11px 20px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+  }
+
+  thead th:first-child { padding-left: 24px; }
+  thead th:last-child { padding-right: 24px; text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+    cursor: pointer;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody tr:hover { background: #FAFBFC; }
+
+  tbody td {
+    padding: 16px 20px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  tbody td:first-child { padding-left: 24px; }
+  tbody td:last-child { padding-right: 24px; text-align: right; }
+
+  .policy-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+    letter-spacing: -0.1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .policy-name:hover .policy-link { opacity: 1; }
+
+  .policy-link {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .domain-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .domain-privacy  { background: #F0FDF4; color: #16A34A; }
+  .domain-service  { background: #EFF6FF; color: #2563EB; }
+  .domain-security { background: #FFF7ED; color: #C2410C; }
+
+  .version {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.2px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .badge-published {
+    background: #EFF6FF;
+    color: #3182F6;
+  }
+
+  .badge-published .badge-dot { background: #3182F6; }
+
+  .badge-draft {
+    background: #FFF7ED;
+    color: #EA580C;
+  }
+
+  .badge-draft .badge-dot { background: #EA580C; }
+
+  .date-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  tbody tr:hover .row-actions { opacity: 1; }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .icon-btn:hover {
+    background: var(--bg-subtle);
+    color: var(--text-primary);
+  }
+
+  /* ── Empty / Pagination ── */
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-subtle);
+  }
+
+  .pagination-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .page-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: var(--font);
+    transition: all 0.12s;
+  }
+
+  .page-btn:hover {
+    background: var(--bg-subtle);
+    color: var(--text-primary);
+  }
+
+  .page-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    font-weight: 700;
+  }
+
+  .page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s, transform 0.15s;
+    cursor: default;
+  }
+
+  .stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .stat-accent { color: var(--accent); }
+  .stat-orange { color: #EA580C; }
+  .stat-green  { color: #16A34A; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="#" class="logo">
+        <div class="logo-icon">📋</div>
+        <div>
+          <div class="logo-text">Policy Manager</div>
+          <div class="logo-sub">정책 관리 시스템</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인</div>
+      <a href="#" class="nav-item active">
+        <span class="nav-icon">📄</span>
+        정책 목록
+        <span class="nav-badge">5</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🗂</span>
+        도메인 관리
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        기능 설정
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">검토</div>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🔍</span>
+        검토 대기
+        <span class="nav-badge">2</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">✅</span>
+        승인 내역
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📜</span>
+        변경 이력
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">시스템</div>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">👥</span>
+        팀 멤버
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        알림 설정
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">김</div>
+        <div class="user-info">
+          <div class="user-name">김관리자</div>
+          <div class="user-role">어드민</div>
+        </div>
+        <span style="font-size:14px;color:var(--text-tertiary)">⋯</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <nav class="breadcrumb">
+        <span>홈</span>
+        <span class="sep">›</span>
+        <span class="current">정책 목록</span>
+      </nav>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost">
+          <span>↓</span> 내보내기
+        </button>
+        <button class="btn btn-primary">
+          <span>+</span> 새 정책 등록
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1 class="page-title">정책 목록</h1>
+        <p class="page-desc">서비스 운영에 필요한 모든 정책 문서를 관리하고 검토하세요.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">전체 정책</div>
+          <div class="stat-value">5</div>
+          <div class="stat-sub">총 등록 정책 수</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">게시됨</div>
+          <div class="stat-value stat-accent">3</div>
+          <div class="stat-sub">현재 활성 정책</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">초안</div>
+          <div class="stat-value stat-orange">2</div>
+          <div class="stat-sub">검토 대기 중</div>
+        </div>
+      </div>
+
+      <!-- Domain Filter Chips -->
+      <div class="filter-row">
+        <button class="chip active" onclick="setFilter(this, 'all')">
+          전체 <span class="chip-count">5</span>
+        </button>
+        <button class="chip" onclick="setFilter(this, 'service')">
+          서비스 <span class="chip-count">2</span>
+        </button>
+        <button class="chip" onclick="setFilter(this, 'security')">
+          보안 <span class="chip-count">2</span>
+        </button>
+        <button class="chip" onclick="setFilter(this, 'privacy')">
+          개인정보 <span class="chip-count">1</span>
+        </button>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="select-wrapper">
+          <select id="statusFilter" onchange="applyFilters()">
+            <option value="all">모든 상태</option>
+            <option value="published">게시됨</option>
+            <option value="draft">초안</option>
+          </select>
+        </div>
+
+        <div class="search-wrapper">
+          <span class="search-icon">🔎</span>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="정책 이름 검색..."
+            oninput="applyFilters()"
+          />
+        </div>
+
+        <div class="toolbar-right">
+          <span class="result-count" id="resultCount"><strong>5</strong>개 정책</span>
+          <button class="btn btn-ghost" style="padding:7px 10px;font-size:13px;">
+            정렬 ▾
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <table id="policyTable">
+          <thead>
+            <tr>
+              <th style="width:38%">정책 이름</th>
+              <th>영역</th>
+              <th>버전</th>
+              <th>상태</th>
+              <th>최종 수정일</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr data-domain="privacy" data-status="published">
+              <td>
+                <div class="policy-name">
+                  개인정보 처리방침
+                  <span class="policy-link">↗</span>
+                </div>
+              </td>
+              <td><span class="domain-tag domain-privacy">개인정보</span></td>
+              <td><span class="version">v2.1</span></td>
+              <td>
+                <span class="badge badge-published">
+                  <span class="badge-dot"></span>게시됨
+                </span>
+              </td>
+              <td><span class="date-text">2026-04-15</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" title="편집">✏️</button>
+                  <button class="icon-btn" title="더보기">⋯</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr data-domain="service" data-status="published">
+              <td>
+                <div class="policy-name">
+                  서비스 이용약관
+                  <span class="policy-link">↗</span>
+                </div>
+              </td>
+              <td><span class="domain-tag domain-service">서비스</span></td>
+              <td><span class="version">v1.3</span></td>
+              <td>
+                <span class="badge badge-published">
+                  <span class="badge-dot"></span>게시됨
+                </span>
+              </td>
+              <td><span class="date-text">2026-04-10</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" title="편집">✏️</button>
+                  <button class="icon-btn" title="더보기">⋯</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr data-domain="security" data-status="draft">
+              <td>
+                <div class="policy-name">
+                  쿠키 정책
+                  <span class="policy-link">↗</span>
+                </div>
+              </td>
+              <td><span class="domain-tag domain-security">보안</span></td>
+              <td><span class="version">v1.0</span></td>
+              <td>
+                <span class="badge badge-draft">
+                  <span class="badge-dot"></span>초안
+                </span>
+              </td>
+              <td><span class="date-text">2026-04-17</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" title="편집">✏️</button>
+                  <button class="icon-btn" title="더보기">⋯</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr data-domain="security" data-status="draft">
+              <td>
+                <div class="policy-name">
+                  데이터 보존 정책
+                  <span class="policy-link">↗</span>
+                </div>
+              </td>
+              <td><span class="domain-tag domain-security">보안</span></td>
+              <td><span class="version">v1.1</span></td>
+              <td>
+                <span class="badge badge-draft">
+                  <span class="badge-dot"></span>초안
+                </span>
+              </td>
+              <td><span class="date-text">2026-04-12</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" title="편집">✏️</button>
+                  <button class="icon-btn" title="더보기">⋯</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr data-domain="service" data-status="published">
+              <td>
+                <div class="policy-name">
+                  접근성 가이드라인
+                  <span class="policy-link">↗</span>
+                </div>
+              </td>
+              <td><span class="domain-tag domain-service">서비스</span></td>
+              <td><span class="version">v1.0</span></td>
+              <td>
+                <span class="badge badge-published">
+                  <span class="badge-dot"></span>게시됨
+                </span>
+              </td>
+              <td><span class="date-text">2026-03-28</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" title="편집">✏️</button>
+                  <button class="icon-btn" title="더보기">⋯</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="table-footer">
+          <span class="pagination-info" id="paginationInfo">1–5 / 5개 정책</span>
+          <div class="pagination">
+            <button class="page-btn" disabled>‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn" disabled>›</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  let activeFilter = 'all';
+
+  function setFilter(el, domain) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = domain;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const status = document.getElementById('statusFilter').value;
+    const query  = document.getElementById('searchInput').value.trim().toLowerCase();
+    const rows   = document.querySelectorAll('#tableBody tr');
+    let count = 0;
+
+    rows.forEach(row => {
+      const domain    = row.dataset.domain;
+      const rowStatus = row.dataset.status;
+      const nameEl    = row.querySelector('.policy-name');
+      const name      = nameEl ? nameEl.textContent.trim().toLowerCase() : '';
+
+      const domainOk  = activeFilter === 'all' || domain === activeFilter;
+      const statusOk  = status === 'all' || rowStatus === status;
+      const searchOk  = !query || name.includes(query);
+
+      if (domainOk && statusOk && searchOk) {
+        row.style.display = '';
+        count++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    document.getElementById('resultCount').innerHTML =
+      '<strong>' + count + '</strong>개 정책';
+    document.getElementById('paginationInfo').textContent =
+      '1–' + count + ' / ' + count + '개 정책';
+  }
+</script>
+
+</body>
+</html>

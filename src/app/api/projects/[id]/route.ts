@@ -7,12 +7,26 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
 
   const { id } = await params
-  const { name } = await request.json() as { name: string }
-  if (!name?.trim()) return NextResponse.json({ error: 'name은 필수입니다.' }, { status: 400 })
+  const body = await request.json() as { name?: string; archived?: boolean }
+
+  if (body.name === undefined && body.archived === undefined) {
+    return NextResponse.json({ error: 'name 또는 archived 필드가 필요합니다.' }, { status: 400 })
+  }
+
+  const updates: { name?: string; archived?: boolean; updated_at: string } = {
+    updated_at: new Date().toISOString(),
+  }
+  if (body.name !== undefined) {
+    if (!body.name.trim()) return NextResponse.json({ error: 'name은 빈 값일 수 없습니다.' }, { status: 400 })
+    updates.name = body.name.trim()
+  }
+  if (body.archived !== undefined) {
+    updates.archived = body.archived
+  }
 
   const { data, error } = await supabase
     .from('projects')
-    .update({ name: name.trim(), updated_at: new Date().toISOString() })
+    .update(updates)
     .eq('id', id)
     .select()
     .single()
@@ -27,11 +41,6 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!user) return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
 
   const { id } = await params
-
-  // 기본 프로젝트는 삭제 불가
-  if (id === '00000000-0000-0000-0000-000000000001') {
-    return NextResponse.json({ error: '기본 프로젝트는 삭제할 수 없습니다.' }, { status: 400 })
-  }
 
   const { error } = await supabase.from('projects').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

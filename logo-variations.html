@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>poli — Logo Variations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #3182F6;
+      --blue-light: #82B4F0;
+      --blue-dark: #1C6EEB;
+      --blue-deep: #0F4EC4;
+      --bg: #F5F7FA;
+      --card: #FFFFFF;
+      --border: #E8ECF2;
+      --text: #191F28;
+      --muted: #8B96A5;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 60px 40px;
+    }
+
+    header {
+      max-width: 1100px;
+      margin: 0 auto 56px;
+    }
+
+    header h1 {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+
+    header h2 {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .section-label {
+      max-width: 1100px;
+      margin: 0 auto 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-left: 2px;
+    }
+
+    .section-label + .section-label {
+      margin-top: 40px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      position: relative;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 32px rgba(49,130,246,0.10);
+      transform: translateY(-2px);
+    }
+
+    .card.dark {
+      background: #191F28;
+      border-color: #272E3B;
+    }
+
+    .card.dark:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .card.blue-bg {
+      background: var(--blue-dark);
+      border-color: var(--blue-dark);
+    }
+
+    .card-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid var(--border);
+      width: 100%;
+      padding-top: 20px;
+    }
+
+    .card.dark .card-label {
+      color: #4A5568;
+      border-color: #272E3B;
+    }
+
+    .card.blue-bg .card-label {
+      color: rgba(255,255,255,0.5);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .var-num {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card.dark .var-num { color: #272E3B; }
+    .card.blue-bg .var-num { color: rgba(255,255,255,0.15); }
+
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      body { padding: 40px 20px; }
+    }
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>poli · Brand Identity</h1>
+  <h2>Logo Variations</h2>
+  <p>Reference sheet — 8 distinct treatments for review and selection.</p>
+</header>
+
+<!-- ─── LIGHT VARIANTS ─────────────────────────────────────── -->
+<div class="section-label">Light backgrounds</div>
+
+<div class="grid">
+
+  <!-- 1. Current (reference) -->
+  <div class="card">
+    <span class="var-num">01</span>
+    <div class="card-logo">
+      <svg width="160" height="48" viewBox="0 0 160 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Icon: two overlapping rounded rects -->
+        <rect x="0" y="0" width="34" height="34" rx="9" fill="#82B4F0"/>
+        <rect x="10" y="10" width="34" height="34" rx="9" fill="#3182F6"/>
+        <!-- wordmark -->
+        <text x="54" y="32" font-family="'DM Sans', system-ui, sans-serif" font-size="26" font-weight="300" fill="#3182F6" letter-spacing="-0.5">poli</text>
+      </svg>
+    </div>
+    <div class="card-label">01 — Current (Reference)</div>
+  </div>
+
+  <!-- 2. Bold / Toss-style -->
+  <div class="card">
+    <span class="var-num">02</span>
+    <div class="card-logo">
+      <svg width="152" height="48" viewBox="0 0 152 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Simplified: single solid shape with cutout overlap hint -->
+        <rect x="0" y="4" width="40" height="40" rx="12" fill="#3182F6"/>
+        <!-- Inner highlight quad to suggest depth without gradient -->
+        <rect x="6" y="4" width="20" height="20" rx="7" fill="#82B4F0" opacity="0.45"/>
+        <rect x="20" y="22" width="14" height="14" rx="5" fill="#1C6EEB" opacity="0.6"/>
+        <!-- bold wordmark -->
+        <text x="52" y="33" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="27" font-weight="700" fill="#191F28" letter-spacing="-1">poli</text>
+      </svg>
+    </div>
+    <div class="card-label">02 — Bold · Toss-style</div>
+  </div>
+
+  <!-- 3. Monochrome dark / flat geometric -->
+  <div class="card">
+    <span class="var-num">03</span>
+    <div class="card-logo">
+      <svg width="152" height="48" viewBox="0 0 152 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Flat geometric: two rects, same color, bottom one slightly offset creates overlap shadow -->
+        <rect x="0" y="2" width="32" height="32" rx="8" fill="#3182F6"/>
+        <rect x="12" y="14" width="32" height="32" rx="8" fill="#3182F6"/>
+        <!-- Punched-out overlap: white gap illusion -->
+        <rect x="12" y="14" width="20" height="20" rx="5" fill="#FFFFFF" opacity="0.22"/>
+        <!-- wordmark: geometric weight -->
+        <text x="54" y="34" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="25" font-weight="600" fill="#3182F6" letter-spacing="-0.8">poli</text>
+      </svg>
+    </div>
+    <div class="card-label">03 — Monochrome Flat</div>
+  </div>
+
+  <!-- 6. Wordmark only (Apple-like) -->
+  <div class="card">
+    <span class="var-num">06</span>
+    <div class="card-logo">
+      <svg width="120" height="48" viewBox="0 0 120 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Custom-drawn wordmark: geometric sans, generous tracking -->
+        <!-- p -->
+        <rect x="0" y="10" width="5" height="30" rx="2.5" fill="#3182F6"/>
+        <rect x="0" y="10" width="18" height="5" rx="2.5" fill="#3182F6"/>
+        <rect x="13" y="10" width="5" height="16" rx="2.5" fill="#3182F6"/>
+        <rect x="0" y="21" width="18" height="5" rx="2.5" fill="#3182F6"/>
+        <!-- o -->
+        <rect x="23" y="10" width="18" height="5" rx="2.5" fill="#3182F6"/>
+        <rect x="23" y="21" width="18" height="5" rx="2.5" fill="#3182F6"/>
+        <rect x="23" y="10" width="5" height="16" rx="2.5" fill="#3182F6"/>
+        <rect x="36" y="10" width="5" height="16" rx="2.5" fill="#3182F6"/>
+        <!-- l -->
+        <rect x="47" y="10" width="5" height="26" rx="2.5" fill="#3182F6"/>
+        <rect x="47" y="31" width="14" height="5" rx="2.5" fill="#3182F6"/>
+        <!-- i -->
+        <rect x="68" y="10" width="5" height="26" rx="2.5" fill="#3182F6"/>
+        <circle cx="70.5" cy="5" r="3.5" fill="#3182F6"/>
+      </svg>
+    </div>
+    <div class="card-label">06 — Wordmark Only · Geometric</div>
+  </div>
+
+  <!-- 7. Compact horizontal -->
+  <div class="card">
+    <span class="var-num">07</span>
+    <div class="card-logo">
+      <svg width="168" height="44" viewBox="0 0 168 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Tighter icon: smaller, bolder -->
+        <rect x="0" y="2" width="28" height="28" rx="7" fill="#82B4F0"/>
+        <rect x="8" y="10" width="28" height="28" rx="7" fill="#3182F6"/>
+        <!-- wordmark: very tight tracking, heavy -->
+        <text x="44" y="31" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="28" font-weight="800" fill="#191F28" letter-spacing="-1.5">poli</text>
+      </svg>
+    </div>
+    <div class="card-label">07 — Compact Horizontal</div>
+  </div>
+
+  <!-- 4. App icon -->
+  <div class="card">
+    <span class="var-num">04</span>
+    <div class="card-logo">
+      <!-- iOS-style app icon: rounded-rect container, icon fills it -->
+      <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- App icon shell -->
+        <rect width="96" height="96" rx="22" fill="#EEF4FE"/>
+        <!-- Icon: two overlapping rects, larger, centered -->
+        <rect x="16" y="16" width="40" height="40" rx="11" fill="#82B4F0"/>
+        <rect x="38" y="38" width="40" height="40" rx="11" fill="#3182F6"/>
+        <!-- Overlap zone: slight inner highlight -->
+        <rect x="38" y="38" width="18" height="18" rx="6" fill="#FFFFFF" opacity="0.18"/>
+      </svg>
+    </div>
+    <div class="card-label">04 — App Icon · iOS Style</div>
+  </div>
+
+</div>
+
+<!-- ─── DARK / COLORED VARIANTS ───────────────────────────── -->
+<div class="section-label" style="margin-top:40px;">Dark & colored backgrounds</div>
+
+<div class="grid grid-2">
+
+  <!-- 5. Inverted (white on blue pill) -->
+  <div class="card blue-bg">
+    <span class="var-num">05</span>
+    <div class="card-logo">
+      <svg width="180" height="60" viewBox="0 0 180 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Pill background -->
+        <rect x="0" y="0" width="180" height="60" rx="30" fill="rgba(255,255,255,0.12)"/>
+        <!-- Icon: white -->
+        <rect x="16" y="13" width="26" height="26" rx="7" fill="rgba(255,255,255,0.55)"/>
+        <rect x="26" y="21" width="26" height="26" rx="7" fill="#FFFFFF"/>
+        <!-- wordmark white -->
+        <text x="62" y="40" font-family="'DM Sans', system-ui, sans-serif" font-size="24" font-weight="300" fill="#FFFFFF" letter-spacing="-0.3">poli</text>
+      </svg>
+    </div>
+    <div class="card-label">05 — Inverted · Blue Pill</div>
+  </div>
+
+  <!-- 8. Dark mode -->
+  <div class="card dark">
+    <span class="var-num">08</span>
+    <div class="card-logo">
+      <svg width="180" height="56" viewBox="0 0 180 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Icon: glowing on dark -->
+        <rect x="0" y="4" width="36" height="36" rx="10" fill="#2A4A7F" opacity="0.9"/>
+        <rect x="14" y="16" width="36" height="36" rx="10" fill="#3182F6"/>
+        <!-- Glow effect: inner highlight -->
+        <rect x="14" y="16" width="22" height="22" rx="7" fill="#82B4F0" opacity="0.25"/>
+        <!-- wordmark: white, light weight -->
+        <text x="60" y="40" font-family="'DM Sans', system-ui, sans-serif" font-size="26" font-weight="300" fill="#FFFFFF" letter-spacing="-0.4">poli</text>
+      </svg>
+    </div>
+    <div class="card-label" style="color:#3D4A5C; border-color:#272E3B;">08 — Dark Mode</div>
+  </div>
+
+</div>
+
+<!-- ─── DETAIL: side-by-side icon anatomy ─────────────────── -->
+<div class="section-label" style="margin-top:56px;">Icon mark — detail view</div>
+
+<div style="max-width:1100px; margin:0 auto;">
+  <div style="background:#fff; border:1px solid var(--border); border-radius:20px; padding:48px 40px; display:flex; align-items:center; justify-content:space-around; flex-wrap:wrap; gap:40px;">
+
+    <!-- 24px -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <svg width="24" height="24" viewBox="0 0 44 44" fill="none">
+        <rect x="0" y="0" width="28" height="28" rx="8" fill="#82B4F0"/>
+        <rect x="12" y="12" width="28" height="28" rx="8" fill="#3182F6"/>
+      </svg>
+      <span style="font-size:11px;color:var(--muted);font-weight:600;">24px</span>
+    </div>
+
+    <!-- 40px -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <svg width="40" height="40" viewBox="0 0 44 44" fill="none">
+        <rect x="0" y="0" width="28" height="28" rx="8" fill="#82B4F0"/>
+        <rect x="12" y="12" width="28" height="28" rx="8" fill="#3182F6"/>
+      </svg>
+      <span style="font-size:11px;color:var(--muted);font-weight:600;">40px</span>
+    </div>
+
+    <!-- 64px -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <svg width="64" height="64" viewBox="0 0 44 44" fill="none">
+        <rect x="0" y="0" width="28" height="28" rx="8" fill="#82B4F0"/>
+        <rect x="12" y="12" width="28" height="28" rx="8" fill="#3182F6"/>
+      </svg>
+      <span style="font-size:11px;color:var(--muted);font-weight:600;">64px</span>
+    </div>
+
+    <!-- 96px -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <svg width="96" height="96" viewBox="0 0 44 44" fill="none">
+        <rect x="0" y="0" width="28" height="28" rx="8" fill="#82B4F0"/>
+        <rect x="12" y="12" width="28" height="28" rx="8" fill="#3182F6"/>
+      </svg>
+      <span style="font-size:11px;color:var(--muted);font-weight:600;">96px</span>
+    </div>
+
+    <!-- 128px -->
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <svg width="128" height="128" viewBox="0 0 44 44" fill="none">
+        <rect x="0" y="0" width="28" height="28" rx="8" fill="#82B4F0"/>
+        <rect x="12" y="12" width="28" height="28" rx="8" fill="#3182F6"/>
+      </svg>
+      <span style="font-size:11px;color:var(--muted);font-weight:600;">128px</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── Color palette ───────────────────────────────────────── -->
+<div class="section-label" style="margin-top:56px;">Brand palette</div>
+<div style="max-width:1100px; margin:0 auto 80px;">
+  <div style="display:flex; gap:12px; flex-wrap:wrap;">
+    <div style="flex:1; min-width:140px; background:#3182F6; border-radius:14px; padding:20px 18px;">
+      <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;">Primary</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.7); font-family:monospace;">#3182F6</div>
+    </div>
+    <div style="flex:1; min-width:140px; background:#82B4F0; border-radius:14px; padding:20px 18px;">
+      <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;">Light</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.7); font-family:monospace;">#82B4F0</div>
+    </div>
+    <div style="flex:1; min-width:140px; background:#1C6EEB; border-radius:14px; padding:20px 18px;">
+      <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;">Accent / Hover</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.7); font-family:monospace;">#1C6EEB</div>
+    </div>
+    <div style="flex:1; min-width:140px; background:#EEF4FE; border:1px solid #D6E5FB; border-radius:14px; padding:20px 18px;">
+      <div style="font-size:13px; font-weight:700; color:#3182F6; margin-bottom:4px;">Surface</div>
+      <div style="font-size:12px; color:#82B4F0; font-family:monospace;">#EEF4FE</div>
+    </div>
+    <div style="flex:1; min-width:140px; background:#191F28; border-radius:14px; padding:20px 18px;">
+      <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;">Dark BG</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.4); font-family:monospace;">#191F28</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

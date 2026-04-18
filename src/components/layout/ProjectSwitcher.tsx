@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Project = { id: string; name: string; created_at: string }
+type Project = { id: string; name: string; created_at: string; archived: boolean }
 
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null
@@ -18,7 +18,7 @@ function setCookie(name: string, value: string) {
 export function ProjectSwitcher() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [currentId, setCurrentId] = useState<string>('00000000-0000-0000-0000-000000000001')
+  const [currentId, setCurrentId] = useState<string>('')
   const [open, setOpen] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [newName, setNewName] = useState('')
@@ -85,7 +85,7 @@ export function ProjectSwitcher() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-content-tertiary">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
           </svg>
-          <span className="flex-1 truncate text-left">{current?.name ?? '프로젝트 선택'}</span>
+          <span className="flex-1 truncate text-left">{current?.name ?? '프로젝트 없음'}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`shrink-0 text-content-tertiary transition-transform ${open ? 'rotate-180' : ''}`}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
@@ -94,18 +94,22 @@ export function ProjectSwitcher() {
         {open && (
           <div className="absolute left-3 right-3 top-full z-50 mt-1 rounded-lg border border-line-primary bg-surface-primary shadow-lg overflow-hidden">
             <div className="max-h-48 overflow-y-auto">
-              {projects.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => switchProject(p.id)}
-                  className={`cursor-pointer flex w-full items-center gap-2 px-3 py-2.5 text-[13px] text-left transition-colors hover:bg-surface-secondary ${p.id === currentId ? 'text-accent font-semibold bg-accent-subtle' : 'text-content-primary'}`}
-                >
-                  {p.id === currentId && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="shrink-0"><path d="M20 6L9 17l-5-5"/></svg>
-                  )}
-                  <span className={`flex-1 truncate ${p.id !== currentId ? 'pl-[20px]' : ''}`}>{p.name}</span>
-                </button>
-              ))}
+              {projects.length === 0 ? (
+                <p className="px-3 py-3 text-xs text-content-tertiary">활성 프로젝트가 없습니다</p>
+              ) : (
+                projects.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => switchProject(p.id)}
+                    className={`cursor-pointer flex w-full items-center gap-2 px-3 py-2.5 text-[13px] text-left transition-colors hover:bg-surface-secondary ${p.id === currentId ? 'text-accent font-semibold bg-accent-subtle' : 'text-content-primary'}`}
+                  >
+                    {p.id === currentId && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="shrink-0"><path d="M20 6L9 17l-5-5"/></svg>
+                    )}
+                    <span className={`flex-1 truncate ${p.id !== currentId ? 'pl-[20px]' : ''}`}>{p.name}</span>
+                  </button>
+                ))
+              )}
             </div>
             <div className="border-t border-line-primary">
               <button
