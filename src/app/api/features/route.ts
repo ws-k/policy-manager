@@ -65,6 +65,8 @@ export async function GET() {
             id,
             title,
             status,
+            slug,
+            version,
             domain:policy_domains(id, name)
           )
         )

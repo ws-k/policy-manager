@@ -8,6 +8,8 @@ type PolicyDoc = {
   id: string
   title: string
   status: string
+  slug: string
+  version: number
   domain: { id: string; name: string } | null
 }
 
@@ -53,6 +55,8 @@ export default async function FeaturesPage() {
             id,
             title,
             status,
+            slug,
+            version,
             domain:policy_domains(id, name)
           )
         )

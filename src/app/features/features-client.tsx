@@ -26,6 +26,8 @@ type PolicyDoc = {
   id: string
   title: string
   status: string
+  slug: string
+  version: number
 }
 
 type PolicySection = {
@@ -415,17 +417,36 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
         <SortableContext items={features.map((f) => f.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {features.map((feature) => {
-              const seenDocIds = new Set<string>()
-              const linkedDocs = feature.feature_policies
-                ?.map((fp) => fp.policy_sections?.policy_docs)
-                .filter((doc): doc is PolicyDoc => {
-                  if (!doc || seenDocIds.has(doc.id)) return false
-                  seenDocIds.add(doc.id)
-                  return true
-                }) ?? []
-              const policyCount = linkedDocs.length
+              // Group by doc slug, keep only latest version per slug
+              const fpsBySlug = new Map<string, { doc: PolicyDoc; fps: FeaturePolicy[]; maxVersion: number }>()
+              for (const fp of feature.feature_policies) {
+                const doc = fp.policy_sections?.policy_docs
+                if (!doc) continue
+                const slug = doc.slug
+                const existing = fpsBySlug.get(slug)
+                if (!existing || doc.version > existing.maxVersion) {
+                  fpsBySlug.set(slug, { doc, fps: [], maxVersion: doc.version })
+                }
+              }
+              // Assign fps to latest version group only
+              for (const fp of feature.feature_policies) {
+                const doc = fp.policy_sections?.policy_docs
+                if (!doc) continue
+                const group = fpsBySlug.get(doc.slug)
+                if (group && doc.version === group.maxVersion) {
+                  group.fps.push(fp)
+                }
+              }
+              // Old version fps (not in latest version group)
+              const latestVersionFpIds = new Set(
+                Array.from(fpsBySlug.values()).flatMap(g => g.fps.map(fp => fp.id))
+              )
+              const oldVersionFps = feature.feature_policies.filter(
+                fp => fp.policy_sections?.policy_docs && !latestVersionFpIds.has(fp.id)
+              )
               const tombstones = feature.feature_policies.filter((fp) => !fp.policy_sections && fp.deleted_section_title)
-              const tombstoneCount = tombstones.length
+              const policyCount = fpsBySlug.size
+              const tombstoneCount = tombstones.length + oldVersionFps.length
               const isEditing = editState?.id === feature.id
 
               return (
@@ -539,34 +560,72 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                             <p className="mb-3 text-sm text-content-secondary">{feature.description}</p>
                           )}
 
-                          {(linkedDocs.length > 0 || tombstoneCount > 0) && (
-                            <div className="mt-3 border-t border-line-primary pt-3 space-y-0.5">
-                              {linkedDocs.map((doc) => {
-                                const linkedSections = feature.feature_policies
-                                  .filter((fp) => fp.policy_sections?.policy_docs?.id === doc.id)
-                                  .map((fp) => ({ id: fp.policy_sections!.id, title: fp.policy_sections!.title }))
+                          {(fpsBySlug.size > 0 || tombstoneCount > 0) && (
+                            <div className="mt-3 border-t border-line-primary pt-3 space-y-2">
+                              {Array.from(fpsBySlug.values()).map((group) => {
+                                const { doc, fps } = group
+                                const totalSections = sectionsByPolicy[doc.id]?.sections.length ?? 0
+                                const isAllSections = totalSections > 0 && fps.length >= totalSections
+                                const linkedSectionIds_forDoc = fps.map(fp => fp.policy_sections!.id)
                                 return (
-                                  <div key={doc.id} className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-secondary transition-colors">
-                                    <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${doc.status === 'published' ? 'bg-emerald-500' : 'bg-content-tertiary'}`} />
-                                    <Link
-                                      href={`/policies/${doc.id}`}
-                                      className="flex-1 truncate text-sm text-content-primary hover:underline underline-offset-2 min-w-0"
-                                    >
-                                      {doc.title}
-                                    </Link>
-                                    <span className="shrink-0 rounded-full bg-surface-tertiary px-2 py-0.5 text-[10px] font-medium text-content-secondary">
-                                      {linkedSections.length}개 섹션
-                                    </span>
+                                  <div key={doc.id} className="rounded-lg border border-line-primary bg-surface-secondary">
+                                    <div className="group flex items-center gap-2 px-3 py-2.5">
+                                      <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${doc.status === 'published' ? 'bg-emerald-500' : 'bg-content-tertiary'}`} />
+                                      <Link
+                                        href={`/policies/${doc.id}`}
+                                        className="flex-1 truncate text-sm font-medium text-content-primary hover:underline underline-offset-2 min-w-0"
+                                      >
+                                        {doc.title}
+                                      </Link>
+                                      {isAllSections && (
+                                        <span className="shrink-0 text-xs text-content-tertiary">전체 연결</span>
+                                      )}
+                                      <button
+                                        onClick={() => setConfirmUnlinkDoc({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSectionIds_forDoc })}
+                                        disabled={bulkLinking}
+                                        className="invisible shrink-0 cursor-pointer rounded p-0.5 text-content-tertiary hover:text-red-500 group-hover:visible transition-colors disabled:opacity-50"
+                                        title="연결 해제"
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                        </svg>
+                                      </button>
+                                    </div>
+                                    {!isAllSections && fps.map(fp => (
+                                      <div key={fp.id} className="group flex items-center gap-2 border-t border-line-primary px-3 py-2 pl-6">
+                                        <span className="text-content-tertiary text-xs">└</span>
+                                        <span className="flex-1 truncate text-xs text-content-secondary">{fp.policy_sections!.title}</span>
+                                        <button
+                                          onClick={() => setConfirmUnlink({ featureId: feature.id, sectionId: fp.policy_sections!.id, sectionTitle: fp.policy_sections!.title, docTitle: doc.title })}
+                                          disabled={!!unlinkingSectionId}
+                                          className="invisible shrink-0 cursor-pointer rounded p-0.5 text-content-tertiary hover:text-red-500 group-hover:visible transition-colors disabled:opacity-50"
+                                          title="섹션 연결 해제"
+                                        >
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )
+                              })}
+                              {oldVersionFps.map(fp => {
+                                const doc = fp.policy_sections!.policy_docs!
+                                return (
+                                  <div key={fp.id} className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-amber-500">
+                                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                                    </svg>
+                                    <div className="flex-1 min-w-0">
+                                      <span className="block text-xs font-medium text-amber-800 truncate">{doc.title}</span>
+                                      <span className="block text-xs text-amber-600">이전 버전 (v{doc.version}) · {fp.policy_sections!.title}</span>
+                                    </div>
                                     <button
-                                      onClick={() => setConfirmUnlinkDoc({ featureId: feature.id, docId: doc.id, docTitle: doc.title, sectionIds: linkedSections.map((s) => s.id) })}
-                                      disabled={bulkLinking}
-                                      className="invisible shrink-0 cursor-pointer rounded p-0.5 text-content-tertiary hover:text-red-500 group-hover:visible transition-colors disabled:opacity-50"
-                                      title="연결 해제"
-                                    >
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                                      </svg>
-                                    </button>
+                                      onClick={() => fetch(`/api/feature-policies?feature_id=${feature.id}&section_id=${fp.policy_sections!.id}`, { method: 'DELETE' }).then(refreshFeatures)}
+                                      className="cursor-pointer shrink-0 text-xs text-amber-600 hover:text-red-600"
+                                    >✕</button>
                                   </div>
                                 )
                               })}
@@ -601,15 +660,22 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           {activeId ? (() => {
             const f = features.find((f) => f.id === activeId)
             if (!f) return null
-            const seenDocIds = new Set<string>()
-            const linkedDocs = f.feature_policies
-              .map((fp) => fp.policy_sections?.policy_docs)
-              .filter((doc): doc is PolicyDoc => {
-                if (!doc || seenDocIds.has(doc.id)) return false
-                seenDocIds.add(doc.id)
-                return true
-              })
-            const policyCount = linkedDocs.length
+            const dragSlugMap = new Map<string, { doc: PolicyDoc; fps: FeaturePolicy[]; maxVersion: number }>()
+            for (const fp of f.feature_policies) {
+              const doc = fp.policy_sections?.policy_docs
+              if (!doc) continue
+              const existing = dragSlugMap.get(doc.slug)
+              if (!existing || doc.version > existing.maxVersion) {
+                dragSlugMap.set(doc.slug, { doc, fps: [], maxVersion: doc.version })
+              }
+            }
+            for (const fp of f.feature_policies) {
+              const doc = fp.policy_sections?.policy_docs
+              if (!doc) continue
+              const group = dragSlugMap.get(doc.slug)
+              if (group && doc.version === group.maxVersion) group.fps.push(fp)
+            }
+            const policyCount = dragSlugMap.size
             return (
               <div className="rounded-xl border border-line-primary bg-surface-primary p-4 shadow-xl opacity-95">
                 <div className="mb-2 flex items-start justify-between gap-2 pr-6">
@@ -624,20 +690,17 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                 </div>
                 {f.screen_path && <p className="mb-1 font-mono text-xs text-content-tertiary">{f.screen_path}</p>}
                 {f.description && <p className="mb-3 text-sm text-content-secondary">{f.description}</p>}
-                {linkedDocs.length > 0 && (
-                  <div className="mt-3 border-t border-line-primary pt-3 space-y-0.5">
-                    {linkedDocs.map((doc) => {
-                      const linkedSections = f.feature_policies
-                        .filter((fp) => fp.policy_sections?.policy_docs?.id === doc.id)
-                        .map((fp) => fp.policy_sections!)
-                      return (
-                        <div key={doc.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                {dragSlugMap.size > 0 && (
+                  <div className="mt-3 border-t border-line-primary pt-3 space-y-2">
+                    {Array.from(dragSlugMap.values()).map(({ doc, fps }) => (
+                      <div key={doc.id} className="rounded-lg border border-line-primary bg-surface-secondary">
+                        <div className="flex items-center gap-2 px-3 py-2.5">
                           <span className={`shrink-0 h-1.5 w-1.5 rounded-full ${doc.status === 'published' ? 'bg-emerald-500' : 'bg-content-tertiary'}`} />
-                          <span className="flex-1 truncate text-sm text-content-primary">{doc.title}</span>
-                          <span className="shrink-0 rounded-full bg-surface-tertiary px-2 py-0.5 text-[10px] font-medium text-content-secondary">{linkedSections.length}개 섹션</span>
+                          <span className="flex-1 truncate text-sm font-medium text-content-primary">{doc.title}</span>
+                          <span className="shrink-0 text-xs text-content-tertiary">{fps.length}개 섹션</span>
                         </div>
-                      )
-                    })}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
