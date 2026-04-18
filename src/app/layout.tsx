@@ -35,6 +35,9 @@ export default async function RootLayout({
   return (
     <html lang="ko" className="h-full">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800&display=swap" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link
           rel="preload"

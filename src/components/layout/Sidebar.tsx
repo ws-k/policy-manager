@@ -51,7 +51,11 @@ export function Sidebar() {
     <aside className="flex h-screen w-52 flex-col border-r border-line-primary bg-surface-tertiary">
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-line-primary px-4">
-        <img src="/poli-logo.png" alt="Poli" className="h-9 w-auto" />
+        <svg width="138" height="36" viewBox="0 0 168 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="2" width="28" height="28" rx="7" fill="#82B4F0"/>
+          <rect x="8" y="10" width="28" height="28" rx="7" fill="#3182F6"/>
+          <text x="44" y="31" fontFamily="'Plus Jakarta Sans', system-ui, sans-serif" fontSize="28" fontWeight="800" fill="#191F28" letterSpacing="-1.5">poli</text>
+        </svg>
       </div>
 
       {/* Search */}
