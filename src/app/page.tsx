@@ -40,9 +40,9 @@ function relativeTime(dateStr: string): string {
 }
 
 const CHANGE_TYPE_LABELS: Record<string, { label: string; className: string }> = {
-  create: { label: '생성', className: 'bg-surface-secondary text-content-secondary' },
-  update: { label: '수정', className: 'bg-surface-secondary text-content-secondary' },
-  publish: { label: '게시', className: 'bg-accent text-accent-text' },
+  create: { label: '생성', className: 'bg-surface-tertiary text-content-secondary' },
+  update: { label: '수정', className: 'bg-surface-tertiary text-content-secondary' },
+  publish: { label: '게시', className: 'bg-accent-subtle text-accent' },
   unpublish: { label: '게시 취소', className: 'bg-surface-tertiary text-content-tertiary' },
 }
 
@@ -99,31 +99,22 @@ export default async function DashboardPage() {
   const recentChanges = (changelogs ?? []) as ChangelogWithPolicy[]
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-10">
       {/* Summary cards */}
       <section>
-        <h2 className="text-content-primary text-sm font-semibold mb-3">정책 현황</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">정책 현황</h2>
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-surface-secondary rounded-xl p-5 border border-line-primary">
-            <p className="text-content-tertiary text-xs mb-1">전체 정책</p>
-            <p className="text-content-primary text-3xl font-bold tabular-nums">{totalCount ?? 0}</p>
-            <p className="text-content-tertiary text-xs mt-1">개 정책</p>
+          <div className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm">
+            <p className="text-content-secondary text-sm font-medium mb-3">전체 정책</p>
+            <p className="text-content-primary text-4xl font-bold tabular-nums">{totalCount ?? 0}</p>
           </div>
-          <div className="bg-surface-secondary rounded-xl p-5 border border-line-primary">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-content-tertiary text-xs">임시저장</p>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-surface-tertiary text-content-secondary">draft</span>
-            </div>
-            <p className="text-content-primary text-3xl font-bold tabular-nums">{draftCount ?? 0}</p>
-            <p className="text-content-tertiary text-xs mt-1">개 정책</p>
+          <div className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm">
+            <p className="text-content-secondary text-sm font-medium mb-3">임시저장</p>
+            <p className="text-content-primary text-4xl font-bold tabular-nums">{draftCount ?? 0}</p>
           </div>
-          <div className="bg-surface-secondary rounded-xl p-5 border border-line-primary">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-content-tertiary text-xs">게시됨</p>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-text">published</span>
-            </div>
-            <p className="text-content-primary text-3xl font-bold tabular-nums">{publishedCount ?? 0}</p>
-            <p className="text-content-tertiary text-xs mt-1">개 정책</p>
+          <div className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm">
+            <p className="text-content-secondary text-sm font-medium mb-3">게시됨</p>
+            <p className="text-content-primary text-4xl font-bold tabular-nums">{publishedCount ?? 0}</p>
           </div>
         </div>
       </section>
@@ -131,11 +122,11 @@ export default async function DashboardPage() {
       {/* Action insights */}
       {(staleDrafts.length > 0 || unmappedFeatures.length > 0) && (
         <section>
-          <h2 className="text-content-primary text-sm font-semibold mb-3">액션이 필요한 항목</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">액션이 필요한 항목</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             {staleDrafts.length > 0 && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-semibold text-amber-900">오래된 초안</p>
                   <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-medium text-amber-900 tabular-nums">
@@ -160,7 +151,7 @@ export default async function DashboardPage() {
             )}
 
             {unmappedFeatures.length > 0 && (
-              <div className="rounded-xl border border-line-primary bg-surface-secondary p-5">
+              <div className="rounded-2xl border border-line-primary bg-surface-secondary p-5">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-semibold text-content-primary">연결 없는 기능</p>
                   <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-xs font-medium text-content-secondary tabular-nums">
@@ -190,7 +181,7 @@ export default async function DashboardPage() {
 
       {/* Domain cards */}
       <section>
-        <h2 className="text-content-primary text-sm font-semibold mb-3">영역별 정책</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">영역별 정책</h2>
         {domainStats.length === 0 ? (
           <p className="text-content-tertiary text-sm">등록된 영역이 없습니다.</p>
         ) : (
@@ -199,12 +190,12 @@ export default async function DashboardPage() {
               <Link
                 key={domain.id}
                 href={`/policies?domain=${domain.id}`}
-                className="bg-surface-secondary rounded-xl p-5 border border-line-primary hover:border-line-secondary transition-colors"
+                className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm hover:shadow-md hover:border-line-secondary transition-all"
               >
                 <p className="text-content-primary font-medium text-sm truncate">{domain.name}</p>
-                <p className="text-content-primary text-2xl font-bold tabular-nums mt-2">
+                <p className="text-content-primary text-3xl font-bold tabular-nums mt-2">
                   {domain.policy_count}
-                  <span className="text-content-tertiary text-xs font-normal ml-1">개</span>
+                  <span className="text-content-tertiary text-sm font-normal ml-1">개</span>
                 </p>
                 <p className="text-content-tertiary text-xs mt-2">
                   최근 수정:{' '}
@@ -218,7 +209,7 @@ export default async function DashboardPage() {
 
       {/* Recent changelog feed */}
       <section>
-        <h2 className="text-content-primary text-sm font-semibold mb-3">최근 변경 내역</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">최근 변경 내역</h2>
         {recentChanges.length === 0 ? (
           <p className="text-content-tertiary text-sm">아직 변경 기록이 없습니다.</p>
         ) : (
@@ -231,7 +222,7 @@ export default async function DashboardPage() {
               return (
                 <li
                   key={log.id}
-                  className="bg-surface-secondary rounded-xl px-5 py-4 border border-line-primary flex items-start gap-4"
+                  className="bg-surface-primary rounded-xl px-5 py-4 border border-line-primary flex items-start gap-4"
                 >
                   <span
                     className={`shrink-0 text-xs px-2 py-0.5 rounded-full mt-0.5 ${badge.className}`}

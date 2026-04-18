@@ -20,8 +20,8 @@ export function TopBar({ userEmail }: TopBarProps) {
     .find(([path]) => pathname.startsWith(path))?.[1] ?? '페이지'
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-line-primary bg-surface-primary px-6">
-      <h1 className="text-sm font-semibold text-content-primary">{title}</h1>
+    <header className="flex h-14 items-center justify-between border-b border-line-primary bg-surface-primary/80 backdrop-blur-sm px-6">
+      <h1 className="text-[15px] font-semibold text-content-primary">{title}</h1>
       {userEmail && (
         <span className="text-xs text-content-tertiary">{userEmail}</span>
       )}
