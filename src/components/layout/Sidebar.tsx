@@ -50,14 +50,8 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-60 flex-col border-r border-line-primary bg-surface-tertiary">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-line-primary px-4">
-        <div className="relative flex-shrink-0" style={{ width: 36, height: 36 }}>
-          <svg width="36" height="36" viewBox="0 0 32 32">
-            <rect x="1" y="1" width="19" height="19" rx="4.5" fill="#7BB5FF"/>
-            <rect x="12" y="12" width="19" height="19" rx="4.5" fill="#3182F6"/>
-          </svg>
-        </div>
-        <span className="text-[18px] font-bold tracking-tight text-content-primary">Poli</span>
+      <div className="flex h-16 items-center border-b border-line-primary px-4">
+        <img src="/poli-logo.jpg" alt="Poli" className="h-8 w-auto" />
       </div>
 
       {/* Search */}
