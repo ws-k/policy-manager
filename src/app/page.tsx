@@ -143,9 +143,9 @@ export default async function DashboardPage() {
 
       {/* Domain cards */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">도메인별 정책</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">정책 유형별 정책</h2>
         {domainStats.length === 0 ? (
-          <p className="text-content-tertiary text-sm">등록된 도메인이 없습니다</p>
+          <p className="text-content-tertiary text-sm">등록된 정책 유형이 없습니다</p>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {domainStats.map((domain) => (

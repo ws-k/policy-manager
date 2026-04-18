@@ -147,7 +147,7 @@ export function ProjectSwitcher({ initialProjectName }: { initialProjectName?: s
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={e => { if (e.target === e.currentTarget) { setShowAddModal(false); setNewName('') } }}>
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
             <h3 className="mb-2 text-base font-semibold text-content-primary">프로젝트 추가</h3>
-            <p className="mb-4 text-sm text-content-secondary leading-relaxed">새 프로젝트를 만들면 정책, 기능, 도메인이 분리됩니다.</p>
+            <p className="mb-4 text-sm text-content-secondary leading-relaxed">새 프로젝트를 만들면 정책, 기능, 정책 유형이 분리됩니다.</p>
             <input
               autoFocus
               className="w-full rounded-lg border border-line-primary bg-surface-secondary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent mb-4"

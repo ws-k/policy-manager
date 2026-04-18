@@ -40,7 +40,7 @@ const navItems = [
   { href: '/', label: '대시보드', icon: <HomeIcon /> },
   { href: '/policies', label: '정책 목록', icon: <DocumentIcon /> },
   { href: '/features', label: '기능 맵', icon: <GridIcon /> },
-  { href: '/domains', label: '도메인 관리', icon: <GlobeIcon /> },
+  { href: '/domains', label: '정책 유형 관리', icon: <GlobeIcon /> },
   { href: '/projects', label: '프로젝트 관리', icon: <SettingsIcon /> },
 ]
 

@@ -19,7 +19,7 @@ export async function PATCH(
     .single()
 
   if (!existing) {
-    return NextResponse.json({ error: '도메인을 찾을 수 없습니다.', code: 'NOT_FOUND' }, { status: 404 })
+    return NextResponse.json({ error: '정책 유형을 찾을 수 없습니다.', code: 'NOT_FOUND' }, { status: 404 })
   }
 
   const body = await request.json()

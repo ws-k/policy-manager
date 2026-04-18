@@ -239,7 +239,7 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
             {domains.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-sm text-content-tertiary">
-                  도메인이 없습니다. 아래에서 추가해주세요.
+                  정책 유형이 없습니다. 아래에서 추가해주세요.
                 </td>
               </tr>
             )}
@@ -251,7 +251,7 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <p className="mb-1 text-sm font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 도메인을 삭제하시겠습니까?</p>
+            <p className="mb-1 text-sm font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 정책 유형을 삭제하시겠습니까?</p>
             <p className="mb-6 text-sm text-content-secondary">이 작업은 되돌릴 수 없습니다.</p>
             <div className="flex justify-end gap-2">
               <button
@@ -275,9 +275,9 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
         </div>
       )}
 
-      {/* 새 도메인 추가 */}
+      {/* 새 정책 유형 추가 */}
       <div className="mt-4 rounded-lg border border-line-primary bg-surface-secondary p-4">
-        <p className="mb-3 text-sm font-medium text-content-primary">새 도메인 추가</p>
+        <p className="mb-3 text-sm font-medium text-content-primary">새 정책 유형 추가</p>
         <div className="flex items-center gap-3">
           <input
             className="flex-1 rounded border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
