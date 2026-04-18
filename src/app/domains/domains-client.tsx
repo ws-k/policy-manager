@@ -116,11 +116,6 @@ export function DomainsClient({ initialDomains }: { initialDomains: DomainWithCo
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-content-primary">도메인 관리</h1>
-        <p className="mt-1 text-sm text-content-secondary">정책 도메인을 추가·수정·삭제합니다.</p>
-      </div>
-
       {error && (
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}

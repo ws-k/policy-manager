@@ -336,11 +336,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold text-content-primary">기능 맵</h1>
-          <p className="mt-1 text-sm text-content-secondary">앱 기능별 연관 정책 현황</p>
-        </div>
+      <div className="mb-6 flex justify-end">
         <button
           onClick={() => { setShowAddForm((v) => !v); setError(null) }}
           className="cursor-pointer shrink-0 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-text"
@@ -621,8 +617,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <p className="mb-1 text-sm font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 기능을 삭제하시겠습니까?</p>
-            <p className="mb-6 text-sm text-content-secondary">연결된 정책 매핑도 함께 삭제됩니다.</p>
+            <h3 className="mb-2 text-base font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 기능을 삭제하시겠습니까?</h3>
+            <p className="mb-6 text-sm text-content-secondary leading-relaxed">연결된 정책 매핑도 함께 삭제됩니다.</p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmDelete(null)}
@@ -649,8 +645,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       {confirmUnlink && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <p className="mb-1 text-sm font-semibold text-content-primary">섹션 연결을 해제하시겠습니까?</p>
-            <p className="mb-6 text-sm text-content-secondary">
+            <h3 className="mb-2 text-base font-semibold text-content-primary">섹션 연결을 해제하시겠습니까?</h3>
+            <p className="mb-6 text-sm text-content-secondary leading-relaxed">
               <span className="font-semibold text-content-primary">{confirmUnlink.docTitle}</span> &rsaquo; <span className="font-semibold text-content-primary">{confirmUnlink.sectionTitle}</span> 섹션과의 연결이 해제됩니다.
             </p>
             <div className="flex justify-end gap-2">
@@ -681,8 +677,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       {confirmUnlinkDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <p className="mb-1 text-sm font-semibold text-content-primary">문서 전체 연결을 해제하시겠습니까?</p>
-            <p className="mb-6 text-sm text-content-secondary">
+            <h3 className="mb-2 text-base font-semibold text-content-primary">문서 전체 연결을 해제하시겠습니까?</h3>
+            <p className="mb-6 text-sm text-content-secondary leading-relaxed">
               <span className="font-semibold text-content-primary">{confirmUnlinkDoc.docTitle}</span>의 모든 섹션 연결이 해제됩니다.
             </p>
             <div className="flex justify-end gap-2">

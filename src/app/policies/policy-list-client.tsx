@@ -60,13 +60,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
   return (
     <div className={isPending ? 'opacity-70 transition-opacity' : ''}>
       {/* Page Header */}
-      <div className="mb-7 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight mb-1">정책 목록</h1>
-          <p className="text-sm text-content-secondary">
-            총 {policies.length}개 &middot; 초안 {policies.filter(p => p.status === 'draft').length}개 &middot; 게시됨 {policies.filter(p => p.status === 'published').length}개
-          </p>
-        </div>
+      <div className="mb-7 flex justify-end">
         <Link
           href="/policies/new"
           className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
