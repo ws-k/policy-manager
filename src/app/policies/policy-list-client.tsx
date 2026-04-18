@@ -70,7 +70,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
         <div className="flex flex-wrap gap-1.5">
           <button
             onClick={() => updateFilter('domain', '')}
-            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+            className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
               !currentDomain
                 ? 'border-accent bg-accent text-accent-text'
                 : 'border-line-primary bg-surface-primary text-content-secondary hover:bg-surface-tertiary'
@@ -82,7 +82,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
             <button
               key={d.id}
               onClick={() => updateFilter('domain', d.id)}
-              className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 currentDomain === d.id
                   ? 'border-accent bg-accent text-accent-text'
                   : 'border-line-primary bg-surface-primary text-content-secondary hover:bg-surface-tertiary'
@@ -97,7 +97,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
         <select
           value={currentStatus}
           onChange={(e) => updateFilter('status', e.target.value)}
-          className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary outline-none focus:border-line-secondary"
+          className="cursor-pointer rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm text-content-primary outline-none focus:border-line-secondary"
         >
           <option value="">전체 상태</option>
           <option value="draft">초안</option>
@@ -118,7 +118,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
             type="text"
             defaultValue={currentQuery}
             placeholder="정책 검색..."
-            className="w-56 rounded-md border border-line-primary bg-surface-primary px-3 py-1.5 text-xs text-content-primary outline-none placeholder:text-content-tertiary focus:border-line-secondary"
+            className="w-64 rounded-md border border-line-primary bg-surface-primary px-4 py-2 text-sm text-content-primary outline-none placeholder:text-content-tertiary focus:border-line-secondary"
           />
         </form>
       </div>
