@@ -94,18 +94,18 @@ export default async function DashboardPage() {
       {/* Summary cards */}
       <section>
         <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">정책 현황</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm">
-            <p className="text-content-secondary text-sm font-medium mb-3">전체 정책</p>
-            <p className="text-content-primary text-4xl font-bold tabular-nums">{totalCount ?? 0}</p>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-surface-primary rounded-xl px-4 py-3 border border-line-primary shadow-sm flex items-center gap-4">
+            <p className="text-content-secondary text-sm font-medium flex-1">전체 정책</p>
+            <p className="text-content-primary text-2xl font-bold tabular-nums">{totalCount ?? 0}</p>
           </div>
-          <div className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm">
-            <p className="text-content-secondary text-sm font-medium mb-3">임시저장</p>
-            <p className="text-content-primary text-4xl font-bold tabular-nums">{draftCount ?? 0}</p>
+          <div className="bg-surface-primary rounded-xl px-4 py-3 border border-line-primary shadow-sm flex items-center gap-4">
+            <p className="text-content-secondary text-sm font-medium flex-1">임시저장</p>
+            <p className="text-content-primary text-2xl font-bold tabular-nums">{draftCount ?? 0}</p>
           </div>
-          <div className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm">
-            <p className="text-content-secondary text-sm font-medium mb-3">게시됨</p>
-            <p className="text-content-primary text-4xl font-bold tabular-nums">{publishedCount ?? 0}</p>
+          <div className="bg-surface-primary rounded-xl px-4 py-3 border border-line-primary shadow-sm flex items-center gap-4">
+            <p className="text-content-secondary text-sm font-medium flex-1">게시됨</p>
+            <p className="text-content-primary text-2xl font-bold tabular-nums">{publishedCount ?? 0}</p>
           </div>
         </div>
       </section>
@@ -143,11 +143,11 @@ export default async function DashboardPage() {
 
       {/* Domain cards */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">영역별 정책</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">도메인별 정책</h2>
         {domainStats.length === 0 ? (
-          <p className="text-content-tertiary text-sm">등록된 영역이 없습니다.</p>
+          <p className="text-content-tertiary text-sm">등록된 도메인이 없습니다.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {domainStats.map((domain) => (
               <Link
                 key={domain.id}
