@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import type { PolicyDoc, Changelog, PolicySection } from '@/lib/types'
 import { PolicyTOC } from '@/components/policy/PolicyTOC'
@@ -229,7 +229,7 @@ function LinkedFeaturesPanel({ policyId }: { policyId: string }) {
         <h2 className="text-xs font-medium text-content-primary">연결된 기능</h2>
         <button
           onClick={() => setShowLinkModal(true)}
-          className="cursor-pointer text-xs text-accent hover:underline"
+          className="cursor-pointer flex items-center gap-1 rounded-md border border-accent px-2 py-1 text-xs font-medium text-accent hover:bg-accent-subtle transition-colors"
         >
           연결하기
         </button>
@@ -292,6 +292,10 @@ function LinkFeatureModal({
   const [selectedSectionId, setSelectedSectionId] = useState('')
   const [linking, setLinking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [featureOpen, setFeatureOpen] = useState(false)
+  const [sectionOpen, setSectionOpen] = useState(false)
+  const featureRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/features')
@@ -307,6 +311,19 @@ function LinkFeatureModal({
       })
       .catch(() => {})
   }, [policyId])
+
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if (featureRef.current && !featureRef.current.contains(e.target as Node)) {
+        setFeatureOpen(false)
+      }
+      if (sectionRef.current && !sectionRef.current.contains(e.target as Node)) {
+        setSectionOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [])
 
   const handleLink = async () => {
     if (!selectedFeatureId || !selectedSectionId) return
@@ -334,54 +351,106 @@ function LinkFeatureModal({
     }
   }
 
+  const selectedFeatureName = features.find((f) => f.id === selectedFeatureId)?.name
+  const selectedSectionTitle = sections.find((s) => s.id === selectedSectionId)?.title
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-sm rounded-xl border border-line-primary bg-surface-primary p-6 shadow-lg">
-        <h3 className="mb-4 text-sm font-medium text-content-primary">기능 연결</h3>
-        <div className="space-y-3">
-          <select
-            value={selectedFeatureId}
-            onChange={(e) => setSelectedFeatureId(e.target.value)}
-            className="w-full rounded-md border border-line-primary bg-surface-secondary px-3 py-2 text-sm text-content-primary"
-          >
-            <option value="">기능 선택</option>
-            {features.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </select>
-          {sections.length === 0 ? (
-            <p className="text-xs text-content-tertiary">
-              이 정책에 섹션이 없습니다. 섹션을 먼저 추가해주세요.
-            </p>
-          ) : (
-            <select
-              value={selectedSectionId}
-              onChange={(e) => setSelectedSectionId(e.target.value)}
-              className="w-full rounded-md border border-line-primary bg-surface-secondary px-3 py-2 text-sm text-content-primary"
-            >
-              <option value="">섹션 선택</option>
-              {sections.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </select>
-          )}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div
+        className="w-full max-w-lg rounded-xl border border-line-primary bg-surface-primary p-7 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="mb-5 text-base font-semibold text-content-primary">기능 연결</h3>
+        <div className="space-y-5">
+          {/* Feature dropdown */}
+          <div>
+            <p className="text-xs font-medium text-content-secondary mb-1.5">기능</p>
+            <div ref={featureRef} className="relative">
+              <button
+                type="button"
+                onClick={() => { setFeatureOpen((v) => !v); setSectionOpen(false) }}
+                className="w-full flex items-center justify-between rounded-lg border border-line-primary bg-surface-secondary px-4 py-3 text-sm text-content-primary hover:border-line-secondary transition-colors cursor-pointer"
+              >
+                <span className={selectedFeatureName ? 'text-content-primary' : 'text-content-tertiary'}>
+                  {selectedFeatureName ?? '기능 선택'}
+                </span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`shrink-0 transition-transform ${featureOpen ? 'rotate-180' : ''}`}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {featureOpen && (
+                <div className="absolute left-0 right-0 top-full z-10 mt-1 rounded-lg border border-line-primary bg-surface-primary shadow-lg overflow-hidden">
+                  <div className="max-h-52 overflow-y-auto">
+                    {features.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => { setSelectedFeatureId(f.id); setFeatureOpen(false) }}
+                        className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-surface-secondary cursor-pointer ${selectedFeatureId === f.id ? 'text-accent font-medium bg-accent-subtle' : 'text-content-primary'}`}
+                      >
+                        {f.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section dropdown */}
+          <div>
+            <p className="text-xs font-medium text-content-secondary mb-1.5">섹션</p>
+            {sections.length === 0 ? (
+              <p className="mt-2 text-xs text-content-tertiary">이 정책에 섹션이 없습니다. 섹션을 먼저 추가해주세요.</p>
+            ) : (
+              <div ref={sectionRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => { setSectionOpen((v) => !v); setFeatureOpen(false) }}
+                  className="w-full flex items-center justify-between rounded-lg border border-line-primary bg-surface-secondary px-4 py-3 text-sm text-content-primary hover:border-line-secondary transition-colors cursor-pointer"
+                >
+                  <span className={selectedSectionTitle ? 'text-content-primary' : 'text-content-tertiary'}>
+                    {selectedSectionTitle ?? '섹션 선택'}
+                  </span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`shrink-0 transition-transform ${sectionOpen ? 'rotate-180' : ''}`}>
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                {sectionOpen && (
+                  <div className="absolute left-0 right-0 top-full z-10 mt-1 rounded-lg border border-line-primary bg-surface-primary shadow-lg overflow-hidden">
+                    <div className="max-h-52 overflow-y-auto">
+                      {sections.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => { setSelectedSectionId(s.id); setSectionOpen(false) }}
+                          className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-surface-secondary cursor-pointer ${selectedSectionId === s.id ? 'text-accent font-medium bg-accent-subtle' : 'text-content-primary'}`}
+                        >
+                          {s.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
-        <div className="mt-4 flex justify-end gap-2">
+        <div className="mt-7 flex justify-end gap-2">
           <button
+            type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-md border border-line-primary px-3 py-1.5 text-xs text-content-secondary hover:bg-surface-secondary"
+            className="rounded-lg border border-line-primary px-5 py-2.5 text-sm text-content-secondary hover:bg-surface-tertiary cursor-pointer"
           >
             취소
           </button>
           <button
+            type="button"
             onClick={handleLink}
             disabled={linking || !selectedFeatureId || !selectedSectionId}
-            className="cursor-pointer rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-text disabled:opacity-50"
+            className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-text disabled:opacity-50 cursor-pointer"
           >
             연결
           </button>
