@@ -25,13 +25,20 @@ export function ProjectSwitcher() {
   const [adding, setAdding] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  function fetchProjects() {
     fetch('/api/projects')
       .then(r => r.json())
       .then(({ data }) => { if (data) setProjects(data) })
+  }
+
+  useEffect(() => {
+    fetchProjects()
 
     const saved = getCookie('poli_project_id')
     if (saved) setCurrentId(saved)
+
+    window.addEventListener('projects-updated', fetchProjects)
+    return () => window.removeEventListener('projects-updated', fetchProjects)
   }, [])
 
   useEffect(() => {

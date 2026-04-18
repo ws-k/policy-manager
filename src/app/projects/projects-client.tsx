@@ -66,6 +66,7 @@ export function ProjectsClient({ initialProjects, initialArchived }: {
       }
       setEditId(null)
       setEditName('')
+      window.dispatchEvent(new Event('projects-updated'))
       router.refresh()
     } finally {
       setSaving(false)
