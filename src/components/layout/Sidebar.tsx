@@ -29,7 +29,7 @@ const GlobeIcon = () => (
   </svg>
 )
 
-const navItems: { href: string; label: string; icon: React.ReactNode; phase?: number }[] = [
+const navItems = [
   { href: '/', label: '대시보드', icon: <HomeIcon /> },
   { href: '/policies', label: '정책 목록', icon: <DocumentIcon /> },
   { href: '/features', label: '기능 맵', icon: <GridIcon /> },
@@ -48,26 +48,32 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-56 flex-col border-r border-line-primary bg-surface-secondary">
+    <aside className="flex h-screen w-60 flex-col border-r border-line-primary bg-surface-tertiary">
       {/* Logo */}
-      <div className="flex h-14 items-center border-b border-line-primary px-4">
-        <span className="text-sm font-semibold text-content-primary">Policy Manager</span>
+      <div className="flex h-14 items-center gap-2.5 border-b border-line-primary px-4">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white text-base flex-shrink-0">
+          📋
+        </div>
+        <div>
+          <div className="text-sm font-bold text-content-primary leading-tight">Policy Manager</div>
+          <div className="text-[11px] text-content-tertiary leading-tight">정책 관리 시스템</div>
+        </div>
       </div>
 
       {/* Search */}
       <div className="px-3 pt-3 pb-2">
         <button
           onClick={() => document.dispatchEvent(new Event('open-search'))}
-          className="cursor-pointer mx-0 flex w-full items-center gap-2.5 rounded-md border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-secondary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
+          className="cursor-pointer flex w-full items-center gap-2.5 rounded-lg border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-secondary transition-colors hover:border-line-secondary hover:text-content-primary shadow-sm"
         >
           <span className="text-base leading-none">⌕</span>
-          <span className="flex-1 text-left">검색</span>
-          <span className="rounded bg-surface-tertiary px-1.5 py-0.5 text-[10px] text-content-tertiary font-mono">⌘K</span>
+          <span className="flex-1 text-left text-[13px]">검색</span>
+          <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] text-content-tertiary font-mono">⌘K</span>
         </button>
       </div>
 
       {/* Nav */}
-      <nav className="flex flex-1 flex-col gap-1 p-3">
+      <nav className="flex flex-1 flex-col gap-0.5 p-3">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -75,19 +81,14 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={[
-                'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors',
+                'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-all',
                 isActive
-                  ? 'bg-accent text-accent-text'
-                  : 'text-content-secondary hover:bg-surface-tertiary hover:text-content-primary',
+                  ? 'bg-surface-primary text-accent shadow-sm font-semibold'
+                  : 'text-content-secondary hover:bg-black/5 hover:text-content-primary',
               ].join(' ')}
             >
               <span className="flex items-center justify-center">{item.icon}</span>
               <span>{item.label}</span>
-              {item.phase && (
-                <span className="ml-auto rounded-full bg-surface-tertiary px-1.5 py-0.5 text-[10px] text-content-tertiary">
-                  Phase {item.phase}
-                </span>
-              )}
             </Link>
           )
         })}
@@ -97,7 +98,7 @@ export function Sidebar() {
       <div className="border-t border-line-primary p-3">
         <button
           onClick={handleLogout}
-          className="cursor-pointer flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-content-secondary transition-colors hover:bg-surface-tertiary hover:text-content-primary"
+          className="cursor-pointer flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-content-secondary transition-colors hover:bg-black/5 hover:text-content-primary"
         >
           <span className="text-base leading-none">→</span>
           <span>로그아웃</span>

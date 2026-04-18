@@ -2,29 +2,32 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --sidebar-width: 14rem; /* matches w-56 in Sidebar.tsx */
+  --sidebar-width: 15rem;
+
   --color-surface-primary: #ffffff;
-  --color-surface-secondary: #f8f9fa;
-  --color-surface-tertiary: #f1f3f5;
+  --color-surface-secondary: #F7F8FA;
+  --color-surface-tertiary: #F2F4F6;
 
-  --color-content-primary: #111827;
-  --color-content-secondary: #6b7280;
-  --color-content-tertiary: #9ca3af;
+  --color-content-primary: #191F28;
+  --color-content-secondary: #6B7684;
+  --color-content-tertiary: #B0B8C1;
 
-  --color-line-primary: #e5e7eb;
-  --color-line-secondary: #d1d5db;
+  --color-line-primary: #E5E8EB;
+  --color-line-secondary: #D1D6DB;
 
-  --color-accent: #111827;
+  --color-accent: #3182F6;
+  --color-accent-hover: #1C6EEB;
+  --color-accent-subtle: #EFF6FF;
   --color-accent-text: #ffffff;
 
-  --color-status-published-bg: #dcfce7;
-  --color-status-published-text: #15803d;
-  --color-status-draft-bg: #fef9c3;
-  --color-status-draft-text: #854d0e;
-  --color-status-archived-bg: #f3f4f6;
-  --color-status-archived-text: #6b7280;
-  --color-danger: #ef4444;
-  --color-danger-bg: #fee2e2;
+  --color-status-published-bg: #EFF6FF;
+  --color-status-published-text: #3182F6;
+  --color-status-draft-bg: #FFF7ED;
+  --color-status-draft-text: #EA580C;
+  --color-status-archived-bg: #F3F4F6;
+  --color-status-archived-text: #6B7684;
+  --color-danger: #EF4444;
+  --color-danger-bg: #FEE2E2;
 }
 
 * {
