@@ -716,16 +716,16 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
         >
           <div className="relative w-full max-w-2xl mx-4 rounded-xl border border-line-primary bg-surface-primary shadow-xl flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-line-primary shrink-0">
-              <h2 className="truncate text-sm font-semibold text-content-primary">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-line-primary shrink-0">
+              <h2 className="truncate text-base font-semibold text-content-primary">
                 정책 연결 — {modalFeature.name}
               </h2>
               <button
                 onClick={() => setLinkModal(null)}
-                className="cursor-pointer ml-4 shrink-0 rounded-md p-1 text-content-tertiary hover:text-content-primary"
+                className="cursor-pointer ml-4 shrink-0 rounded-md p-1.5 text-content-tertiary hover:text-content-primary"
                 aria-label="닫기"
               >
-                ✕
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
 
@@ -733,7 +733,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
             <div className="flex h-[500px]">
               {/* Left panel: policy list */}
               <div className="w-64 shrink-0 border-r border-line-primary flex flex-col">
-                <div className="px-4 py-3 border-b border-line-primary text-xs font-medium text-content-secondary">
+                <div className="px-4 py-[13px] border-b border-line-primary text-xs font-medium text-content-secondary">
                   정책 문서
                 </div>
                 <div className="flex-1 overflow-y-auto py-2">
@@ -785,7 +785,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                   </div>
                 ) : (
                   <>
-                    <div className="px-5 py-3 border-b border-line-primary flex items-center justify-between shrink-0">
+                    <div className="px-5 py-[13px] border-b border-line-primary flex items-center justify-between shrink-0">
                       <span className="text-sm font-medium text-content-primary truncate">
                         {modalPolicy.doc.title}
                       </span>
