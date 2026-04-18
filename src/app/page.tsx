@@ -1,6 +1,9 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import type { PolicyDomain, Changelog, PolicyDoc } from '@/lib/types'
+
+const DEFAULT_PROJECT_ID = '00000000-0000-0000-0000-000000000001'
 
 export const revalidate = 60
 
@@ -41,6 +44,8 @@ const CHANGE_TYPE_LABELS: Record<string, { label: string; className: string }> =
 
 export default async function DashboardPage() {
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
 
   const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
 
@@ -53,15 +58,16 @@ export default async function DashboardPage() {
     { data: changelogs },
     { data: rawStaleDrafts },
   ] = await Promise.all([
-    supabase.from('policy_docs').select('*', { count: 'exact', head: true }),
-    supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
-    supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('status', 'published'),
-    supabase.from('policy_domains').select('*').order('sort_order', { ascending: true }),
-    supabase.from('policy_docs').select('id, domain_id, updated_at').order('updated_at', { ascending: false }),
+    supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('project_id', projectId),
+    supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('project_id', projectId).eq('status', 'draft'),
+    supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('project_id', projectId).eq('status', 'published'),
+    supabase.from('policy_domains').select('*').eq('project_id', projectId).order('sort_order', { ascending: true }),
+    supabase.from('policy_docs').select('id, domain_id, updated_at').eq('project_id', projectId).order('updated_at', { ascending: false }),
     supabase.from('changelogs').select('*, policy:policy_docs(id, title)').order('created_at', { ascending: false }).limit(10),
     supabase
       .from('policy_docs')
       .select('id, title, updated_at')
+      .eq('project_id', projectId)
       .eq('status', 'draft')
       .lt('updated_at', fourteenDaysAgo)
       .order('updated_at', { ascending: true })

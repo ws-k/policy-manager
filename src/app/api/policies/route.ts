@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { tiptapJsonToPlainText } from '@/lib/tiptap-utils'
+
+const DEFAULT_PROJECT_ID = '00000000-0000-0000-0000-000000000001'
 
 function generateSlug(title: string): string {
   const cleaned = title
@@ -26,6 +29,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: '인증이 필요합니다.', code: 'UNAUTHORIZED' }, { status: 401 })
   }
 
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
+
   const searchParams = request.nextUrl.searchParams
   const domain = searchParams.get('domain')
   const status = searchParams.get('status')
@@ -34,6 +40,7 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('policy_docs')
     .select('*, domain:policy_domains(*)')
+    .eq('project_id', projectId)
     .order('updated_at', { ascending: false })
 
   if (domain) {
@@ -73,6 +80,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '인증이 필요합니다.', code: 'UNAUTHORIZED' }, { status: 401 })
   }
 
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
+
   const body = await request.json()
   const { title, domain_id, content, is_public, slug: customSlug, status: reqStatus, summary } = body as {
     title: string
@@ -107,6 +117,7 @@ export async function POST(request: Request) {
     .insert({
       title,
       domain_id,
+      project_id: projectId,
       slug,
       version: 1,
       status: reqStatus === 'published' ? 'published' : 'draft',

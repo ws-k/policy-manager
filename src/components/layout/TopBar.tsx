@@ -6,6 +6,7 @@ const pageTitles: Record<string, string> = {
   '/': '대시보드',
   '/policies': '정책 목록',
   '/features': '기능 맵',
+  '/projects': '프로젝트 관리',
 }
 
 interface TopBarProps {

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+
+const DEFAULT_PROJECT_ID = '00000000-0000-0000-0000-000000000001'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -7,6 +10,9 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: '인증이 필요합니다.', code: 'UNAUTHORIZED' }, { status: 401 })
   }
+
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
 
   const body = await request.json() as {
     name?: string
@@ -22,7 +28,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase
     .from('features')
-    .insert({ name, slug, description: description ?? null, screen_path: screen_path ?? null })
+    .insert({ name, slug, description: description ?? null, screen_path: screen_path ?? null, project_id: projectId })
     .select()
     .single()
 
@@ -39,6 +45,9 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ error: '인증이 필요합니다.', code: 'UNAUTHORIZED' }, { status: 401 })
   }
+
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
 
   const { data, error } = await supabase
     .from('features')
@@ -59,6 +68,7 @@ export async function GET() {
         )
       )
     `)
+    .eq('project_id', projectId)
     .order('name')
 
   if (error) {

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+
+const DEFAULT_PROJECT_ID = '00000000-0000-0000-0000-000000000001'
 
 export async function GET() {
   const supabase = await createClient()
@@ -8,9 +11,13 @@ export async function GET() {
     return NextResponse.json({ error: '인증이 필요합니다.', code: 'UNAUTHORIZED' }, { status: 401 })
   }
 
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
+
   const { data, error } = await supabase
     .from('policy_domains')
     .select('*')
+    .eq('project_id', projectId)
     .order('sort_order', { ascending: true })
 
   if (error) {
@@ -27,6 +34,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '인증이 필요합니다.', code: 'UNAUTHORIZED' }, { status: 401 })
   }
 
+  const cookieStore = await cookies()
+  const projectId = cookieStore.get('poli_project_id')?.value ?? DEFAULT_PROJECT_ID
+
   const body = await request.json()
   const { name, slug, description, sort_order, icon } = body as {
     name: string
@@ -42,7 +52,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase
     .from('policy_domains')
-    .insert({ name, slug, description: description ?? null, sort_order: sort_order ?? 0, icon: icon ?? null })
+    .insert({ name, slug, description: description ?? null, sort_order: sort_order ?? 0, icon: icon ?? null, project_id: projectId })
     .select()
     .single()
 
