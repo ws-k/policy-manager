@@ -63,7 +63,7 @@ export default async function DashboardPage() {
     supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('project_id', projectId).eq('status', 'published'),
     supabase.from('policy_domains').select('*').eq('project_id', projectId).order('sort_order', { ascending: true }),
     supabase.from('policy_docs').select('id, domain_id, updated_at').eq('project_id', projectId).order('updated_at', { ascending: false }),
-    supabase.from('changelogs').select('*, policy:policy_docs(id, title)').order('created_at', { ascending: false }).limit(10),
+    supabase.from('changelogs').select('*, policy:policy_docs!inner(id, title)').eq('policy_docs.project_id', projectId).order('created_at', { ascending: false }).limit(10),
     supabase
       .from('policy_docs')
       .select('id, title, updated_at')
