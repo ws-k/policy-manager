@@ -862,8 +862,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                           const unlinkedIds = modalPolicy.sections.filter((s) => !linkedSectionIds.has(s.id)).map((s) => s.id)
                           const allSectionIds = modalPolicy.sections.map((s) => s.id)
                           return (
-                            <div className="flex items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent/5 px-4 py-3">
-                              <span className="flex-1 truncate text-sm font-medium text-accent">
+                            <div className="flex items-center justify-between gap-3 rounded-lg border border-line-primary bg-surface-primary px-4 py-3">
+                              <span className="flex-1 truncate text-sm font-semibold text-content-primary">
                                 문서 전체
                               </span>
                               {allLinked ? (
@@ -891,7 +891,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                           return (
                             <div
                               key={section.id}
-                              className="flex items-center justify-between gap-3 rounded-lg border border-line-primary bg-surface-secondary px-4 py-3"
+                              className="ml-3 flex items-center justify-between gap-3 rounded-lg border border-line-primary bg-surface-secondary px-4 py-3"
                             >
                               <span className="flex-1 truncate text-sm text-content-primary">
                                 {section.title}
