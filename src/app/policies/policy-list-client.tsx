@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useTransition } from 'react'
+import { useCallback, useTransition, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import type { PolicyDoc, PolicyDomain } from '@/lib/types'
 import { StatusBadge } from '@/components/policy/StatusBadge'
@@ -19,10 +19,28 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
+const statusOptions = [
+  { value: '', label: '전체 상태' },
+  { value: 'draft', label: '초안' },
+  { value: 'published', label: '게시됨' },
+]
+
 export function PolicyListClient({ policies, domains, currentDomain, currentStatus, currentQuery }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
+  const [statusOpen, setStatusOpen] = useState(false)
+  const statusRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (statusRef.current && !statusRef.current.contains(e.target as Node)) {
+        setStatusOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
@@ -87,16 +105,31 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
           ))}
         </div>
 
-        {/* Status select */}
-        <select
-          value={currentStatus}
-          onChange={(e) => updateFilter('status', e.target.value)}
-          className="cursor-pointer rounded-full border border-line-primary bg-surface-primary px-4 py-[7px] text-sm text-content-primary outline-none focus:border-accent transition-colors hover:border-line-secondary font-medium"
-        >
-          <option value="">전체 상태</option>
-          <option value="draft">초안</option>
-          <option value="published">게시됨</option>
-        </select>
+        {/* Status dropdown */}
+        <div ref={statusRef} className="relative">
+          <button
+            onClick={() => setStatusOpen((o) => !o)}
+            className="cursor-pointer flex items-center gap-2 rounded-lg border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:border-line-secondary"
+          >
+            {statusOptions.find((o) => o.value === currentStatus)?.label ?? '전체 상태'}
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${statusOpen ? 'rotate-180' : ''}`}>
+              <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          {statusOpen && (
+            <div className="absolute left-0 top-full z-10 mt-1 min-w-full overflow-hidden rounded-lg border border-line-primary bg-surface-primary shadow-md">
+              {statusOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => { updateFilter('status', opt.value); setStatusOpen(false) }}
+                  className={`cursor-pointer flex w-full items-center px-4 py-2 text-sm transition-colors hover:bg-surface-secondary ${currentStatus === opt.value ? 'font-semibold text-accent' : 'text-content-primary'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Search input */}
         <form
