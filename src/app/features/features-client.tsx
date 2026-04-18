@@ -437,16 +437,9 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                   group.fps.push(fp)
                 }
               }
-              // Old version fps (not in latest version group)
-              const latestVersionFpIds = new Set(
-                Array.from(fpsBySlug.values()).flatMap(g => g.fps.map(fp => fp.id))
-              )
-              const oldVersionFps = feature.feature_policies.filter(
-                fp => fp.policy_sections?.policy_docs && !latestVersionFpIds.has(fp.id)
-              )
               const tombstones = feature.feature_policies.filter((fp) => !fp.policy_sections && fp.deleted_section_title)
               const policyCount = fpsBySlug.size
-              const tombstoneCount = tombstones.length + oldVersionFps.length
+              const tombstoneCount = tombstones.length
               const isEditing = editState?.id === feature.id
 
               return (
@@ -607,25 +600,6 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                         </button>
                                       </div>
                                     ))}
-                                  </div>
-                                )
-                              })}
-                              {oldVersionFps.map(fp => {
-                                const doc = fp.policy_sections!.policy_docs!
-                                return (
-                                  <div key={fp.id} className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-amber-500">
-                                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                                      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                                    </svg>
-                                    <div className="flex-1 min-w-0">
-                                      <span className="block text-xs font-medium text-amber-800 truncate">{doc.title}</span>
-                                      <span className="block text-xs text-amber-600">이전 버전 (v{doc.version}) · {fp.policy_sections!.title}</span>
-                                    </div>
-                                    <button
-                                      onClick={() => fetch(`/api/feature-policies?feature_id=${feature.id}&section_id=${fp.policy_sections!.id}`, { method: 'DELETE' }).then(refreshFeatures)}
-                                      className="cursor-pointer shrink-0 text-xs text-amber-600 hover:text-red-600"
-                                    >✕</button>
                                   </div>
                                 )
                               })}
