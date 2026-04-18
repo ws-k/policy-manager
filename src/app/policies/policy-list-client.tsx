@@ -109,7 +109,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
         <div ref={statusRef} className="relative">
           <button
             onClick={() => setStatusOpen((o) => !o)}
-            className="cursor-pointer flex items-center gap-2 rounded-lg border border-line-primary bg-surface-primary px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:border-line-secondary"
+            className="cursor-pointer flex items-center gap-2 rounded-lg border border-line-primary bg-surface-primary px-4 py-[9px] text-sm font-medium text-content-primary transition-colors hover:border-line-secondary"
           >
             {statusOptions.find((o) => o.value === currentStatus)?.label ?? '전체 상태'}
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform ${statusOpen ? 'rotate-180' : ''}`}>
