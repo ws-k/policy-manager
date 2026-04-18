@@ -92,28 +92,30 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
     <aside className={`flex h-screen flex-col border-r border-line-primary bg-surface-tertiary transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center border-b border-line-primary px-3 gap-2">
-        {!collapsed && (
-          <svg className="flex-1 min-w-0" width="138" height="36" viewBox="0 0 168 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="2" width="28" height="28" rx="7" fill="#82B4F0"/>
-            <rect x="8" y="10" width="28" height="28" rx="7" fill="#3182F6"/>
-            <text x="44" y="31" fontFamily="'Plus Jakarta Sans', system-ui, sans-serif" fontSize="28" fontWeight="800" fill="#191F28" letterSpacing="-1.5">poli</text>
-          </svg>
-        )}
-        {collapsed && (
-          <div className="flex flex-1 justify-center">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="0" width="20" height="20" rx="5" fill="#82B4F0"/>
-              <rect x="8" y="8" width="20" height="20" rx="5" fill="#3182F6"/>
+        {collapsed ? (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="cursor-pointer flex w-full items-center justify-center rounded-lg p-2 text-content-tertiary transition-colors hover:bg-black/5 hover:text-content-secondary"
+            title="메뉴 펼치기"
+          >
+            <ChevronRightIcon />
+          </button>
+        ) : (
+          <>
+            <svg className="flex-1 min-w-0" width="138" height="36" viewBox="0 0 168 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" y="2" width="28" height="28" rx="7" fill="#82B4F0"/>
+              <rect x="8" y="10" width="28" height="28" rx="7" fill="#3182F6"/>
+              <text x="44" y="31" fontFamily="'Plus Jakarta Sans', system-ui, sans-serif" fontSize="28" fontWeight="800" fill="#191F28" letterSpacing="-1.5">poli</text>
             </svg>
-          </div>
+            <button
+              onClick={() => setCollapsed(true)}
+              className="cursor-pointer shrink-0 flex items-center justify-center rounded-lg p-2 text-content-tertiary transition-colors hover:bg-black/5 hover:text-content-secondary"
+              title="메뉴 접기"
+            >
+              <ChevronLeftIcon />
+            </button>
+          </>
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="cursor-pointer shrink-0 flex items-center justify-center rounded-lg p-2 text-content-tertiary transition-colors hover:bg-black/5 hover:text-content-secondary"
-          title={collapsed ? '메뉴 펼치기' : '메뉴 접기'}
-        >
-          {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-        </button>
       </div>
 
       {collapsed ? (
