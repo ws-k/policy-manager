@@ -15,9 +15,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '기능 ID와 섹션 ID를 입력해주세요.', code: 'VALIDATION_ERROR' }, { status: 400 })
   }
 
+  const { data: sectionRow } = await supabase
+    .from('policy_sections')
+    .select('policy_doc_id')
+    .eq('id', section_id)
+    .single()
+
   const { data, error } = await supabase
     .from('feature_policies')
-    .insert({ feature_id, section_id, note: note ?? null })
+    .insert({ feature_id, section_id, note: note ?? null, policy_doc_id: sectionRow?.policy_doc_id ?? null })
     .select()
     .single()
 
@@ -40,8 +46,22 @@ export async function DELETE(request: Request) {
   }
 
   const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
   const feature_id = searchParams.get('feature_id')
   const section_id = searchParams.get('section_id')
+
+  if (id) {
+    const { error } = await supabase
+      .from('feature_policies')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message, code: 'DB_ERROR' }, { status: 500 })
+    }
+
+    return NextResponse.json({ data: { id } })
+  }
 
   if (!feature_id || !section_id) {
     return NextResponse.json({ error: 'feature_id와 section_id가 필요합니다.', code: 'VALIDATION_ERROR' }, { status: 400 })

@@ -99,6 +99,7 @@ export async function POST(
               feature_id: fp.feature_id,
               section_id: newSection.id,
               note: fp.note,
+              policy_doc_id: newDoc.id,
             }))
           )
         }

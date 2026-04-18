@@ -56,6 +56,8 @@ export async function GET() {
       feature_policies (
         id,
         note,
+        deleted_section_title,
+        policy_doc_id,
         policy_sections:section_id (
           id,
           title,

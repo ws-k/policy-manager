@@ -195,6 +195,7 @@ type LinkedFeature = {
   id: string
   feature: { id: string; name: string; slug: string; screen_path: string | null }
   section: { id: string; title: string }
+  is_broken?: boolean
 }
 
 function LinkedFeaturesPanel({ policyId }: { policyId: string }) {
@@ -223,6 +224,11 @@ function LinkedFeaturesPanel({ policyId }: { policyId: string }) {
     fetchItems()
   }
 
+  const handleUnlinkBroken = async (fpId: string) => {
+    await fetch(`/api/feature-policies?id=${fpId}`, { method: 'DELETE' })
+    fetchItems()
+  }
+
   return (
     <div className="rounded-lg border border-line-primary bg-surface-primary p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -244,23 +250,37 @@ function LinkedFeaturesPanel({ policyId }: { policyId: string }) {
         <p className="text-xs text-content-tertiary">연결된 기능이 없습니다</p>
       ) : (
         <ul className="space-y-1">
-          {items.map((item) => (
-            <li key={item.id} className="flex items-center">
-              <Link
-                href={`/features#${item.feature.slug}`}
-                className="flex-1 rounded-md px-2.5 py-1.5 transition-colors hover:bg-surface-secondary"
-              >
-                <span className="block text-xs font-medium text-content-primary">{item.feature.name}</span>
-                <span className="block text-xs text-content-tertiary">· {item.section.title}</span>
-              </Link>
-              <button
-                onClick={() => handleUnlink(item.feature.id, item.section.id)}
-                className="cursor-pointer rounded px-1.5 py-1 text-xs text-content-tertiary hover:text-content-primary"
-              >
-                ✕
-              </button>
-            </li>
-          ))}
+          {items.map((item) =>
+            item.is_broken ? (
+              <li key={item.id} className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-amber-500">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-xs font-medium text-amber-700 truncate">{item.feature.name}</span>
+                  <span className="block text-xs text-amber-600">섹션 삭제됨: {item.section.title}</span>
+                </div>
+                <button onClick={() => handleUnlinkBroken(item.id)} className="cursor-pointer text-xs text-amber-600 hover:text-red-600">✕</button>
+              </li>
+            ) : (
+              <li key={item.id} className="flex items-center">
+                <Link
+                  href={`/features#${item.feature.slug}`}
+                  className="flex-1 rounded-md px-2.5 py-1.5 transition-colors hover:bg-surface-secondary"
+                >
+                  <span className="block text-xs font-medium text-content-primary">{item.feature.name}</span>
+                  <span className="block text-xs text-content-tertiary">· {item.section.title}</span>
+                </Link>
+                <button
+                  onClick={() => handleUnlink(item.feature.id, item.section.id)}
+                  className="cursor-pointer rounded px-1.5 py-1 text-xs text-content-tertiary hover:text-content-primary"
+                >
+                  ✕
+                </button>
+              </li>
+            )
+          )}
         </ul>
       )}
       {showLinkModal && (

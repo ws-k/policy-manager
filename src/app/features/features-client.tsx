@@ -39,6 +39,8 @@ type PolicySection = {
 type FeaturePolicy = {
   id: string
   note: string | null
+  deleted_section_title: string | null
+  policy_doc_id: string | null
   policy_sections: {
     id: string
     title: string
@@ -294,6 +296,13 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
     }
   }
 
+  async function handleDismissTombstone(fpId: string) {
+    await fetch(`/api/feature-policies?id=${fpId}`, { method: 'DELETE' })
+    const res = await fetch('/api/features')
+    const result = await res.json() as { data: Feature[] } | { error: string }
+    if ('data' in result) setFeatures(result.data)
+  }
+
   async function handleUnlinkDoc(featureId: string, sectionIds: string[]) {
     setBulkLinking(true)
     try {
@@ -415,6 +424,8 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                   return true
                 }) ?? []
               const policyCount = linkedDocs.length
+              const tombstones = feature.feature_policies.filter((fp) => !fp.policy_sections && fp.deleted_section_title)
+              const tombstoneCount = tombstones.length
               const isEditing = editState?.id === feature.id
 
               return (
@@ -495,6 +506,9 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                               </button>
                             </div>
                             <div className="flex shrink-0 items-center gap-2">
+                              {tombstoneCount > 0 && (
+                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">⚠ {tombstoneCount}개 끊김</span>
+                              )}
                               {policyCount > 0 ? (
                                 <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-text">
                                   정책 {policyCount}개 연결
@@ -525,7 +539,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                             <p className="mb-3 text-sm text-content-secondary">{feature.description}</p>
                           )}
 
-                          {linkedDocs.length > 0 && (
+                          {(linkedDocs.length > 0 || tombstoneCount > 0) && (
                             <div className="mt-3 border-t border-line-primary pt-3 space-y-0.5">
                               {linkedDocs.map((doc) => {
                                 const linkedSections = feature.feature_policies
@@ -556,6 +570,22 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
                                   </div>
                                 )
                               })}
+                              {tombstones.map((fp) => (
+                                <div key={fp.id} className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-amber-500">
+                                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                                    </svg>
+                                    <span className="truncate text-xs text-amber-700">섹션 삭제됨: {fp.deleted_section_title}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => handleDismissTombstone(fp.id)}
+                                    className="cursor-pointer shrink-0 text-xs text-amber-600 hover:text-red-600"
+                                    title="연결 제거"
+                                  >✕</button>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </>

@@ -20,6 +20,8 @@ type PolicySection = {
 type FeaturePolicy = {
   id: string
   note: string | null
+  deleted_section_title: string | null
+  policy_doc_id: string | null
   policy_sections: PolicySection | null
 }
 
