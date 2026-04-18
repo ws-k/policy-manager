@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   DndContext,
+  DragOverlay,
   closestCenter,
   PointerSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -84,7 +86,7 @@ function SortableFeatureCard({ id, children }: { id: string; children: (dragHand
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0 : 1,
     zIndex: isDragging ? 10 : undefined,
   }
   return (
@@ -112,13 +114,19 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
   const [confirmUnlinkDoc, setConfirmUnlinkDoc] = useState<{ featureId: string; docId: string; docTitle: string; sectionIds: string[] } | null>(null)
   const [bulkLinking, setBulkLinking] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string)
+  }
+
   function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null)
     const { active, over } = event
     if (over && active.id !== over.id) {
       setFeatures((items) => {
@@ -395,7 +403,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
         </div>
       )}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <SortableContext items={features.map((f) => f.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {features.map((feature) => {
@@ -560,6 +568,26 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
             })}
           </div>
         </SortableContext>
+        <DragOverlay dropAnimation={null}>
+          {activeId ? (() => {
+            const f = features.find((f) => f.id === activeId)
+            if (!f) return null
+            const count = new Set(f.feature_policies.map((fp) => fp.policy_sections?.policy_docs?.id).filter(Boolean)).size
+            return (
+              <div className="rounded-xl border border-line-primary bg-surface-primary p-4 shadow-xl opacity-95">
+                <div className="flex items-start justify-between gap-2 pr-6">
+                  <h2 className="truncate font-semibold text-content-primary">{f.name}</h2>
+                  {count > 0 ? (
+                    <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-text shrink-0">정책 {count}개 연결</span>
+                  ) : (
+                    <span className="text-xs text-content-tertiary shrink-0">정책 미연결</span>
+                  )}
+                </div>
+                {f.description && <p className="mt-1 text-sm text-content-secondary">{f.description}</p>}
+              </div>
+            )
+          })() : null}
+        </DragOverlay>
       </DndContext>
 
       {/* Delete Confirm Modal */}
