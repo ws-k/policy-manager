@@ -51,7 +51,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-60 flex-col border-r border-line-primary bg-surface-tertiary">
       {/* Logo */}
       <div className="flex h-16 items-center justify-start border-b border-line-primary px-4" style={{ paddingTop: 0, paddingBottom: 0 }}>
-        <span style={{ fontFamily: "'Luckiest Guy', cursive", fontSize: '54px', fontWeight: 400, color: '#1779E9', lineHeight: '64px', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block' }}>Poli</span>
+        <span style={{ fontFamily: "'Porter Sans Block', sans-serif", fontSize: '56px', fontWeight: 400, color: '#1779E9', lineHeight: '64px', letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block' }}>Poli</span>
       </div>
 
       {/* Search */}
