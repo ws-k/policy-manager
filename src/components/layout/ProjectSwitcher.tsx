@@ -18,29 +18,30 @@ function setCookie(name: string, value: string) {
 export function ProjectSwitcher() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [currentId, setCurrentId] = useState<string>('')
+  const [currentId, setCurrentId] = useState<string>(() => getCookie('poli_project_id') ?? '')
+  const [cachedName, setCachedName] = useState<string>(() => getCookie('poli_project_name') ?? '')
   const [open, setOpen] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
-  const [loaded, setLoaded] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   function fetchProjects() {
     fetch('/api/projects')
       .then(r => r.json())
-      .then(({ data }) => { if (data) setProjects(data); setLoaded(true) })
+      .then(({ data }) => { if (data) setProjects(data) })
   }
 
   useEffect(() => {
     fetchProjects()
-
-    const saved = getCookie('poli_project_id')
-    if (saved) setCurrentId(saved)
-
     window.addEventListener('projects-updated', fetchProjects)
     return () => window.removeEventListener('projects-updated', fetchProjects)
   }, [])
+
+  useEffect(() => {
+    const found = projects.find(p => p.id === currentId)
+    if (found) { setCookie('poli_project_name', found.name); setCachedName(found.name) }
+  }, [projects, currentId])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -53,10 +54,12 @@ export function ProjectSwitcher() {
   }, [])
 
   const current = projects.find(p => p.id === currentId)
+  const displayName = current?.name ?? (cachedName || '프로젝트 없음')
 
-  function switchProject(id: string) {
+  function switchProject(id: string, name?: string) {
     setCurrentId(id)
     setCookie('poli_project_id', id)
+    if (name) { setCookie('poli_project_name', name); setCachedName(name) }
     setOpen(false)
     router.refresh()
   }
@@ -73,7 +76,7 @@ export function ProjectSwitcher() {
       const { data } = await res.json()
       if (data) {
         setProjects(prev => [...prev, data])
-        switchProject(data.id)
+        switchProject(data.id, data.name)
         setNewName('')
         setShowAddModal(false)
       }
@@ -93,7 +96,7 @@ export function ProjectSwitcher() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-content-tertiary">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
           </svg>
-          <span className="flex-1 truncate text-left">{loaded ? (current?.name ?? '프로젝트 없음') : ''}</span>
+          <span className="flex-1 truncate text-left">{displayName}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`shrink-0 text-content-tertiary transition-transform ${open ? 'rotate-180' : ''}`}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
@@ -108,7 +111,7 @@ export function ProjectSwitcher() {
                 projects.map(p => (
                   <button
                     key={p.id}
-                    onClick={() => switchProject(p.id)}
+                    onClick={() => switchProject(p.id, p.name)}
                     className={`cursor-pointer flex w-full items-center gap-2 px-3 py-2.5 text-[13px] text-left transition-colors hover:bg-surface-secondary ${p.id === currentId ? 'text-accent font-semibold bg-accent-subtle' : 'text-content-primary'}`}
                   >
                     {p.id === currentId && (
