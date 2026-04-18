@@ -51,7 +51,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-60 flex-col border-r border-line-primary bg-surface-tertiary">
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-line-primary px-4">
-        <span style={{ fontFamily: "'KyivType Sans', sans-serif", fontSize: '32px', fontWeight: 400, color: '#1779E9', lineHeight: 1 }}>Poli</span>
+        <span style={{ fontFamily: "'KyivType Sans', sans-serif", fontSize: '32px', fontWeight: 400, color: '#1779E9', lineHeight: 1, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Poli</span>
       </div>
 
       {/* Search */}
