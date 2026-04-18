@@ -117,7 +117,7 @@ export function PolicyListClient({ policies, domains, currentDomain, currentStat
             </svg>
           </button>
           {statusOpen && (
-            <div className="absolute left-0 top-full z-10 mt-1 min-w-full overflow-hidden rounded-lg border border-line-primary bg-surface-primary shadow-md">
+            <div className="absolute left-0 top-full z-10 mt-1 min-w-[120px] overflow-hidden rounded-lg border border-line-primary bg-surface-primary shadow-md">
               {statusOptions.map((opt) => (
                 <button
                   key={opt.value}
