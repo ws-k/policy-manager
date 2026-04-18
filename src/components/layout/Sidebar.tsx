@@ -48,7 +48,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-60 flex-col border-r border-line-primary bg-surface-tertiary">
+    <aside className="flex h-screen w-52 flex-col border-r border-line-primary bg-surface-tertiary">
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-line-primary px-4">
         <img src="/poli-logo.png" alt="Poli" className="h-9 w-auto" />
