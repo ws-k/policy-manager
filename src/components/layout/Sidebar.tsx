@@ -78,6 +78,7 @@ const iconBtn = 'cursor-pointer flex w-full items-center justify-center rounded-
 
 export function Sidebar({ initialProjectName }: { initialProjectName?: string }) {
   const [collapsed, setCollapsed] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -89,6 +90,19 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
   }
 
   return (
+    <>
+    {showLogoutModal && (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50" onClick={e => { if (e.target === e.currentTarget) setShowLogoutModal(false) }}>
+        <div className="w-full max-w-xs mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
+          <h3 className="mb-2 text-base font-semibold text-content-primary">로그아웃</h3>
+          <p className="mb-5 text-sm text-content-secondary">정말 로그아웃 하시겠습니까?</p>
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setShowLogoutModal(false)} className="cursor-pointer rounded-md border border-line-primary px-4 py-2 text-sm text-content-secondary hover:bg-surface-tertiary">취소</button>
+            <button onClick={handleLogout} className="cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-medium text-white">로그아웃</button>
+          </div>
+        </div>
+      </div>
+    )}
     <aside className={`relative z-10 flex h-screen flex-col border-r border-line-primary bg-surface-tertiary transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center border-b border-line-primary px-3 gap-2">
@@ -169,7 +183,7 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
       {/* Logout */}
       <div className="border-t border-line-primary p-2">
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           title={collapsed ? '로그아웃' : undefined}
           className={`cursor-pointer flex w-full items-center rounded-lg py-2.5 text-[13px] text-content-secondary transition-colors hover:bg-black/5 hover:text-content-primary ${collapsed ? 'justify-center px-2' : 'gap-2.5 px-3'}`}
         >
@@ -178,5 +192,6 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
         </button>
       </div>
     </aside>
+    </>
   )
 }
