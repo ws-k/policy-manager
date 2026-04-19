@@ -22,6 +22,12 @@ interface StaleDraft {
   updated_at: string
 }
 
+interface FeatureWithLinks {
+  id: string
+  name: string
+  feature_policies: { id: string; section_id: string | null }[]
+}
+
 function relativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()
   const minutes = Math.floor(diff / 60000)
@@ -57,6 +63,7 @@ export default async function DashboardPage() {
     { data: allPolicies },
     { data: changelogs },
     { data: rawStaleDrafts },
+    { data: rawFeatures },
   ] = await Promise.all([
     supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('project_id', projectId),
     supabase.from('policy_docs').select('*', { count: 'exact', head: true }).eq('project_id', projectId).eq('status', 'draft'),
@@ -72,9 +79,15 @@ export default async function DashboardPage() {
       .lt('updated_at', fourteenDaysAgo)
       .order('updated_at', { ascending: true })
       .limit(5),
+    supabase
+      .from('features')
+      .select('id, name, feature_policies(id, section_id)')
+      .eq('project_id', projectId)
+      .order('sort_order', { ascending: true }),
   ])
 
   const staleDrafts = (rawStaleDrafts ?? []) as StaleDraft[]
+  const features = (rawFeatures ?? []) as FeatureWithLinks[]
 
   // Compute per-domain stats
   const domainStats = ((domains ?? []) as PolicyDomain[]).map((domain) => {
@@ -100,7 +113,7 @@ export default async function DashboardPage() {
             <p className="text-content-primary text-2xl font-bold tabular-nums">{totalCount ?? 0}</p>
           </div>
           <div className="bg-surface-primary rounded-xl px-4 py-3 border border-line-primary shadow-sm flex items-center gap-4">
-            <p className="text-content-secondary text-sm font-medium flex-1">임시저장</p>
+            <p className="text-content-secondary text-sm font-medium flex-1">초안</p>
             <p className="text-content-primary text-2xl font-bold tabular-nums">{draftCount ?? 0}</p>
           </div>
           <div className="bg-surface-primary rounded-xl px-4 py-3 border border-line-primary shadow-sm flex items-center gap-4">
@@ -143,7 +156,7 @@ export default async function DashboardPage() {
 
       {/* Domain cards */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">정책 유형별 정책</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">정책 유형별</h2>
         {domainStats.length === 0 ? (
           <p className="text-content-tertiary text-sm">등록된 정책 유형이 없습니다</p>
         ) : (
@@ -165,6 +178,42 @@ export default async function DashboardPage() {
                 </p>
               </Link>
             ))}
+          </div>
+        )}
+      </section>
+
+      {/* Feature cards */}
+      <section>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-content-tertiary mb-4">기능별</h2>
+        {features.length === 0 ? (
+          <p className="text-content-tertiary text-sm">등록된 기능이 없습니다</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {features.map((feature) => {
+              const activeLinks = feature.feature_policies.filter((fp) => fp.section_id !== null).length
+              const tombstones = feature.feature_policies.filter((fp) => fp.section_id === null).length
+              return (
+                <Link
+                  key={feature.id}
+                  href="/features"
+                  className="bg-surface-primary rounded-2xl p-6 border border-line-primary shadow-sm hover:shadow-md hover:border-line-secondary transition-all"
+                >
+                  <p className="text-content-primary font-medium text-sm truncate">{feature.name}</p>
+                  <p className="text-content-primary text-3xl font-bold tabular-nums mt-2">
+                    {activeLinks}
+                    <span className="text-content-tertiary text-sm font-normal ml-1">개 연결</span>
+                  </p>
+                  {tombstones > 0 && (
+                    <p className="text-amber-600 text-xs mt-2">{tombstones}개 끊어진 연결</p>
+                  )}
+                  {tombstones === 0 && (
+                    <p className="text-content-tertiary text-xs mt-2">
+                      {activeLinks === 0 ? '연결된 정책 없음' : '정상'}
+                    </p>
+                  )}
+                </Link>
+              )
+            })}
           </div>
         )}
       </section>
