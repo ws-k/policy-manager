@@ -380,7 +380,7 @@ function LinkFeatureModal({
         className="w-full max-w-lg rounded-xl border border-line-primary bg-surface-primary p-7 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-5 text-base font-semibold text-content-primary">기능 연결</h3>
+        <h3 className="mb-5 text-lg font-semibold text-content-primary">기능 연결</h3>
         <div className="space-y-5">
           {/* Feature dropdown */}
           <div>

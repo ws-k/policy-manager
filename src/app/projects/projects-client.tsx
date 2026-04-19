@@ -307,7 +307,7 @@ export function ProjectsClient({ initialProjects, initialArchived }: {
           onClick={e => { if (e.target === e.currentTarget) { setShowAddModal(false); setNewName('') } }}
         >
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-content-primary">프로젝트 추가</h3>
+            <h3 className="mb-4 text-lg font-semibold text-content-primary">프로젝트 추가</h3>
             <p className="mb-4 text-sm text-content-secondary leading-relaxed">새 프로젝트를 만들면 정책, 기능, 정책 유형이 분리됩니다.</p>
             <input
               autoFocus
@@ -337,7 +337,7 @@ export function ProjectsClient({ initialProjects, initialArchived }: {
       {confirmArchive && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-content-primary">&ldquo;{confirmArchive.name}&rdquo; 프로젝트를 보관하시겠습니까?</h3>
+            <h3 className="mb-4 text-lg font-semibold text-content-primary">&ldquo;{confirmArchive.name}&rdquo; 프로젝트를 보관하시겠습니까?</h3>
             <p className="mb-6 text-sm text-content-secondary leading-relaxed">보관하면 사이드 메뉴에서 선택이 불가능해집니다. 보관된 프로젝트 관리에서 되살릴 수 있습니다.</p>
             <div className="flex justify-end gap-2">
               <button
@@ -363,7 +363,7 @@ export function ProjectsClient({ initialProjects, initialArchived }: {
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 프로젝트를 영구 삭제하시겠습니까?</h3>
+            <h3 className="mb-4 text-lg font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 프로젝트를 영구 삭제하시겠습니까?</h3>
             <p className="mb-6 text-sm text-content-secondary leading-relaxed">이 프로젝트를 영구적으로 삭제합니다. 복구할 수 없습니다.</p>
             <div className="flex justify-end gap-2">
               <button

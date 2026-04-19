@@ -687,7 +687,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 기능을 삭제하시겠습니까?</h3>
+            <h3 className="mb-4 text-lg font-semibold text-content-primary">&ldquo;{confirmDelete.name}&rdquo; 기능을 삭제하시겠습니까?</h3>
             <p className="mb-6 text-sm text-content-secondary leading-relaxed">연결된 정책 매핑도 함께 삭제됩니다.</p>
             <div className="flex justify-end gap-2">
               <button
@@ -715,7 +715,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       {confirmUnlink && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-content-primary">섹션 연결을 해제하시겠습니까?</h3>
+            <h3 className="mb-4 text-lg font-semibold text-content-primary">섹션 연결을 해제하시겠습니까?</h3>
             <p className="mb-6 text-sm text-content-secondary leading-relaxed">
               <span className="font-semibold text-content-primary">{confirmUnlink.docTitle}</span> &rsaquo; <span className="font-semibold text-content-primary">{confirmUnlink.sectionTitle}</span> 섹션과의 연결이 해제됩니다.
             </p>
@@ -747,7 +747,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
       {confirmUnlinkDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-            <h3 className="mb-2 text-base font-semibold text-content-primary">문서 전체 연결을 해제하시겠습니까?</h3>
+            <h3 className="mb-4 text-lg font-semibold text-content-primary">문서 전체 연결을 해제하시겠습니까?</h3>
             <p className="mb-6 text-sm text-content-secondary leading-relaxed">
               <span className="font-semibold text-content-primary">{confirmUnlinkDoc.docTitle}</span>의 모든 섹션 연결이 해제됩니다.
             </p>
@@ -784,7 +784,7 @@ export function FeaturesClient({ initialFeatures }: { initialFeatures: Feature[]
           <div className="relative w-full max-w-2xl mx-4 rounded-xl border border-line-primary bg-surface-primary shadow-xl flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-line-primary shrink-0">
-              <h2 className="truncate text-base font-semibold text-content-primary">
+              <h2 className="truncate text-lg font-semibold text-content-primary">
                 정책 연결 — {modalFeature.name}
               </h2>
               <button

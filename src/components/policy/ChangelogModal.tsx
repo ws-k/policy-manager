@@ -28,7 +28,7 @@ export function ChangelogModal({ open, loading, onClose, onConfirm }: ChangelogM
 
       {/* Modal */}
       <div className="relative w-full max-w-md rounded-lg border border-line-primary bg-surface-primary p-6 shadow-lg">
-        <h2 className="mb-4 text-base font-semibold text-content-primary">변경 사유 입력</h2>
+        <h2 className="mb-4 text-lg font-semibold text-content-primary">변경 사유 입력</h2>
 
         <textarea
           value={summary}

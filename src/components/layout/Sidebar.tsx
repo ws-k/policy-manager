@@ -94,7 +94,7 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
     {showLogoutModal && (
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50" onClick={e => { if (e.target === e.currentTarget) setShowLogoutModal(false) }}>
         <div className="w-full max-w-xs mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">
-          <h3 className="mb-2 text-base font-semibold text-content-primary">로그아웃</h3>
+          <h3 className="mb-4 text-lg font-semibold text-content-primary">로그아웃</h3>
           <p className="mb-5 text-sm text-content-secondary">정말 로그아웃 하시겠습니까?</p>
           <div className="flex justify-end gap-2">
             <button onClick={() => setShowLogoutModal(false)} className="cursor-pointer rounded-md border border-line-primary px-4 py-2 text-sm text-content-secondary hover:bg-surface-tertiary">취소</button>
