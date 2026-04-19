@@ -69,10 +69,8 @@ export function ProjectSwitcher({ initialProjectName, collapsed }: { initialProj
   const displayName = current?.name ?? (cachedName || '프로젝트 없음')
 
   function handleToggle() {
-    console.log('handleToggle called', { collapsed, open, buttonRef: !!buttonRef.current })
     if (collapsed && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
-      console.log('rect:', rect)
       setPortalPos({ top: rect.top, left: rect.right + 8 })
     }
     setOpen(v => !v)
