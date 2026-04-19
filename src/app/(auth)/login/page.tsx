@@ -39,7 +39,6 @@ export default function LoginPage() {
             <text x="44" y="31" fontFamily="'Plus Jakarta Sans', system-ui, sans-serif" fontSize="28" fontWeight="800" fill="#191F28" letterSpacing="-1.5">poli</text>
           </svg>
         </div>
-        <p className="mb-6 text-sm text-content-secondary">동승그룹 정책 관리 시스템</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
