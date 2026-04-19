@@ -32,7 +32,13 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-surface-secondary">
       <div className="w-full max-w-sm rounded-xl border border-line-primary bg-surface-primary p-8 shadow-sm">
-        <h1 className="mb-1 text-lg font-semibold text-content-primary">Policy Manager</h1>
+        <div className="mb-6 flex items-center gap-2">
+          <svg width="138" height="36" viewBox="0 0 168 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="2" width="28" height="28" rx="7" fill="#82B4F0"/>
+            <rect x="8" y="10" width="28" height="28" rx="7" fill="#3182F6"/>
+            <text x="44" y="31" fontFamily="'Plus Jakarta Sans', system-ui, sans-serif" fontSize="28" fontWeight="800" fill="#191F28" letterSpacing="-1.5">poli</text>
+          </svg>
+        </div>
         <p className="mb-6 text-sm text-content-secondary">동승그룹 정책 관리 시스템</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

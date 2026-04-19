@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 
 type Project = { id: string; name: string; created_at: string; archived: boolean }
@@ -15,7 +16,7 @@ function setCookie(name: string, value: string) {
   document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=31536000;SameSite=Lax`
 }
 
-export function ProjectSwitcher({ initialProjectName }: { initialProjectName?: string }) {
+export function ProjectSwitcher({ initialProjectName, collapsed }: { initialProjectName?: string; collapsed?: boolean }) {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
   const [currentId, setCurrentId] = useState<string>('')
@@ -25,6 +26,8 @@ export function ProjectSwitcher({ initialProjectName }: { initialProjectName?: s
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [portalPos, setPortalPos] = useState<{ top: number; left: number }>({ top: 60, left: 64 })
 
   function fetchProjects() {
     fetch('/api/projects')
@@ -32,7 +35,7 @@ export function ProjectSwitcher({ initialProjectName }: { initialProjectName?: s
       .then(({ data }) => { if (data) setProjects(data) })
   }
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const savedId = getCookie('poli_project_id')
     const savedName = getCookie('poli_project_name')
     if (savedId) setCurrentId(savedId)
@@ -51,17 +54,29 @@ export function ProjectSwitcher({ initialProjectName }: { initialProjectName?: s
   }, [projects, currentId])
 
   useEffect(() => {
+    if (!open) return
     function handleClick(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+      const target = e.target as Node
+      const inDropdown = dropdownRef.current?.contains(target)
+      const inButton = buttonRef.current?.contains(target)
+      if (!inDropdown && !inButton) setOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
+  }, [open])
 
   const current = projects.find(p => p.id === currentId)
   const displayName = current?.name ?? (cachedName || '프로젝트 없음')
+
+  function handleToggle() {
+    console.log('handleToggle called', { collapsed, open, buttonRef: !!buttonRef.current })
+    if (collapsed && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      console.log('rect:', rect)
+      setPortalPos({ top: rect.top, left: rect.right + 8 })
+    }
+    setOpen(v => !v)
+  }
 
   function switchProject(id: string, name?: string) {
     setCurrentId(id)
@@ -92,57 +107,78 @@ export function ProjectSwitcher({ initialProjectName }: { initialProjectName?: s
     }
   }
 
+  const projectList = (
+    <>
+      <div className="max-h-48 overflow-y-auto">
+        {projects.length === 0 ? (
+          <p className="px-3 py-3 text-xs text-content-tertiary">활성 프로젝트가 없습니다</p>
+        ) : (
+          projects.map(p => (
+            <button
+              key={p.id}
+              onClick={() => switchProject(p.id, p.name)}
+              className={`cursor-pointer flex w-full items-center gap-2 px-3 py-2.5 text-[13px] text-left transition-colors hover:bg-surface-secondary ${p.id === currentId ? 'text-accent font-semibold bg-accent-subtle' : 'text-content-primary'}`}
+            >
+              {p.id === currentId && (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="shrink-0"><path d="M20 6L9 17l-5-5"/></svg>
+              )}
+              <span className={`flex-1 truncate ${p.id !== currentId ? 'pl-[20px]' : ''}`}>{p.name}</span>
+            </button>
+          ))
+        )}
+      </div>
+      <div className="border-t border-line-primary">
+        <button
+          onClick={() => { setOpen(false); setShowAddModal(true) }}
+          className="cursor-pointer flex w-full items-center gap-2 px-3 py-2.5 text-[13px] text-content-secondary hover:bg-surface-secondary transition-colors"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          프로젝트 추가
+        </button>
+      </div>
+    </>
+  )
+
   return (
     <>
-      <div className="relative px-3 pt-3 pb-1" ref={dropdownRef}>
+      <div className={`relative ${collapsed ? 'px-2 pt-2 pb-1' : 'px-3 pt-3 pb-1'}`}>
         <button
-          onClick={() => setOpen(v => !v)}
-          className="cursor-pointer flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-content-primary hover:bg-black/5 transition-colors"
+          ref={buttonRef}
+          onClick={handleToggle}
+          className={`cursor-pointer flex w-full items-center rounded-lg text-[13px] font-medium text-content-primary hover:bg-black/5 transition-colors ${collapsed ? 'justify-center py-2.5' : 'gap-2 px-2.5 py-2'}`}
+          title={collapsed ? displayName : undefined}
         >
-          {/* folder icon */}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-content-tertiary">
+          <svg width={collapsed ? 18 : 14} height={collapsed ? 18 : 14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-content-tertiary">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
           </svg>
-          <span className="flex-1 truncate text-left">{displayName}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`shrink-0 text-content-tertiary transition-transform ${open ? 'rotate-180' : ''}`}>
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+          {!collapsed && (
+            <>
+              <span className="flex-1 truncate text-left">{displayName}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`shrink-0 text-content-tertiary transition-transform ${open ? 'rotate-180' : ''}`}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </>
+          )}
         </button>
 
-        {open && (
-          <div className="absolute left-3 right-3 top-full z-50 mt-1 rounded-lg border border-line-primary bg-surface-primary shadow-lg overflow-hidden">
-            <div className="max-h-48 overflow-y-auto">
-              {projects.length === 0 ? (
-                <p className="px-3 py-3 text-xs text-content-tertiary">활성 프로젝트가 없습니다</p>
-              ) : (
-                projects.map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => switchProject(p.id, p.name)}
-                    className={`cursor-pointer flex w-full items-center gap-2 px-3 py-2.5 text-[13px] text-left transition-colors hover:bg-surface-secondary ${p.id === currentId ? 'text-accent font-semibold bg-accent-subtle' : 'text-content-primary'}`}
-                  >
-                    {p.id === currentId && (
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="shrink-0"><path d="M20 6L9 17l-5-5"/></svg>
-                    )}
-                    <span className={`flex-1 truncate ${p.id !== currentId ? 'pl-[20px]' : ''}`}>{p.name}</span>
-                  </button>
-                ))
-              )}
-            </div>
-            <div className="border-t border-line-primary">
-              <button
-                onClick={() => { setOpen(false); setShowAddModal(true) }}
-                className="cursor-pointer flex w-full items-center gap-2 px-3 py-2.5 text-[13px] text-content-secondary hover:bg-surface-secondary transition-colors"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                프로젝트 추가
-              </button>
-            </div>
+        {open && !collapsed && (
+          <div ref={dropdownRef} className="absolute z-50 left-3 right-3 top-full mt-1 rounded-lg border border-line-primary bg-surface-primary shadow-lg overflow-hidden">
+            {projectList}
           </div>
         )}
       </div>
 
-      {/* Add project modal */}
+      {open && collapsed && createPortal(
+        <div
+          ref={dropdownRef}
+          style={{ position: 'fixed', top: portalPos.top, left: portalPos.left, zIndex: 9999 }}
+          className="w-52 rounded-lg border border-line-primary bg-surface-primary shadow-lg overflow-hidden"
+        >
+          {projectList}
+        </div>,
+        document.body
+      )}
+
       {showAddModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={e => { if (e.target === e.currentTarget) { setShowAddModal(false); setNewName('') } }}>
           <div className="w-full max-w-sm mx-4 rounded-xl border border-line-primary bg-surface-primary p-6 shadow-xl">

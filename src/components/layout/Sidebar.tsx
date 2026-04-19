@@ -89,7 +89,7 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
   }
 
   return (
-    <aside className={`flex h-screen flex-col border-r border-line-primary bg-surface-tertiary transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
+    <aside className={`relative z-10 flex h-screen flex-col border-r border-line-primary bg-surface-tertiary transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center border-b border-line-primary px-3 gap-2">
         {collapsed ? (
@@ -118,12 +118,9 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
         )}
       </div>
 
+      <ProjectSwitcher initialProjectName={initialProjectName} collapsed={collapsed} />
       {collapsed ? (
-        /* Collapsed: icon-only for project switcher and search */
-        <div className="flex flex-col gap-0.5 p-2 border-b border-line-primary">
-          <button onClick={() => {}} className={iconBtn} title="프로젝트 선택">
-            <FolderIcon />
-          </button>
+        <div className="p-2 border-b border-line-primary">
           <button
             onClick={() => document.dispatchEvent(new Event('open-search'))}
             className={iconBtn}
@@ -133,19 +130,16 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
           </button>
         </div>
       ) : (
-        <>
-          <ProjectSwitcher initialProjectName={initialProjectName} />
-          <div className="px-3 pt-3 pb-2">
-            <button
-              onClick={() => document.dispatchEvent(new Event('open-search'))}
-              className="cursor-pointer flex w-full items-center gap-2.5 rounded-lg border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-secondary transition-colors hover:border-line-secondary hover:text-content-primary shadow-sm"
-            >
-              <span className="text-base leading-none">⌕</span>
-              <span className="flex-1 text-left text-[13px]">검색</span>
-              <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] text-content-tertiary font-mono">⌘K</span>
-            </button>
-          </div>
-        </>
+        <div className="px-3 pt-3 pb-2">
+          <button
+            onClick={() => document.dispatchEvent(new Event('open-search'))}
+            className="cursor-pointer flex w-full items-center gap-2.5 rounded-lg border border-line-primary bg-surface-primary px-3 py-2 text-sm text-content-secondary transition-colors hover:border-line-secondary hover:text-content-primary shadow-sm"
+          >
+            <span className="text-base leading-none">⌕</span>
+            <span className="flex-1 text-left text-[13px]">검색</span>
+            <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] text-content-tertiary font-mono">⌘K</span>
+          </button>
+        </div>
       )}
 
       {/* Nav */}
