@@ -83,7 +83,7 @@ export default async function DashboardPage() {
       .from('features')
       .select('id, name, feature_policies(id, section_id)')
       .eq('project_id', projectId)
-      .order('sort_order', { ascending: true }),
+      .order('name', { ascending: true }),
   ])
 
   const staleDrafts = (rawStaleDrafts ?? []) as StaleDraft[]
