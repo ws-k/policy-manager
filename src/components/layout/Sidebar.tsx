@@ -116,11 +116,13 @@ export function Sidebar({ initialProjectName }: { initialProjectName?: string })
           </button>
         ) : (
           <>
-            <svg className="flex-1 min-w-0" width="138" height="36" viewBox="0 0 168 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="2" width="28" height="28" rx="7" fill="#82B4F0"/>
-              <rect x="8" y="10" width="28" height="28" rx="7" fill="#3182F6"/>
-              <text x="44" y="31" fontFamily="'Plus Jakarta Sans', system-ui, sans-serif" fontSize="28" fontWeight="800" fill="#191F28" letterSpacing="-1.5">poli</text>
-            </svg>
+            <Link href="/" className="flex-1 min-w-0">
+              <svg width="138" height="36" viewBox="0 0 168 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="2" width="28" height="28" rx="7" fill="#82B4F0"/>
+                <rect x="8" y="10" width="28" height="28" rx="7" fill="#3182F6"/>
+                <text x="44" y="31" fontFamily="'Plus Jakarta Sans', system-ui, sans-serif" fontSize="28" fontWeight="800" fill="#191F28" letterSpacing="-1.5">poli</text>
+              </svg>
+            </Link>
             <button
               onClick={() => setCollapsed(true)}
               className="cursor-pointer shrink-0 flex items-center justify-center rounded-lg p-2 text-content-tertiary transition-colors hover:bg-black/5 hover:text-content-secondary"
