@@ -56,8 +56,13 @@ export function ScreenNode({ id, data, selected }: NodeProps<ScreenNodeType>) {
     setEditing(false)
   }
 
+  const hasLabel = (data.label?.trim().length ?? 0) > 0
+
   return (
-    <div className="flex flex-col items-center" style={{ width: 240 }}>
+    <div className="relative flex w-fit flex-col items-center">
+      {/* Top handle sits above the title so incoming edges don't overlap it */}
+      <Handle id="top" type="source" position={Position.Top} style={{ ...handleStyle, top: -7 }} />
+
       {/* Title (editable) */}
       {editing ? (
         <input
@@ -75,29 +80,30 @@ export function ScreenNode({ id, data, selected }: NodeProps<ScreenNodeType>) {
               setEditing(false)
             }
           }}
-          className="nodrag mb-1 w-full rounded bg-transparent text-center text-[14px] font-medium text-[#191F28] outline-none ring-1 ring-[#3182F6]"
-          style={{ padding: '2px 6px' }}
+          className="nodrag mb-1 rounded bg-transparent text-center text-[14px] font-medium text-[#191F28] outline-none ring-1 ring-[#3182F6]"
+          style={{ padding: '2px 6px', minWidth: 120 }}
         />
       ) : (
         <button
           type="button"
           onDoubleClick={() => setEditing(true)}
-          className="nodrag mb-1 w-full truncate bg-transparent text-center text-[14px] font-medium text-[#191F28]"
-          title={data.label}
+          className={[
+            'nodrag mb-1 bg-transparent px-1 text-center text-[14px] font-medium',
+            hasLabel ? 'text-[#191F28]' : 'text-[#B0B8C1]',
+          ].join(' ')}
+          title={hasLabel ? data.label : '더블클릭하여 제목 입력'}
         >
-          {data.label || '이름 없음'}
+          {hasLabel ? data.label : '제목'}
         </button>
       )}
 
-      {/* Image with handles */}
+      {/* Image with side/bottom handles */}
       <div
         className={[
           'relative overflow-hidden rounded-md',
           selected ? 'ring-2 ring-[#3182F6]' : '',
         ].join(' ')}
-        style={{ width: 240, height: 150 }}
       >
-        <Handle id="top" type="source" position={Position.Top} style={{ ...handleStyle, top: -7 }} />
         <Handle id="right" type="source" position={Position.Right} style={{ ...handleStyle, right: -7 }} />
         <Handle id="bottom" type="source" position={Position.Bottom} style={{ ...handleStyle, bottom: -7 }} />
         <Handle id="left" type="source" position={Position.Left} style={{ ...handleStyle, left: -7 }} />
@@ -107,11 +113,11 @@ export function ScreenNode({ id, data, selected }: NodeProps<ScreenNodeType>) {
           <img
             src={data.imageUrl}
             alt={data.label}
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            style={{ height: 300, width: 'auto', display: 'block' }}
             draggable={false}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-[#B0B8C1]">
+          <div className="flex items-center justify-center text-[#B0B8C1]" style={{ width: 138, height: 300 }}>
             <PlaceholderIcon />
           </div>
         )}
