@@ -54,6 +54,12 @@ const LogoutIcon = () => (
   </svg>
 )
 
+const FlowIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/>
+  </svg>
+)
+
 const ChevronLeftIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 18 9 12 15 6"/>
@@ -72,6 +78,7 @@ const navItems = [
   { href: '/features', label: '기능 목록', icon: <GridIcon /> },
   { href: '/domains', label: '정책 유형 관리', icon: <GlobeIcon /> },
   { href: '/projects', label: '프로젝트 관리', icon: <SettingsIcon /> },
+  { href: '/user-flow', label: '유저 플로우', icon: <FlowIcon /> },
 ]
 
 const iconBtn = 'cursor-pointer flex w-full items-center justify-center rounded-lg py-2.5 text-content-secondary transition-colors hover:bg-black/5 hover:text-content-primary'

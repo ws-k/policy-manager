@@ -1,0 +1,82 @@
+[
+  {
+    "label": "홈",
+    "file": "/dwfm-screens/01_홈.png"
+  },
+  {
+    "label": "검색",
+    "file": "/dwfm-screens/02_검색.png"
+  },
+  {
+    "label": "소재 탐색",
+    "file": "/dwfm-screens/03_소재탐색.png"
+  },
+  {
+    "label": "지도",
+    "file": "/dwfm-screens/04_지도.png"
+  },
+  {
+    "label": "매장 상세",
+    "file": "/dwfm-screens/05_매장상세.png"
+  },
+  {
+    "label": "MY",
+    "file": "/dwfm-screens/06_마이.png"
+  },
+  {
+    "label": "셰어라운지",
+    "file": "/dwfm-screens/07_셰어라운지.png"
+  },
+  {
+    "label": "업무 공간",
+    "file": "/dwfm-screens/08_업무공간.png"
+  },
+  {
+    "label": "푸드코트",
+    "file": "/dwfm-screens/09_푸드코트.png"
+  },
+  {
+    "label": "디자이너 라운지",
+    "file": "/dwfm-screens/10_디자이너라운지.png"
+  },
+  {
+    "label": "생산실",
+    "file": "/dwfm-screens/11_생산실.png"
+  },
+  {
+    "label": "생산실 목록",
+    "file": "/dwfm-screens/12_생산실목록.png"
+  },
+  {
+    "label": "회의실 (4인)",
+    "file": "/dwfm-screens/13_회의실4인.png"
+  },
+  {
+    "label": "회의실 (6인)",
+    "file": "/dwfm-screens/14_회의실6인.png"
+  },
+  {
+    "label": "무신사 스튜디오",
+    "file": "/dwfm-screens/15_무신사스튜디오.png"
+  },
+  {
+    "label": "포토 스튜디오",
+    "file": "/dwfm-screens/16_포토스튜디오.png"
+  },
+  {
+    "label": "방송 스튜디오",
+    "file": "/dwfm-screens/17_방송스튜디오.png"
+  },
+  {
+    "label": "물류 센터",
+    "file": "/dwfm-screens/18_물류센터.png"
+  },
+  {
+    "label": "의료실",
+    "file": "/dwfm-screens/19_의료실.png"
+  },
+  {
+    "label": "아라막",
+    "file": "/dwfm-screens/20_아라막.png"
+  }
+]

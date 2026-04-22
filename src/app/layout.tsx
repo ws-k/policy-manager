@@ -70,7 +70,7 @@ export default async function RootLayout({
             <Sidebar initialProjectName={initialProjectName} />
             <div className="flex flex-1 flex-col min-h-0">
               <TopBar userEmail={userEmail} />
-              <main className="flex-1 overflow-auto p-6">{children}</main>
+              <main className={`flex-1 overflow-auto${pathname.startsWith('/user-flow') ? '' : ' p-6'}`}>{children}</main>
             </div>
           </>
         )}

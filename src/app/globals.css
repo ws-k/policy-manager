@@ -106,3 +106,16 @@ body {
   background-color: var(--color-surface-primary);
   -webkit-font-smoothing: antialiased;
 }
+
+/* React Flow: show handles only on node hover */
+.react-flow__node .react-flow__handle {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.react-flow__node:hover .react-flow__handle,
+.react-flow__node.selected .react-flow__handle,
+.react-flow__handle.connecting,
+.react-flow__handle.connectingto {
+  opacity: 1;
+}
