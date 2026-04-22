@@ -25,6 +25,12 @@ const handleStyle: React.CSSProperties = {
   borderRadius: '9999px',
 }
 
+const handleClass = (selected: boolean) =>
+  [
+    'transition-opacity',
+    selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+  ].join(' ')
+
 const PlaceholderIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -60,9 +66,6 @@ export function ScreenNode({ id, data, selected }: NodeProps<ScreenNodeType>) {
 
   return (
     <div className="relative flex w-fit flex-col items-center">
-      {/* Top handle sits above the title so incoming edges don't overlap it */}
-      <Handle id="top" type="source" position={Position.Top} style={{ ...handleStyle, top: -7 }} />
-
       {/* Title (editable) */}
       {editing ? (
         <input
@@ -97,16 +100,17 @@ export function ScreenNode({ id, data, selected }: NodeProps<ScreenNodeType>) {
         </button>
       )}
 
-      {/* Image with side/bottom handles */}
+      {/* Image with hover-visible handles on all four edges */}
       <div
         className={[
-          'relative overflow-hidden rounded-md',
+          'group relative rounded-md',
           selected ? 'ring-2 ring-[#3182F6]' : '',
         ].join(' ')}
       >
-        <Handle id="right" type="source" position={Position.Right} style={{ ...handleStyle, right: -7 }} />
-        <Handle id="bottom" type="source" position={Position.Bottom} style={{ ...handleStyle, bottom: -7 }} />
-        <Handle id="left" type="source" position={Position.Left} style={{ ...handleStyle, left: -7 }} />
+        <Handle id="top" type="source" position={Position.Top} style={{ ...handleStyle, top: -7 }} className={handleClass(selected)} />
+        <Handle id="right" type="source" position={Position.Right} style={{ ...handleStyle, right: -7 }} className={handleClass(selected)} />
+        <Handle id="bottom" type="source" position={Position.Bottom} style={{ ...handleStyle, bottom: -7 }} className={handleClass(selected)} />
+        <Handle id="left" type="source" position={Position.Left} style={{ ...handleStyle, left: -7 }} className={handleClass(selected)} />
 
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

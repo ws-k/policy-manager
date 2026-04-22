@@ -384,6 +384,9 @@ export default function UserFlowCanvas() {
           connectionMode={ConnectionMode.Loose}
           fitView
           deleteKeyCode={['Delete']}
+          selectionOnDrag
+          panOnDrag={[1, 2]}
+          panActivationKeyCode="Space"
           proOptions={{ hideAttribution: true }}
         >
           <Background color="#E5E8EB" gap={20} />
