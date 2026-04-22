@@ -1,6 +1,13 @@
 'use client'
 
-import { Handle, Position, type NodeProps, type Node } from '@xyflow/react'
+import { useEffect, useRef, useState } from 'react'
+import {
+  Handle,
+  Position,
+  useReactFlow,
+  type Node,
+  type NodeProps,
+} from '@xyflow/react'
 
 export type ScreenNodeData = {
   label: string
@@ -26,26 +33,75 @@ const PlaceholderIcon = () => (
   </svg>
 )
 
-export function ScreenNode({ data, selected }: NodeProps<ScreenNodeType>) {
-  return (
-    <div
-      className={[
-        'rounded-xl bg-surface-primary shadow-sm transition-shadow',
-        selected ? 'ring-2 ring-[#3182F6]' : 'ring-1 ring-[#E5E8EB]',
-      ].join(' ')}
-      style={{ width: 240 }}
-    >
-      {/* Handles: Top / Right / Bottom / Left. Each serves as both source and target. */}
-      <Handle id="top" type="source" position={Position.Top} style={{ ...handleStyle, top: -7 }} />
-      <Handle id="right" type="source" position={Position.Right} style={{ ...handleStyle, right: -7 }} />
-      <Handle id="bottom" type="source" position={Position.Bottom} style={{ ...handleStyle, bottom: -7 }} />
-      <Handle id="left" type="source" position={Position.Left} style={{ ...handleStyle, left: -7 }} />
+export function ScreenNode({ id, data, selected }: NodeProps<ScreenNodeType>) {
+  const { updateNodeData } = useReactFlow<ScreenNodeType>()
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(data.label)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-      {/* Image */}
+  useEffect(() => {
+    if (!editing) setDraft(data.label)
+  }, [data.label, editing])
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+  }, [editing])
+
+  const commit = () => {
+    const next = draft.trim()
+    if (next !== data.label) updateNodeData(id, { label: next })
+    setEditing(false)
+  }
+
+  return (
+    <div className="flex flex-col items-center" style={{ width: 240 }}>
+      {/* Title (editable) */}
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              commit()
+            } else if (e.key === 'Escape') {
+              e.preventDefault()
+              setDraft(data.label)
+              setEditing(false)
+            }
+          }}
+          className="nodrag mb-1 w-full rounded bg-transparent text-center text-[14px] font-medium text-[#191F28] outline-none ring-1 ring-[#3182F6]"
+          style={{ padding: '2px 6px' }}
+        />
+      ) : (
+        <button
+          type="button"
+          onDoubleClick={() => setEditing(true)}
+          className="nodrag mb-1 w-full truncate bg-transparent text-center text-[14px] font-medium text-[#191F28]"
+          title={data.label}
+        >
+          {data.label || '이름 없음'}
+        </button>
+      )}
+
+      {/* Image with handles */}
       <div
-        className="flex items-center justify-center overflow-hidden rounded-t-xl bg-[#F2F4F6] text-[#B0B8C1]"
+        className={[
+          'relative overflow-hidden rounded-md',
+          selected ? 'ring-2 ring-[#3182F6]' : '',
+        ].join(' ')}
         style={{ width: 240, height: 150 }}
       >
+        <Handle id="top" type="source" position={Position.Top} style={{ ...handleStyle, top: -7 }} />
+        <Handle id="right" type="source" position={Position.Right} style={{ ...handleStyle, right: -7 }} />
+        <Handle id="bottom" type="source" position={Position.Bottom} style={{ ...handleStyle, bottom: -7 }} />
+        <Handle id="left" type="source" position={Position.Left} style={{ ...handleStyle, left: -7 }} />
+
         {data.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -55,13 +111,10 @@ export function ScreenNode({ data, selected }: NodeProps<ScreenNodeType>) {
             draggable={false}
           />
         ) : (
-          <PlaceholderIcon />
+          <div className="flex h-full w-full items-center justify-center text-[#B0B8C1]">
+            <PlaceholderIcon />
+          </div>
         )}
-      </div>
-
-      {/* Label */}
-      <div className="truncate px-3 py-2 text-[14px] font-medium text-[#191F28]" title={data.label}>
-        {data.label || '이름 없음'}
       </div>
     </div>
   )
