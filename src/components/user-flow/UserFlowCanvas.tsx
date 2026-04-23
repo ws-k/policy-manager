@@ -11,6 +11,7 @@ import {
   MarkerType,
   reconnectEdge,
   ConnectionMode,
+  SelectionMode,
   type Connection,
   type Edge,
   type OnNodesChange,
@@ -383,11 +384,13 @@ export default function UserFlowCanvas() {
           defaultEdgeOptions={defaultEdgeOptions}
           connectionMode={ConnectionMode.Loose}
           fitView
-          deleteKeyCode={['Delete']}
+          deleteKeyCode={['Delete', 'Backspace']}
           selectionOnDrag
+          selectionMode={SelectionMode.Partial}
           panOnDrag={[1, 2]}
           panActivationKeyCode="Space"
           proOptions={{ hideAttribution: true }}
+          className="user-flow-canvas"
         >
           <Background color="#E5E8EB" gap={20} />
           <Controls showInteractive={false} />

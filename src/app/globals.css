@@ -119,3 +119,12 @@ body {
 .react-flow__handle.connectingto {
   opacity: 1;
 }
+
+/* Default cursor is arrow; React Flow switches to crosshair during
+   selection drag and to grab/grabbing during pan automatically. */
+.user-flow-canvas .react-flow__pane {
+  cursor: default;
+}
+.user-flow-canvas .react-flow__pane.dragging {
+  cursor: grabbing;
+}
